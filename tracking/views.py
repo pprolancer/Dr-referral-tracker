@@ -1,3 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+class ReferralReport(ListView):
+    """
+    See Referral Report.pdf in misc folder for example of this view
+    """
