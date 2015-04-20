@@ -12,6 +12,7 @@ class Organization(models.Model):
         - ? How can the user add special Organizations
         If org_special==True then only require org_name and call it Referral group type
     https://github.com/stefanfoulis/django-phonenumber-field
+    pip install django-phonenumber-field
     '''
     org_name = models.CharField("Organization name", max_length=254, blank=False, null=True)
     org_contact_name = models.CharField("Organization contact name", max_length=254, blank=False, null=True)
