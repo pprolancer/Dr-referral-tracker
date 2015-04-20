@@ -17,7 +17,7 @@ class Organization(models.Model):
     org_contact_name = models.CharField("Organization contact name", max_length=254, blank=False, null=True)
     org_phone = PhoneNumberField("Organization contact phone")
     org_email = EmailField("Organization contact email", max_length=254)
-    org_special = BooleanField("Other group type")
+    org_special = models.BooleanField("Other group type", default=True)
 
 class Physician(models.Model):
     """
@@ -29,7 +29,7 @@ class Physician(models.Model):
     physician_name = models.CharField("Physician name", max_length=254, blank=False, null=True)
     physician_phone = PhoneNumberField("Physician contact phone")
     physician_email = EmailField("Physician contact email", max_length=254)
-    referral_special = BooleanField("Other referral type")
+    referral_special = models.BooleanField("Other referral type", default=True)
 
 class Referral(models.Model):
     """

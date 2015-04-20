@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+        <h2>Welcome to Django application</h2>
+        <p class="lead">Search and  read unlimited Posts
+        	<a class="" href="{% url 'article-index' %}">GO</a>
+        </p>
+        <p class="lead">New User Here?
+        	<a class="" href="{% url 'account:create_user' %}">Register User. </a>
+        </p>
+        <p class="lead">Existing user? 
+        	<a class="" href="{% url 'account:login' %}"> Login and manage your Account's.</a>
+        </p>
+        <!-- <a class="btn btn-large btn-success" href="#">Read post's</a>
+        <a class="btn btn-large btn-success" href="#">Login</a> -->
+      </div>
+      <hr>
+{% endblock content %}
