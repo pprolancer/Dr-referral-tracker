@@ -11,7 +11,7 @@ class OrganizationForm(forms.ModelForm):
     org_cont_name = forms.CharField(label="contact name", max_length=140)
     org_phone_no = forms.CharField(label="phone number", max_length=140)
     org_email = forms.CharField(label="email add", max_length=140)
-    org_special = forms.BooleanField(label="special", max_length=140)
+    org_special = forms.BooleanField(label="special")
 
     class Meta:
         model = Organization
