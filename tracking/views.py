@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from .forms import OrganizationForm
+from django.contrib import messages
 from django.views.generic import View
+from django.template import RequestContext
+from django.shortcuts import render_to_response, render, redirect
 
 # class ReferralReport(ListView):
 #     """
@@ -15,13 +18,16 @@ class organization(View):
         return render(request,"tracking/welcome.html",ctx )
 
     def post(self, request, *args, **kwargs):
-
+        # import pdb; pdb.set_trace()
         form = OrganizationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return render_to_response('', RequestContext(request, {}))
         ctx = {"form": form}
-        return render(request, "", ctx)
+        if form.is_valid():
+
+            form.save()
+            # messages.warning(request, 'Form have saved successfully....')
+        form = OrganizationForm()
+        ctx = {"form": form}
+        return render(request,"tracking/welcome.html",ctx )
 
 class physician(View):
     # display the physician form
