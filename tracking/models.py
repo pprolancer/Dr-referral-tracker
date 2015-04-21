@@ -15,7 +15,7 @@ class Organization(models.Model):
     pip install django-phonenumber-field
     '''
     org_name = models.CharField(
-        "Organization name", max_length=254, blank=False, null=True)
+        "Organization name", max_length=254, unique=True, blank=False, null=True)
     org_contact_name = models.CharField(
         "Organization contact name", max_length=254, blank=False, null=True)
     org_phone = PhoneNumberField("Organization contact phone")
@@ -25,6 +25,11 @@ class Organization(models.Model):
     def get_absolute_url(self):
         return reverse('add-organization')
 
+    def __str__(self):
+        return self.org_name
+
+    def __unicode__(self):
+        return self.org_name
 
 class Physician(models.Model):
     """
@@ -34,7 +39,7 @@ class Physician(models.Model):
     """
     organization = models.ForeignKey(Organization, related_name="Physician")
     physician_name = models.CharField(
-        "Physician name", max_length=254, blank=False, null=True)
+        "Physician name", max_length=254, unique=True, blank=False, null=True)
     physician_phone = PhoneNumberField("Physician contact phone")
     physician_email = models.EmailField(
         "Physician contact email", max_length=254)

@@ -11,6 +11,7 @@ class OrganizationForm(forms.ModelForm):
 
     class Meta:
         model = Organization
+        exclude = []
 
 
 class PhysicianForm(forms.ModelForm):
@@ -23,6 +24,7 @@ class PhysicianForm(forms.ModelForm):
 
     class Meta:
         model = Physician
+        exclude = []
 
 
 class ReferralForm(forms.ModelForm):
@@ -35,4 +37,4 @@ class ReferralForm(forms.ModelForm):
 
     class Meta:
         model = Referral
-        fields = ["visit_date", "visit_count"]
+        exclude = []

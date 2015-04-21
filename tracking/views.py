@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from .forms import OrganizationForm
-from .models import Organization
+from .forms import OrganizationForm, ReferralForm, PhysicianForm
 from django.contrib import messages
 from django.views.generic import View
 from django.template import RequestContext
@@ -18,9 +17,9 @@ class Organization(View):
         form = OrganizationForm(request.POST)
         ctx = {"form": form}
         if form.is_valid():
-            form.save()
-            # messages.warning(request, 'Form have saved successfully....')
-        ctx = {"form": form}
+            orga = form.save()
+            return redirect(orga.get_absolute_url())
+
         return render(request,"tracking/organization.html",ctx )
 
 
@@ -29,15 +28,16 @@ class Physician(View):
     def get(self, request, *args, **kwargs):
         form = PhysicianForm()
         ctx = {"form": form}
-        return render(request,"tracking/organization.html",ctx )
+        return render(request,"tracking/physician.html",ctx )
 
     def post(self, request, *args, **kwargs):
-        form = OrganizationForm(request.POST)
+        form = PhysicianForm(request.POST)
         if form.is_valid():
             form.save()
-            return render_to_response('', RequestContext(request, {}))
+            form = PhysicianForm()
+
         ctx = {"form": form}
-        return render(request, "", ctx)
+        return render(request,"tracking/physician.html",ctx )
 
 
 class Referral(View):
@@ -45,13 +45,12 @@ class Referral(View):
     def get(self, request, *args, **kwargs):
         form = ReferralForm()
         ctx = {"form": form}
-        return render(request,"tracking/organization.html",ctx )
+        return render(request,"tracking/referral.html",ctx )
 
     def post(self, request, *args, **kwargs):
-        form = OrganizationForm(request.POST)
+        form = ReferralForm(request.POST)
         if form.is_valid():
             form.save()
-            return render_to_response('', RequestContext(request, {}))
         ctx = {"form": form}
-        return render(request, "", ctx)
+        return render(request,"tracking/referral.html",ctx )
 
