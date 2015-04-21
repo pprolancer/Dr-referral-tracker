@@ -1,6 +1,6 @@
 from django import forms
 from tracking.models import *
-from phonenumber_field.formfields import PhoneNumberField
+
 
 class OrganizationForm(forms.ModelForm):
     """
@@ -11,8 +11,7 @@ class OrganizationForm(forms.ModelForm):
 
     class Meta:
         model = Organization
-        fields = ["org_name", "org_contact_name", "org_phone",
-         "org_email", "org_special"]
+
 
 class PhysicianForm(forms.ModelForm):
     """
@@ -24,8 +23,7 @@ class PhysicianForm(forms.ModelForm):
 
     class Meta:
         model = Physician
-        fields = ["physician_name", "physician_phone", "physician_email",
-         "referral_special"]
+
 
 class ReferralForm(forms.ModelForm):
     """
@@ -38,4 +36,3 @@ class ReferralForm(forms.ModelForm):
     class Meta:
         model = Referral
         fields = ["visit_date", "visit_count"]
-

@@ -6,13 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- CSS -->
         <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
-
-        <!-- JS -->
-        <script src="{{ STATIC_URL }}js/jquery.js"></script>
-        <script src="{{ STATIC_URL }}js/bootstrap.js"></script>
-        
-
-        
+        {% block css %}
+        {% endblock %}
     </head>
 
     <body>
@@ -73,6 +68,12 @@
         <!-- Le javascript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
+        <!-- JS -->
+        <script src="{{ STATIC_URL }}js/jquery.js"></script>
+        <script src="{{ STATIC_URL }}js/bootstrap.js"></script>
+        {% block javascript %}
+
+        {% endblock %}
 
     </body>
 
