@@ -1,4 +1,5 @@
 from django import forms
+import autocomplete_light
 from tracking.models import *
 
 
@@ -14,7 +15,7 @@ class OrganizationForm(forms.ModelForm):
         exclude = []
 
 
-class PhysicianForm(forms.ModelForm):
+class PhysicianForm(autocomplete_light.ModelForm):
     """
     Create a new Physician
     autocomplete Organization https://github.com/yourlabs/django-autocomplete-light/tree/stable/2.x.x

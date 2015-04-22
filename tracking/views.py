@@ -1,8 +1,6 @@
-from django.shortcuts import render
 from .forms import OrganizationForm, ReferralForm, PhysicianForm
-from django.contrib import messages
 from django.views.generic import View
-from django.template import RequestContext
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, render, redirect
 
 
@@ -17,8 +15,8 @@ class Organization(View):
         form = OrganizationForm(request.POST)
         ctx = {"form": form}
         if form.is_valid():
-            orga = form.save()
-            return redirect(orga.get_absolute_url())
+            form.save()
+            return redirect(reverse('add-physician'))
 
         return render(request,"tracking/organization.html",ctx )
 

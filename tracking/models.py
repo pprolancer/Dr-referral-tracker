@@ -28,8 +28,6 @@ class Organization(models.Model):
     def __str__(self):
         return self.org_name
 
-    def __unicode__(self):
-        return self.org_name
 
 class Physician(models.Model):
     """
@@ -44,6 +42,9 @@ class Physician(models.Model):
     physician_email = models.EmailField(
         "Physician contact email", max_length=254)
     referral_special = models.BooleanField("Other referral type", default=True)
+
+    def __str__(self):
+        return self.physician_name
 
 
 class Referral(models.Model):
