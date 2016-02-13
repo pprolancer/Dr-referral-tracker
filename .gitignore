@@ -60,3 +60,4 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+Practice_Referral/settings_secret.py
