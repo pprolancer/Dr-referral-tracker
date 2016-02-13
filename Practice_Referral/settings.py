@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-# Change this for production
-#from Practice_Referral.settings_secret import *
-from Practice_Referral.settings_secret_template import *
+try:
+    from Practice_Referral.settings_secret import *
+except:
+    from Practice_Referral.settings_secret_template import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # see settings_secret
