@@ -12,17 +12,12 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 
 try:
-    from Practice_Referral.settings_secret import *
+    from Practice_Referral.settings_production import *
 except:
-    from Practice_Referral.settings_secret_template import *
+    from Practice_Referral.settings_development import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # see settings_secret
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
