@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from datetime import datetime , timedelta, date
 from django.utils.decorators import method_decorator
-from django.shortcuts import render_to_response, render, redirect
+from django.shortcuts import render_to_response, render, redirect, get_object_or_404
 from tracking.models import Referral,Physician, Organization, LAST_MONTH, LAST_12_MONTH
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
@@ -234,3 +234,33 @@ class GetReferralHistory(View):
             "form": form
         } 
         return render(request,"tracking/show_referral_history.html",ctx )
+
+def edit_physician(request, physician_id):
+    physician = get_object_or_404(Physician, id=physician_id)
+    if request.method == 'POST':
+        form = PhysicianForm(request.POST, instance=physician)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/physician_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = PhysicianForm(instance=physician)
+
+    return render(request, 'tracking/physician_edit.html', {'form': form})
+
+def edit_organization(request, organization_id):
+    organization = get_object_or_404(Organization, id=organization_id)
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST, instance=organization)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/organization_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = OrganizationForm(instance=organization)
+
+    return render(request, 'tracking/organization_edit.html', {'form': form})

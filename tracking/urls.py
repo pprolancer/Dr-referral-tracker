@@ -11,6 +11,8 @@ urlpatterns = patterns(
     url(r'^add/referral/$', ReferralView.as_view(), name="add-referral"),
     url(r'^add/get-referral-view/$', GetReferralReport.as_view(), name="get-referral-view"),
     url(r'^referral-history/$', GetReferralHistory.as_view(), name="referral-history"),
+    url(r'^edit/physician/([0-9])/$', edit_physician, name="edit-physician"),
+    url(r'^edit/organization/([0-9])/$', edit_organization, name="edit-organization"),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 )
