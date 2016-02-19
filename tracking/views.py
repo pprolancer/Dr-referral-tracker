@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from datetime import datetime , timedelta, date
 from django.utils.decorators import method_decorator
-from django.shortcuts import render_to_response, render, redirect
+from django.shortcuts import render_to_response, render, redirect, get_object_or_404
 from tracking.models import Referral,Physician, Organization, LAST_MONTH, LAST_12_MONTH
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
@@ -201,57 +201,66 @@ class LogoutView(View):
 
 class GetReferralHistory(View):
     """
-    Display a summary of referrals by Organization:provider:
+    Display a summary of referrals by Date:Physician:Organization:Count:
     """
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        today = date.today()
-        week_ago = today - timedelta(days=7)
-        all_orgs = Physician.objects.order_by('physician_name')
-        all_ref = {}
-        for phys in all_orgs :
-            phys_ref = phys.get_referral({'from_date' : week_ago, 'to_date' : today});
-            if phys_ref.count() :
-                for ref in phys_ref :
-                    if not phys.id in all_ref : 
-                        all_ref[phys.id] = {'name' : phys.physician_name, 'refs' :  [ ref ] }
-                    else :
-                        all_ref[phys.id]['refs'].append(ref)
-                
-        form = ReferralHistoryForm(initial={'from_date': week_ago, 'to_date' : today})
+        today = date.today() 
+        referrals = Referral.objects.filter(visit_date=today).order_by('-visit_date')
+        form = ReferralHistoryForm(initial={'from_date': today, 'to_date' : today})
         ctx = {
-                'all_orgs': all_ref,
-                'today': today,
-                'week_ago' : week_ago,
+                'referrals': referrals,
                 "form": form
-            }
+            }   
         return render(request,"tracking/show_referral_history.html",ctx )
     
     
     def post(self, request, *args, **kwargs):
         
-        today = datetime.strptime(request.POST['to_date'], "%Y-%m-%d").date()
-        week_ago = datetime.strptime(request.POST['from_date'], "%Y-%m-%d").date()
         form = ReferralHistoryForm(request.POST)
-        form.is_valid()
-        if 'physician' in request.POST : 
-            all_orgs = Physician.objects.filter(id=int(request.POST['physician'])).order_by('physician_name')
-        else :
-            all_orgs = []
+        if form.is_valid():
+            cleaned_data = form.clean()
+            referrals = Referral.objects\
+                .filter(visit_date__gte=cleaned_data['from_date'])\
+                .filter(visit_date__lte=cleaned_data['to_date'])\
+                .order_by('-visit_date')
+            if cleaned_data['physician']:
+                referrals = referrals.filter(physician__in=cleaned_data['physician'])
+        else:
+            referrals = []
         
-        all_ref = {}
-        for phys in all_orgs :
-            phys_ref = phys.get_referral({'from_date' : week_ago, 'to_date' : today});
-            if phys_ref.count() :
-                for ref in phys_ref :
-                    if not phys.id in all_ref : 
-                        all_ref[phys.id] = {'name' : phys.physician_name, 'refs' :  [ ref ] }
-                    else :
-                        all_ref[phys.id]['refs'].append(ref)
         ctx = {
-            'all_orgs': all_ref,
-            'today': today,
-            'week_ago' : week_ago,
+            'referrals': referrals,
             "form": form
-        }
+        } 
         return render(request,"tracking/show_referral_history.html",ctx )
+
+def edit_physician(request, physician_id):
+    physician = get_object_or_404(Physician, id=physician_id)
+    if request.method == 'POST':
+        form = PhysicianForm(request.POST, instance=physician)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/physician_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = PhysicianForm(instance=physician)
+
+    return render(request, 'tracking/physician_edit.html', {'form': form})
+
+def edit_organization(request, organization_id):
+    organization = get_object_or_404(Organization, id=organization_id)
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST, instance=organization)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/organization_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = OrganizationForm(instance=organization)
+
+    return render(request, 'tracking/organization_edit.html', {'form': form})
