@@ -2,6 +2,7 @@
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.urlresolvers import reverse
@@ -78,6 +79,7 @@ class Referral(models.Model):
         Physician, related_name="Referral",verbose_name="Practitioner")
     visit_date = models.DateField("Date", default=date.today)
     visit_count = models.IntegerField("Referrals", default=1)
+    referral_date = models.DateTimeField("Referral Date", default=timezone.now)
 
     def __str__(self):
         return self.physician.organization.org_name
