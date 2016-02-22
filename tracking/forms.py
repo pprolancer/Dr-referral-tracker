@@ -38,7 +38,7 @@ class ReferralForm(autocomplete_light.ModelForm):
 
     class Meta:                                             
         model = Referral
-        exclude = []
+        exclude = ['referral_date']
    
 
 class ReferralHistoryForm(forms.Form):
