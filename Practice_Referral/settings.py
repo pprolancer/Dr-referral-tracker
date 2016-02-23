@@ -19,9 +19,6 @@ except:
 # SECURITY WARNING: keep the secret key used in production secret!
 # see settings_secret
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = (
