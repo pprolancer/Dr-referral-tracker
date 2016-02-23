@@ -151,4 +151,10 @@ def get_referral_months(month_number):
 
 @register.assignment_tag
 def get_dict_item(dictionary, key):
+    '''
+    get value of a key in dictionary.
+    this will be used in django template.
+    for example:
+        get_dict_item dict key1
+    '''
     return dictionary.get(key)
