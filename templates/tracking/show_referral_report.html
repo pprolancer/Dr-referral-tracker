@@ -25,29 +25,38 @@
 		   </th>
   	</tr>
   </thead>
-{% for organization in all_orgs %}
+  <thead>
+  	<tr class="active">
+	  <th><em>Total</em></th>
+	  <th><em>{{total_counts.counts}}</em></th>
+	  <th><em>{{total_counts.counts_month_lastyear}}</em></th>
+	  <th><em>{{total_counts.counts_year}}</em></th>
+	  <th><em>{{total_counts.counts_year_lastyear}}</em></th>
+  	</tr>
+  </thead>
+{% for org in all_orgs %}
 <tr class="">
-			  <th class="active">{{organization}}
+			  <th class="active">{{org}}
 			  </th>
 
 			  <td class="current_month_date">
-			  {% get_organization_counts organization as counts %}
+			  {% get_dict_item orgs_counts org.id as org_counts %}
 
-			  <span>{{counts}}</span>
+			  <span>{{org_counts.counts}}</span>
 			  </td>
 			  <td class="last_month_date">
-			  	{% get_organization_counts_month_lastyear organization as counts %}{{counts}}
+			  	{{org_counts.counts_month_lastyear}}
 			  </td>
 			  <td class="current_year">
-			  	{% get_organization_counts_year organization as counts %}{{counts}}
+			  	{{org_counts.counts_year}}
 			  	</td>
 			  <td class="last_year" >
-			  	{% get_organization_counts_year_lastyear organization as counts %}{{counts}}
+				{{org_counts.counts_year_lastyear}}
 			  	</td>
 		</tr>
 <br/>
-	
-	{% for physician in organization.get_physician %}
+
+	{% for physician in org.get_physician %}
 
 	<tr class="">
 			  <td class="active text-right"> {{physician}}
@@ -69,7 +78,7 @@
 	{% endfor %}
 
 {% endfor %}
-  	
+
 
 
 </table>

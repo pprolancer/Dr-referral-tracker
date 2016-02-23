@@ -12,6 +12,10 @@ from django.shortcuts import render_to_response, render, redirect, get_object_or
 from tracking.models import Referral,Physician, Organization, LAST_MONTH, LAST_12_MONTH
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
+from tracking.templatetags.visite_counts import get_organization_counts, \
+    get_organization_counts_month_lastyear, get_organization_counts_year, \
+    get_organization_counts_year_lastyear
+
 
 class IndexView(View):
     # display the Organization form
@@ -73,7 +77,7 @@ class IndexView(View):
             phys_ref = phys.get_referral({'from_date' : week_ago, 'to_date' : today});
             if phys_ref.count() :
                 for ref in phys_ref :
-                    if not phys.id in all_ref : 
+                    if not phys.id in all_ref :
                         all_ref[phys.id] = {'name' : phys.physician_name, 'refs' :  [ ref ] }
                     else :
                         all_ref[phys.id]['refs'].append(ref)
@@ -186,11 +190,32 @@ class GetReferralReport(View):
         all_orgs = Organization.objects.all().order_by('org_name')
         today = datetime.now().date()
         last_year = today.year - 1
+        orgs_counts = {}
+        total_counts = dict(counts=0, counts_month_lastyear=0,
+                            counts_year=0, counts_year_lastyear=0)
+        for org in all_orgs:
+            counts = get_organization_counts(org)
+            counts_month_lastyear = get_organization_counts_month_lastyear(org)
+            counts_year = get_organization_counts_year(org)
+            counts_year_lastyear = get_organization_counts_year_lastyear(org)
+            orgs_counts[org.id] = dict(
+                counts=counts,
+                counts_month_lastyear=counts_month_lastyear,
+                counts_year=counts_year,
+                counts_year_lastyear=counts_year_lastyear,
+            )
+            total_counts['counts'] += counts
+            total_counts['counts_month_lastyear'] += counts_month_lastyear
+            total_counts['counts_year'] += counts_year
+            total_counts['counts_year_lastyear'] += counts_year_lastyear
+
         ctx = {
                 'all_orgs': all_orgs,
-                'last_year':last_year,
+                'last_year': last_year,
+                'orgs_counts': orgs_counts,
+                'total_counts': total_counts
             }
-        return render(request,"tracking/show_referral_report.html",ctx )
+        return render(request, "tracking/show_referral_report.html", ctx)
 
 
 class LogoutView(View):
