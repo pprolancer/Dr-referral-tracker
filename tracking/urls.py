@@ -13,6 +13,8 @@ urlpatterns = patterns(
     url(r'^referral-history/$', GetReferralHistory.as_view(), name="referral-history"),
     url(r'^edit/physician/([0-9])/$', edit_physician, name="edit-physician"),
     url(r'^edit/organization/([0-9])/$', edit_organization, name="edit-organization"),
+    url(r'^view/organizations/$', OrganizationView.as_view(), name="view-organizations"),
+    url(r'^view/physicians/$', PhysicianView.as_view(), name="view-physicians"),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 )

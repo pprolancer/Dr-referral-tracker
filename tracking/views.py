@@ -1,5 +1,5 @@
 from .forms import *
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, ListView
 from django.views.generic.edit import FormView
 
 import calendar
@@ -264,3 +264,15 @@ def edit_organization(request, organization_id):
         form = OrganizationForm(instance=organization)
 
     return render(request, 'tracking/organization_edit.html', {'form': form})
+    
+class OrganizationView(ListView):
+    model = Organization
+    template_name = 'tracking/organization_list.html' 
+    context_object_name = "organizations"
+    paginate_by = 10
+    
+class PhysicianView(ListView):
+    model = Physician
+    template_name = 'tracking/physician_list.html' 
+    context_object_name = "physicians"
+    paginate_by = 10    

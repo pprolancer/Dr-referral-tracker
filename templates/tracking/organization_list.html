@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if organizations %}
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Contact Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Special</th>
+        </tr>
+        {% for organization in organizations %}
+            <tr>
+                <td><a href="/edit/organization/{{ organization.id }}/">
+                    {{ organization.org_name }}
+                </a></td>
+                <td>{{ organization.org_contact_name }}</td>
+                <td>{{ organization.org_phone }}</td>
+                <td>{{ organization.org_email }}</td>
+                <td>{{ organization.org_special }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% if is_paginated %}
+        <nav>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}" 
+                               aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a></li>
+                {% endif %}
+                {% for page in page_obj.paginator.page_range %}
+                    {% if page == page_obj.number %}
+                        <li class="active"><a href="?page={{ page }}">
+                            {{ page }}
+                        </a></li>
+                    {% else %}
+                        <li><a href="?page={{ page }}">{{ page }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}" 
+                               aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <p>No organizations found.</p>
+{% endif %}
+{% endblock content %}

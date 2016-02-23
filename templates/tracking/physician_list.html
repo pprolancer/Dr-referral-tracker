@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if physicians %}
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Organization</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Special</th>
+        </tr>
+        {% for physician in physicians %}
+            <tr>
+                <td><a href="/edit/physician/{{ physician.id }}/">
+                    {{ physician.physician_name }}
+                </a></td>
+                <td>{{ physician.organization.org_name }}</td>
+                <td>{{ physician.physician_phone }}</td>
+                <td>{{ physician.physician_email }}</td>
+                <td>{{ physician.referral_special }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% if is_paginated %}
+        <nav>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}" 
+                               aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a></li>
+                {% endif %}
+                {% for page in page_obj.paginator.page_range %}
+                    {% if page == page_obj.number %}
+                        <li class="active"><a href="?page={{ page }}">
+                            {{ page }}
+                        </a></li>
+                    {% else %}
+                        <li><a href="?page={{ page }}">{{ page }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}" 
+                               aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <p>No physicians found.</p>
+{% endif %}
+{% endblock content %}
