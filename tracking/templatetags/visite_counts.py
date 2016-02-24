@@ -7,7 +7,7 @@ register = template.Library()
 # @register.assignment_tag
 # def get_video(video):
 # 	video_type = video.content_type.split('/')[0]
-# 	return video_type 
+# 	return video_type
 
 @register.assignment_tag
 def get_physician_counts(physician):
@@ -147,3 +147,14 @@ def get_referral_months(month_number):
         return month_name
     except Exception:
         return 0
+
+
+@register.assignment_tag
+def get_dict_item(dictionary, key):
+    '''
+    get value of a key in dictionary.
+    this will be used in django template.
+    for example:
+        get_dict_item dict key1
+    '''
+    return dictionary.get(key)
