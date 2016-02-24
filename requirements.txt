@@ -11,7 +11,7 @@ django-autocomplete-light==2.3.3
 django-bootstrap3==6.2.2
 django-celery==3.1.17
 django-phonenumber-field==1.0.0
-django-ses==0.7.0
+django-mailgun==0.8.0
 kombu==3.0.33
 oauthlib==1.0.3
 phonenumbers==7.2.4
