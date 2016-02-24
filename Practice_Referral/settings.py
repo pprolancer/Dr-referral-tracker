@@ -110,13 +110,13 @@ INSTALLED_APPS += ('kombu.transport.django', )
 
 ## Amazon ses settings
 
-INSTALLED_APPS += ('django_ses', )
+INSTALLED_APPS += ('django_mailgun', )
 
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
 # EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
-EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'
-EMAIL_PORT = 465
+EMAIL_HOST = 'smtp.mailgun.org'
+EMAIL_PORT = 587
 
 EMAIL_USE_TLS = True
 
