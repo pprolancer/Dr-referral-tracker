@@ -13,7 +13,8 @@ before_script:
 # command to run tests
 script:
   - python manage.py test --settings=Practice_Referral.test_settings --noinput
-  - coverage  run  --omit 'seqs/tests/*.*' -m py.test
+  # - coverage  run  --omit 'seqs/tests/*.*' -m py.test
+  - coverage  run  --omit 'seqs/tests/*.*' -m python manage.py test --settings=Practice_Referral.test_settings --noinput
 
 notifications:
   email: false
