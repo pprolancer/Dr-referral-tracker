@@ -7,11 +7,16 @@ python:
 # command to install dependencies
 install:
     - "pip install -r requirements.txt"
+    - pip install codecov
 before_script:
   - python manage.py syncdb --noinput
 # command to run tests
 script:
   - python manage.py test --settings=Practice_Referral.test_settings --noinput
+  - coverage  run  --omit 'seqs/tests/*.*' -m py.test
 
 notifications:
   email: false
+
+after_success:
+  - codecov
