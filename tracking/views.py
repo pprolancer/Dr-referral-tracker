@@ -94,6 +94,7 @@ class IndexView(View):
             "all_orgs" : all_ref,
             'today': today,
             'week_ago' : week_ago,
+            'timezone': TIME_ZONE,
             }
         return render(request,"index.html",ctx )
 
@@ -125,6 +126,7 @@ class IndexView(View):
             "orgform": orgform,
             "phyform": phyform,
             "refform": refform,
+            'timezone': TIME_ZONE,
           }
 
         return render(request,"index.html",ctx )
@@ -171,7 +173,7 @@ class ReferralView(View):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         form = ReferralForm()
-        ctx = {"form": form}
+        ctx = {"form": form, 'timezone': TIME_ZONE}
         return render(request,"tracking/referral.html",ctx )
 
     def post(self, request, *args, **kwargs):
@@ -179,7 +181,7 @@ class ReferralView(View):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/add/referral/')
-        ctx = {"form": form}
+        ctx = {"form": form, 'timezone': TIME_ZONE}
         return render(request,"tracking/referral.html",ctx )
 
 class GetReferralReport(View):
