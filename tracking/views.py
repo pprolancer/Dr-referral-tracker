@@ -15,6 +15,7 @@ from django.contrib.auth import logout as auth_logout
 from tracking.templatetags.visite_counts import get_organization_counts, \
     get_organization_counts_month_lastyear, get_organization_counts_year, \
     get_organization_counts_year_lastyear
+from Practice_Referral.settings import TIME_ZONE
 
 
 class IndexView(View):
@@ -230,18 +231,19 @@ class GetReferralHistory(View):
     """
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        today = date.today() 
+        today = date.today()
         referrals = Referral.objects.filter(visit_date=today).order_by('-visit_date')
         form = ReferralHistoryForm(initial={'from_date': today, 'to_date' : today})
         ctx = {
                 'referrals': referrals,
+                'timezone': TIME_ZONE,
                 "form": form
-            }   
+            }
         return render(request,"tracking/show_referral_history.html",ctx )
-    
-    
+
+
     def post(self, request, *args, **kwargs):
-        
+
         form = ReferralHistoryForm(request.POST)
         if form.is_valid():
             cleaned_data = form.clean()
@@ -253,11 +255,12 @@ class GetReferralHistory(View):
                 referrals = referrals.filter(physician__in=cleaned_data['physician'])
         else:
             referrals = []
-        
+
         ctx = {
             'referrals': referrals,
+            'timezone': TIME_ZONE,
             "form": form
-        } 
+        }
         return render(request,"tracking/show_referral_history.html",ctx )
 
 def edit_physician(request, physician_id):
@@ -289,15 +292,15 @@ def edit_organization(request, organization_id):
         form = OrganizationForm(instance=organization)
 
     return render(request, 'tracking/organization_edit.html', {'form': form})
-    
+
 class OrganizationView(ListView):
     model = Organization
-    template_name = 'tracking/organization_list.html' 
+    template_name = 'tracking/organization_list.html'
     context_object_name = "organizations"
     paginate_by = 10
-    
+
 class PhysicianView(ListView):
     model = Physician
-    template_name = 'tracking/physician_list.html' 
+    template_name = 'tracking/physician_list.html'
     context_object_name = "physicians"
-    paginate_by = 10    
+    paginate_by = 10
