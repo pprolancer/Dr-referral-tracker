@@ -36,10 +36,10 @@ class ReferralForm(autocomplete_light.ModelForm):
     Assume today's date
     """
 
-    class Meta:                                             
+    class Meta:
         model = Referral
         exclude = ['referral_date']
-   
+
 
 class ReferralHistoryForm(forms.Form):
     """
@@ -50,6 +50,5 @@ class ReferralHistoryForm(forms.Form):
     """
 
     physician = autocomplete_light.ModelMultipleChoiceField('PhysicianAutocomplete', required=False)
-    from_date = forms.DateField(widget=forms.TextInput(attrs={'class':'datepicker', 'readonly' : 'readonly'}))
-    to_date = forms.DateField(widget=forms.TextInput(attrs={'class':'datepicker', 'readonly' : 'readonly'}))
-    
+    from_date = forms.DateField(widget=forms.TextInput(attrs={'readonly' : 'readonly'}))
+    to_date = forms.DateField(widget=forms.TextInput(attrs={'readonly' : 'readonly'}))

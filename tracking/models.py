@@ -63,7 +63,7 @@ class Physician(models.Model):
 
     def __str__(self):
         return self.physician_name
-    
+
     def get_referral(self, params):
         today = params['to_date']
         week_ago = params['from_date']
