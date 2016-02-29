@@ -106,8 +106,3 @@ class ThankyouMails(models.Model):
 
     def __str__(self):
         return str(self.physician)
-
-
-@receiver(pre_save,sender=User)
-def my_callback(sender, instance, *args, **kwargs):
-    instance.is_active = False
