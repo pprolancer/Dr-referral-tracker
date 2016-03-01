@@ -27,6 +27,9 @@ def custom_create_user(username, email=None, password=None, **extra_fields):
 
 def social_auth_custom_create_user(strategy, details, user=None, *args,
                                    **kwargs):
+    '''
+    a custom social auth pipline to create user with active=False
+    '''
     if user:
         return {'is_new': False}
 
