@@ -22,6 +22,7 @@ class RegisterView(View):
         password = request.POST.get('password')
         if form.is_valid():
             user = form.save(commit=False)
+            user.is_active = False
             user.set_password(password)
             user.save()
             messages.success(request, 'User Succefully registered.')
