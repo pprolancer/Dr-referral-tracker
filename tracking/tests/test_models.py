@@ -5,18 +5,28 @@ from tracking.models import Physician, Referral, Organization
 
 
 class OrganizationTest(TestCase):
+    ''' a testcases class for Organization model '''
+
     def setUp(self):
+        ''' setup initial objects '''
+
         self.organization = Organization.objects.create(org_name='org1')
 
     def test_get_physician_no_physician(self):
+        ''' quantifiedcode: ignore it! '''
+
         self.assertEqual(self.organization.get_physician().count(), 0)
 
     def test_get_physician(self):
+        ''' quantifiedcode: ignore it! '''
+
         Physician.objects.create(
             physician_name='phys1', organization_id=self.organization.id)
         self.assertEqual(self.organization.get_physician().count(), 1)
 
     def test_get_physician_sorting(self):
+        ''' quantifiedcode: ignore it! '''
+
         p1 = Physician.objects.create(
             physician_name='phys2', organization_id=self.organization.id)
         p2 = Physician.objects.create(
@@ -32,12 +42,18 @@ class OrganizationTest(TestCase):
 
 
 class PhysicianTest(TestCase):
+    ''' a testcases class for Physician model '''
+
     def setUp(self):
+        ''' setup initial objects '''
+
         self.organization = Organization.objects.create(org_name='org1')
         self.physician = Physician.objects.create(
             physician_name='phys1', organization_id=self.organization.id)
 
     def test_get_referral_no_referral(self):
+        ''' quantifiedcode: ignore it! '''
+
         params = {
             'to_date': datetime.now().date(),
             'from_date': (datetime.now() - timedelta(days=1)).date()
@@ -46,6 +62,8 @@ class PhysicianTest(TestCase):
         self.assertEqual(self.physician.get_referral(params).count(), 0)
 
     def test_get_referral_today(self):
+        ''' quantifiedcode: ignore it! '''
+
         physician2 = Physician.objects.create(
             physician_name='phys2', organization_id=self.organization.id)
         referrals = [Referral.objects.create(physician=self.physician)
@@ -63,6 +81,8 @@ class PhysicianTest(TestCase):
         self.assertEqual(p_referrals[0]['visit_date'], today)
 
     def test_get_referral_10_days(self):
+        ''' quantifiedcode: ignore it! '''
+
         today = datetime.now().date()
         referrals = [
             Referral.objects.create(physician=self.physician,
@@ -76,6 +96,6 @@ class PhysicianTest(TestCase):
         p_referrals = self.physician.get_referral(params).all()
 
         self.assertEqual(len(p_referrals), 10)
-        self.assertEqual(set([p['visit'] for p in p_referrals]), set([1]))
+        self.assertSetEqual({p['visit'] for p in p_referrals}, {1})
         self.assertListEqual([p['visit_date'] for p in p_referrals],
                              [r.visit_date for r in referrals])

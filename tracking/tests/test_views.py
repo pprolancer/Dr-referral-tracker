@@ -8,28 +8,40 @@ from tracking.models import Organization, Physician, Referral
 
 
 def date2str(d):
+    '''convert date to string format like 2016-01-03 01:01:01'''
     return d.strftime('%Y-%m-%d %H:%M:%S')
 
 
 class LoginBaseTest(TestCase):
+    ''' a base class for testcases which need login '''
+
     def setUp(self):
+        '''initial default user to be login in '''
         self.default_pass = 'pass1234'
         self.user = User.objects.create_user(username='user1',
                                              password=self.default_pass)
 
-    def login(self):
+    def _login(self):
+        ''' do login on client '''
+
         return self.client.post(reverse('user_login'),
                                 {'username': self.user.username,
                                  'password': self.default_pass})
 
 
 class IndexViewTest(LoginBaseTest):
+    ''' testcases class for IndexView '''
+
     def test_no_login_get(self):
+        ''' quantifiedcode: ignore it! '''
+
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 302)
 
     def test_get(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
@@ -44,8 +56,10 @@ class IndexViewTest(LoginBaseTest):
         self.assertEqual(context['week_ago'], today - timedelta(days=7))
 
     def test_post_phyform(self):
+        ''' quantifiedcode: ignore it! '''
+
         org = Organization.objects.create(org_name='org1')
-        self.login()
+        self._login()
         data = {
             'phyform': 'submit',
             'organization': org.id,
@@ -70,7 +84,9 @@ class IndexViewTest(LoginBaseTest):
         self.assertEqual(created_physician.referral_special, True)
 
     def test_post_orgform(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         data = {
             'orgform': 'submit',
             'org_name': 'org1',
@@ -94,8 +110,12 @@ class IndexViewTest(LoginBaseTest):
 
 
 class LogoutViewTest(LoginBaseTest):
+    ''' testcases class for LogoutView '''
+
     def test_logout(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         response = self.client.get(reverse('index'))
         self.assertEqual(str(self.user.id),
                          self.client.session.get('_auth_user_id'))
@@ -105,14 +125,20 @@ class LogoutViewTest(LoginBaseTest):
 
 
 class ReferralViewTest(LoginBaseTest):
+    ''' testcases class for ReferralView '''
+
     def test_add_get_form(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         response = self.client.get(reverse('add-referral'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'tracking/referral.html')
 
     def test_add_post_form(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         organization = Organization.objects.create(org_name='org1')
         physician = Physician.objects.create(
             physician_name='phys1', organization=organization)
@@ -137,22 +163,32 @@ class ReferralViewTest(LoginBaseTest):
 
 
 class GetReferralReportViewTest(LoginBaseTest):
+    ''' testcases class for GetReferralReportView '''
+
     def test_get(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         response = self.client.get(reverse('get-referral-view'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'tracking/show_referral_report.html')
 
 
 class GetReferralHistoryViewTest(LoginBaseTest):
+    ''' testcases class for GetReferralHistoryView '''
+
     def test_get(self):
-        self.login()
+        ''' quantifiedcode: ignore it! '''
+
+        self._login()
         response = self.client.get(reverse('referral-history'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response,
                                 'tracking/show_referral_history.html')
 
     def test_post(self):
+        ''' quantifiedcode: ignore it! '''
+
         organization = Organization.objects.create(org_name='org1')
         physician = Physician.objects.create(
             physician_name='phys1', organization=organization)
@@ -162,7 +198,7 @@ class GetReferralHistoryViewTest(LoginBaseTest):
                                     visit_date=today + timedelta(days=i))
             for i in range(10)]
 
-        self.login()
+        self._login()
         data = {
             'from_date': str(today),
             'to_date': str(today)
@@ -179,12 +215,16 @@ class GetReferralHistoryViewTest(LoginBaseTest):
         response = self.client.post(reverse('referral-history'), data)
         context = response.context
         self.assertEqual(len(context['referrals']), len(referrals))
-        self.assertSetEqual(set([r.id for r in context['referrals']]),
-                            set([r.id for r in referrals]))
+        self.assertSetEqual({r.id for r in context['referrals']},
+                            {r.id for r in referrals})
 
 
 class EditPhysicianViewTest(LoginBaseTest):
+    ''' testcases class for EditPhysicianView '''
+
     def test_edit(self):
+        ''' quantifiedcode: ignore it! '''
+
         organization = Organization.objects.create(org_name='org1')
         physician = Physician.objects.create(
             physician_name='phys1', organization=organization,
@@ -208,7 +248,11 @@ class EditPhysicianViewTest(LoginBaseTest):
 
 
 class EditOrganizationViewTest(LoginBaseTest):
+    ''' testcases class for EditOrganizationView '''
+
     def test_edit(self):
+        ''' quantifiedcode: ignore it! '''
+
         organization = Organization.objects.create(
             org_name='phys1', org_contact_name="contact1",
             org_email='test@email.com', org_phone='+442083660000',
