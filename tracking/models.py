@@ -73,6 +73,7 @@ class Physician(models.Model):
 
 class Referral(models.Model):
     """
+    Referral is a patient visit referred to the clinic from a "Physician" that is part of an "Organization"
     Not sure how to do the multiple ForeignKey or if that is right.
     """
     physician = models.ForeignKey(
