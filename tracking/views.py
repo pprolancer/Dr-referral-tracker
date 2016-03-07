@@ -295,13 +295,13 @@ def edit_organization(request, organization_id):
 
     return render(request, 'tracking/organization_edit.html', {'form': form})
 
-class OrganizationView(ListView):
+class OrganizationListView(ListView):
     model = Organization
     template_name = 'tracking/organization_list.html'
     context_object_name = "organizations"
     paginate_by = 10
 
-class PhysicianView(ListView):
+class PhysicianListView(ListView):
     model = Physician
     template_name = 'tracking/physician_list.html'
     context_object_name = "physicians"
