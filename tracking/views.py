@@ -18,10 +18,15 @@ from tracking.templatetags.visite_counts import get_organization_counts, \
 from Practice_Referral.settings import TIME_ZONE
 
 
-class IndexView(View):
+class LoginRequiredMixin(object):
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+
+
+class IndexView(LoginRequiredMixin, View):
     # display the Organization form
     # template_name = "index.html"
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
 
         orgform = OrganizationForm()
@@ -131,9 +136,8 @@ class IndexView(View):
 
         return render(request,"index.html",ctx )
 
-class OrganizationView(View):
+class OrganizationView(LoginRequiredMixin, View):
     # display the Organization form
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         form = OrganizationForm()
         ctx = {"form": form}
@@ -149,9 +153,8 @@ class OrganizationView(View):
         return render(request,"tracking/organization.html",ctx )
 
 
-class PhysicianView(View):
+class PhysicianView(LoginRequiredMixin, View):
     # display the physician form
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         form = PhysicianForm()
         ctx = {"form": form}
@@ -168,9 +171,8 @@ class PhysicianView(View):
         return render(request,"tracking/physician.html",ctx )
 
 
-class ReferralView(View):
+class ReferralView(LoginRequiredMixin, View):
     # display the referral form
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         form = ReferralForm()
         ctx = {"form": form, 'timezone': TIME_ZONE}
@@ -184,11 +186,10 @@ class ReferralView(View):
         ctx = {"form": form, 'timezone': TIME_ZONE}
         return render(request,"tracking/referral.html",ctx )
 
-class GetReferralReport(View):
+class GetReferralReport(LoginRequiredMixin, View):
     """
     Display a summary of referrals by Organization:provider:
     """
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         all_orgs = Organization.objects.all().order_by('org_name')
         today = datetime.now().date()
@@ -221,17 +222,17 @@ class GetReferralReport(View):
         return render(request, "tracking/show_referral_report.html", ctx)
 
 
-class LogoutView(View):
+class LogoutView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         auth_logout(request)
         return redirect('/')
 
-class GetReferralHistory(View):
+
+class GetReferralHistory(LoginRequiredMixin, View):
     """
     Display a summary of referrals by Date:Physician:Organization:Count:
     """
-    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         today = date.today()
         referrals = Referral.objects.filter(visit_date=today).order_by('-visit_date')
@@ -265,6 +266,8 @@ class GetReferralHistory(View):
         }
         return render(request,"tracking/show_referral_history.html",ctx )
 
+
+@login_required
 def edit_physician(request, physician_id):
     physician = get_object_or_404(Physician, id=physician_id)
     if request.method == 'POST':
@@ -280,6 +283,8 @@ def edit_physician(request, physician_id):
 
     return render(request, 'tracking/physician_edit.html', {'form': form})
 
+
+@login_required
 def edit_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
     if request.method == 'POST':
@@ -295,13 +300,15 @@ def edit_organization(request, organization_id):
 
     return render(request, 'tracking/organization_edit.html', {'form': form})
 
-class OrganizationListView(ListView):
+
+class OrganizationListView(LoginRequiredMixin, ListView):
     model = Organization
     template_name = 'tracking/organization_list.html'
     context_object_name = "organizations"
     paginate_by = 10
 
-class PhysicianListView(ListView):
+
+class PhysicianListView(LoginRequiredMixin, ListView):
     model = Physician
     template_name = 'tracking/physician_list.html'
     context_object_name = "physicians"
