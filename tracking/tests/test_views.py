@@ -237,6 +237,7 @@ class EditPhysicianViewTest(LoginBaseTest):
             'physician_email': 'new_email@email.com',
             'referral_special': 'on'
         }
+        self._login()
         response = self.client.post(
             reverse('edit-physician', args=(physician.id,)), data)
         self.assertEqual(response.status_code, 200)
@@ -264,6 +265,7 @@ class EditOrganizationViewTest(LoginBaseTest):
             'org_email': 'new_email@email.com',
             'org_special': 'on'
         }
+        self._login()
         response = self.client.post(
             reverse('edit-organization', args=(organization.id,)), data)
         self.assertEqual(response.status_code, 200)
