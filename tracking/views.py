@@ -19,8 +19,16 @@ from Practice_Referral.settings import TIME_ZONE
 
 
 class LoginRequiredMixin(object):
+    '''
+    a Mixin class to check login in class views. View calsses can inherit
+    from this class to enforce login_required.
+    '''
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        '''
+        check login_required for every actions(get, post, ...) by
+        this dispatcher
+        '''
         return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
 
 
