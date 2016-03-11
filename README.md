@@ -20,19 +20,20 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 
 #### Model design:
 * Organization
-* - Name and profile
-* - Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
+* -Name and profile
+* -Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
 
 * ReferriingEntity
-* - name and profile
+* -name and profile
 
 * PatientVist
-* - ReferriingEntity
-* - VisitDate
-* - AppiontmentTime (optional)
-* - ActualTime (optional)
-* - TimeStamp
+* -ReferriingEntity
+* -VisitDate
+* -AppiontmentTime (optional)
+* -ActualTime (optional)
+* -TimeStamp
 
 * TreatingProvider
-* - name
-* - type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
+* -Title
+* -name
+* -type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
