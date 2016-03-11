@@ -51,5 +51,5 @@ class RegisterViewTest(TestCase):
         ''' quantifiedcode: ignore it! '''
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, '%s?next=%s' % (reverse('user_login'),
-                                                       reverse('index')))
+        self.assertRedirects(response, '{}?next={}'.format(
+            reverse('user_login'), reverse('index')))
