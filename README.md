@@ -15,3 +15,26 @@ QuantifiedCode
 CodeCove
 
 [![codecov.io](https://codecov.io/github/Heteroskedastic/Dr-referral-tracker/coverage.svg?branch=master)](https://codecov.io/github/Heteroskedastic/Dr-referral-tracker?branch=master)
+
+A simple app designed to allow Medical clinics to easily track patient visits, patient referral sources and treating physician procutivity.
+
+#### Model design:
+* Organization
+* - Name and profile
+* - Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
+
+* ReferriingEntity
+* - name and profile
+
+* PatientVist
+* - ReferriingEntity
+* Date
+* AppiontmentTime (optional
+* ActualTime (optional)
+
+* Provider
+* - name
+* - type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
+
+
+
