@@ -18,22 +18,23 @@ CodeCove
 
 A simple app designed to allow Medical clinics to easily track patient visits, patient referral sources and treating physician procutivity.
 
-#### Model design:
-* Organization
-* -Name and profile
-* -Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
+### Model design:
 
-* ReferriingEntity
-* -name and profile
+#### Organization
+* Name and profile
+* Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
 
-* PatientVist
-* -ReferriingEntity
-* -VisitDate
-* -AppiontmentTime (optional)
-* -ActualTime (optional)
-* -TimeStamp
+#### ReferriingEntity
+* name and profile
 
-* TreatingProvider
-* -Title
-* -name
-* -type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
+#### PatientVist
+* ReferriingEntity (key)
+* VisitDate
+* AppiontmentTime (optional)
+* ActualTime (optional)
+* TimeStamp
+
+#### TreatingProvider
+* Title
+* name
+* type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
