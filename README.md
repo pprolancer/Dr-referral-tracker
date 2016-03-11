@@ -28,13 +28,11 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 
 * PatientVist
 * - ReferriingEntity
-* Date
-* AppiontmentTime (optional
-* ActualTime (optional)
+* - VisitDate
+* - AppiontmentTime (optional)
+* - ActualTime (optional)
+* - TimeStamp
 
-* Provider
+* TreatingProvider
 * - name
 * - type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
-
-
-
