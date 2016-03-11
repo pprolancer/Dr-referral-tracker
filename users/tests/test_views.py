@@ -48,6 +48,7 @@ class RegisterViewTest(TestCase):
         self.assertIn('password1',  form.errors)
 
     def test_no_login_redirect(self):
+        ''' quantifiedcode: ignore it! '''
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '%s?next=%s' % (reverse('user_login'),
