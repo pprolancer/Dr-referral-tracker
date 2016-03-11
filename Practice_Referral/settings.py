@@ -84,6 +84,8 @@ ROOT_URLCONF = 'Practice_Referral.urls'
 
 WSGI_APPLICATION = 'Practice_Referral.wsgi.application'
 
+LOGIN_URL = '/'
+
 # SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/'
 SOCIAL_AUTH_LOGIN_URL = '/'
 
