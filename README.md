@@ -24,11 +24,11 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 * Name and profile
 * Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
 
-#### ReferriingEntity
+#### ReferringEntity
 * name and profile
 
 #### PatientVist
-* ReferriingEntity (key)
+* ReferringEntity (key)
 * VisitDate
 * AppiontmentTime (optional)
 * ActualTime (optional)
