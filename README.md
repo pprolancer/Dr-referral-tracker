@@ -25,7 +25,12 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 * Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
 
 #### ReferringEntity
-* name and profile
+(Current Patient and  Social are built in and directly linked (not sure what that means the the Orgs with the same name)
+* title
+* name
+* phone
+* email
+
 
 #### PatientVist
 * ReferringEntity (key)
