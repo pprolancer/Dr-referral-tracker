@@ -13,6 +13,10 @@ class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
         exclude = []
+        
+    def __init__(self, *args, **kwargs):
+        super(OrganizationForm, self).__init__(*args, **kwargs)
+        self.fields['org_type'].required = True
 
 
 class ReferringEntityForm(autocomplete_light.ModelForm):

@@ -25,8 +25,22 @@ class Organization(models.Model):
     https://github.com/stefanfoulis/django-phonenumber-field
     pip install django-phonenumber-field
     '''
-    org_name = models.CharField(
+    ORG_TYPE_MARKETING         = "MAR"
+    ORG_TYPE_INSURANCE         = "INS"
+    ORG_TYPE_INTERNAL          = "INT"
+    ORG_TYPE_WORKCOMP          = "WKC"
+    ORG_TYPE_HEATHCAREPROVIDER = "HCP"
+    ORG_TYPE_CHOICES = (
+        (ORG_TYPE_MARKETING        , "Marketing"          ), 
+        (ORG_TYPE_INSURANCE        , "Insurance"          ), 
+        (ORG_TYPE_INTERNAL         , "Internal"           ), 
+        (ORG_TYPE_WORKCOMP         , "Work comp."         ), 
+        (ORG_TYPE_HEATHCAREPROVIDER, "Healthcare Provider")
+    )
+    org_name = models.CharField(                   
         "Group Name", max_length=254, unique=True, blank=False, null=True)
+    org_type = models.CharField(
+        "Group Type", max_length=2, choices=ORG_TYPE_CHOICES, blank=True)
     org_contact_name = models.CharField(
         "Contact name", max_length=254, blank=True, null=True)
     org_phone = PhoneNumberField("Phone", blank=True)
