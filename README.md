@@ -17,14 +17,15 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 
 #### Organization
 * Name and profile
-* Type (Marketing, Insurance, "Social" (Previous Patient, family friends), Current Patient, Work comp., Healthcare Provider)
+* Type (Marketing, Insurance, Internal, Work comp., Healthcare Provider)
 
 #### ReferringEntity
-(Current Patient and  Social are built in and directly linked (not sure what that means the the Orgs with the same name)
-* title
+(Current patient and Returning patient, will be assigned to the "Internal" Org.)
+* OrgForgnkey
+* title (optional)
 * name
-* phone
-* email
+* phone (optional)
+* email (optional)
 
 
 #### PatientVist
@@ -35,6 +36,6 @@ A simple app designed to allow Medical clinics to easily track patient visits, p
 * TimeStamp
 
 #### TreatingProvider
-* Title
+* Title (optional)
 * name
 * type (Physician Assistant, Doctor, Nurse, Nurse Pratitioner)
