@@ -7,6 +7,7 @@ from .models import *
 
 admin.site.register(Organization)
 admin.site.register(ReferringEntity)
+admin.site.register(TreatingProvider)
 admin.site.register(PatientVisit)
 admin.site.register(ThankyouMails)
 admin.site.register(EmailReport)

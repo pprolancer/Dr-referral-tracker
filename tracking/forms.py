@@ -35,7 +35,7 @@ class ReferringEntityForm(autocomplete_light.ModelForm):
 class PatientVisitForm(autocomplete_light.ModelForm):
     """
     record a new patient_visit
-    autocomplete ReferringEntity
+    autocomplete PatientVisit
     Don't need blank for Org
     Assume today's date
     """
@@ -43,6 +43,16 @@ class PatientVisitForm(autocomplete_light.ModelForm):
     class Meta:
         model = PatientVisit
         exclude = ['record_date']
+        
+class TreatingProviderForm(autocomplete_light.ModelForm):
+    """
+    record a new treating_provider
+    autocomplete TreatingProvider
+    """
+
+    class Meta:
+        model = TreatingProvider
+        exclude = []        
 
 
 class PatientVisitHistoryForm(forms.Form):

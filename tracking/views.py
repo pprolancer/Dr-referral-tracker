@@ -177,6 +177,23 @@ class ReferringEntityView(LoginRequiredMixin, View):
 
         ctx = {"form": form}
         return render(request,"tracking/referring_entity.html",ctx )
+        
+class TreatingProviderView(LoginRequiredMixin, View):
+    # display the treating_provider form
+    def get(self, request, *args, **kwargs):
+        form = TreatingProviderForm()
+        ctx = {"form": form}
+        return render(request,"tracking/treating_provider.html",ctx )
+
+
+    def post(self, request, *args, **kwargs):
+        form = TreatingProviderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form = TreatingProviderForm()
+
+        ctx = {"form": form}
+        return render(request,"tracking/treating_provider.html",ctx )        
 
 
 class PatientVisitView(LoginRequiredMixin, View):
@@ -276,23 +293,6 @@ class GetPatientVisitHistory(LoginRequiredMixin, View):
 
 
 @login_required
-def edit_referring_entity(request, referring_entity_id):
-    referring_entity = get_object_or_404(ReferringEntity, id=referring_entity_id)
-    if request.method == 'POST':
-        form = ReferringEntityForm(request.POST, instance=referring_entity)
-        if form.is_valid():
-            form.save()
-            return render(request, 'tracking/referring_entity_edit.html', {
-                'form': form,
-                'success': True})
-
-    else:
-        form = ReferringEntityForm(instance=referring_entity)
-
-    return render(request, 'tracking/referring_entity_edit.html', {'form': form})
-
-
-@login_required
 def edit_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
     if request.method == 'POST':
@@ -309,6 +309,40 @@ def edit_organization(request, organization_id):
     return render(request, 'tracking/organization_edit.html', {'form': form})
 
 
+@login_required
+def edit_referring_entity(request, referring_entity_id):
+    referring_entity = get_object_or_404(ReferringEntity, id=referring_entity_id)
+    if request.method == 'POST':
+        form = ReferringEntityForm(request.POST, instance=referring_entity)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/referring_entity_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = ReferringEntityForm(instance=referring_entity)
+
+    return render(request, 'tracking/referring_entity_edit.html', {'form': form})
+    
+
+@login_required
+def edit_treating_provider(request, treating_provider_id):
+    treating_provider = get_object_or_404(TreatingProvider, id=treating_provider_id)
+    if request.method == 'POST':
+        form = TreatingProviderForm(request.POST, instance=treating_provider)
+        if form.is_valid():
+            form.save()
+            return render(request, 'tracking/treating_provider_edit.html', {
+                'form': form,
+                'success': True})
+
+    else:
+        form = TreatingProviderForm(instance=treating_provider)
+
+    return render(request, 'tracking/treating_provider_edit.html', {'form': form})    
+
+
 class OrganizationListView(LoginRequiredMixin, ListView):
     model = Organization
     template_name = 'tracking/organization_list.html'
@@ -321,3 +355,9 @@ class ReferringEntityListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/referring_entity_list.html'
     context_object_name = "referring_entitys"
     paginate_by = 10
+    
+class TreatingProviderListView(LoginRequiredMixin, ListView):
+    model = TreatingProvider
+    template_name = 'tracking/treating_provider_list.html'
+    context_object_name = "treating_providers"
+    paginate_by = 10    
