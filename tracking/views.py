@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from datetime import datetime , timedelta, date
 from django.utils.decorators import method_decorator
 from django.shortcuts import render_to_response, render, redirect, get_object_or_404
-from tracking.models import Referral,Physician, Organization, LAST_MONTH, LAST_12_MONTH
+from tracking.models import PatientVisit,ReferringEntity, Organization, LAST_MONTH, LAST_12_MONTH
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from tracking.templatetags.visite_counts import get_organization_counts, \
@@ -38,61 +38,61 @@ class IndexView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
 
         orgform = OrganizationForm()
-        phyform = PhysicianForm()
-        refform = ReferralForm()
+        phyform = ReferringEntityForm()
+        refform = PatientVisitForm()
 
         today_date = datetime.now().date()
         start_date = today_date - timedelta(days=365)
         end_date = today_date - timedelta(days=1)
 
-        physician_visit_sum = Physician.objects.filter(
-            Referral__visit_date__range=(start_date,end_date)).annotate(
-            total_visits=Sum('Referral__visit_count')
+        referring_entity_visit_sum = ReferringEntity.objects.filter(
+            PatientVisit__visit_date__range=(start_date,end_date)).annotate(
+            total_visits=Sum('PatientVisit__visit_count')
             ).order_by('-total_visits')[:10]
 
         org_visit_sum =  Organization.objects.filter(
-            Physician__Referral__visit_date__range=(start_date,end_date)).annotate(
-            total_org_visits=Sum('Physician__Referral__visit_count')
+            ReferringEntity__PatientVisit__visit_date__range=(start_date,end_date)).annotate(
+            total_org_visits=Sum('ReferringEntity__PatientVisit__visit_count')
             ).order_by('-total_org_visits')[:5]
 
         special_visit_sum =  Organization.objects.filter(org_special=True).filter(
-            Physician__Referral__visit_date__range=(start_date,end_date)).annotate(
-            total_org_special_visits=Sum('Physician__Referral__visit_count')
+            ReferringEntity__PatientVisit__visit_date__range=(start_date,end_date)).annotate(
+            total_org_special_visits=Sum('ReferringEntity__PatientVisit__visit_count')
             ).order_by('-total_org_special_visits')[:5]
 
-        referrals = Referral.objects.filter(visit_date__range=[LAST_12_MONTH,LAST_MONTH])
+        patient_visits = PatientVisit.objects.filter(visit_date__range=[LAST_12_MONTH,LAST_MONTH])
 
-        if referrals:
+        if patient_visits:
             try:
-                referrals = referrals.extra(select={'month': 'STRFTIME("%m",visit_date)'})
-                print (referrals[0].month)
+                patient_visits = patient_visits.extra(select={'month': 'STRFTIME("%m",visit_date)'})
+                print (patient_visits[0].month)
             except:
-                referrals = referrals.extra(select={'month': 'EXTRACT(month FROM visit_date)'})
-            referrals = referrals.values('month').annotate(total_visit_count=Sum('visit_count'))
+                patient_visits = patient_visits.extra(select={'month': 'EXTRACT(month FROM visit_date)'})
+            patient_visits = patient_visits.values('month').annotate(total_visit_count=Sum('visit_count'))
 
-            for referral in referrals:
-                if LAST_MONTH.month <= int(referral['month']) :
-                    current_month = date(day=LAST_MONTH.day, month= int(referral['month']), year=LAST_MONTH.year)
+            for patient_visit in patient_visits:
+                if LAST_MONTH.month <= int(patient_visit['month']) :
+                    current_month = date(day=LAST_MONTH.day, month= int(patient_visit['month']), year=LAST_MONTH.year)
                 else:
                     current_month = date(day=LAST_12_MONTH.day, month= int(
-                        referral['month']), year=LAST_12_MONTH.year)
+                        patient_visit['month']), year=LAST_12_MONTH.year)
 
                 last_month = current_month-timedelta(days=364)
-                referrals_year = Referral.objects.filter(
+                patient_visits_year = PatientVisit.objects.filter(
                     visit_date__range=[last_month, current_month]).aggregate(year_total=Sum('visit_count'))
-                referral['year_total'] = referrals_year['year_total']
-                referral['year_from'] = last_month
-                referral['year_to'] = current_month
+                patient_visit['year_total'] = patient_visits_year['year_total']
+                patient_visit['year_from'] = last_month
+                patient_visit['year_to'] = current_month
         today = date.today()
         week_ago = today - timedelta(days=7)
-        all_orgs = Physician.objects.order_by('physician_name')
+        all_orgs = ReferringEntity.objects.order_by('entity_name')
         all_ref = {}
         for phys in all_orgs :
-            phys_ref = phys.get_referral({'from_date' : week_ago, 'to_date' : today});
+            phys_ref = phys.get_patient_visit({'from_date' : week_ago, 'to_date' : today});
             if phys_ref.count() :
                 for ref in phys_ref :
                     if not phys.id in all_ref :
-                        all_ref[phys.id] = {'name' : phys.physician_name, 'refs' :  [ ref ] }
+                        all_ref[phys.id] = {'name' : phys.entity_name, 'refs' :  [ ref ] }
                     else :
                         all_ref[phys.id]['refs'].append(ref)
 
@@ -100,10 +100,10 @@ class IndexView(LoginRequiredMixin, View):
             "orgform": orgform,
             "phyform": phyform,
             "refform": refform,
-            "physician_visit_sum": physician_visit_sum,
+            "referring_entity_visit_sum": referring_entity_visit_sum,
             "org_visit_sum": org_visit_sum,
             "special_visit_sum": special_visit_sum,
-            "referrals":referrals,
+            "patient_visits":patient_visits,
             "all_orgs" : all_ref,
             'today': today,
             'week_ago' : week_ago,
@@ -113,12 +113,12 @@ class IndexView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
 
-        phyform = PhysicianForm()
+        phyform = ReferringEntityForm()
         orgform = OrganizationForm()
-        refform = ReferralForm()
+        refform = PatientVisitForm()
 
         if 'phyform' in request.POST:
-            phyform = PhysicianForm(request.POST)
+            phyform = ReferringEntityForm(request.POST)
             if phyform.is_valid():
                 phyform.save()
                 return redirect(reverse('index'))
@@ -130,7 +130,7 @@ class IndexView(LoginRequiredMixin, View):
                 return redirect(reverse('index'))
 
         elif 'refform' in request.POST:
-            refform = ReferralForm(request.POST)
+            refform = PatientVisitForm(request.POST)
             if refform.is_valid():
                 refform.save()
                 return redirect(reverse('index'))
@@ -156,47 +156,47 @@ class OrganizationView(LoginRequiredMixin, View):
         ctx = {"form": form}
         if form.is_valid():
             form.save()
-            return redirect(reverse('add-physician'))
+            return redirect(reverse('add-referring-entity'))
 
         return render(request,"tracking/organization.html",ctx )
 
 
-class PhysicianView(LoginRequiredMixin, View):
-    # display the physician form
+class ReferringEntityView(LoginRequiredMixin, View):
+    # display the referring_entity form
     def get(self, request, *args, **kwargs):
-        form = PhysicianForm()
+        form = ReferringEntityForm()
         ctx = {"form": form}
-        return render(request,"tracking/physician.html",ctx )
+        return render(request,"tracking/referring_entity.html",ctx )
 
 
     def post(self, request, *args, **kwargs):
-        form = PhysicianForm(request.POST)
+        form = ReferringEntityForm(request.POST)
         if form.is_valid():
             form.save()
-            form = PhysicianForm()
+            form = ReferringEntityForm()
 
         ctx = {"form": form}
-        return render(request,"tracking/physician.html",ctx )
+        return render(request,"tracking/referring_entity.html",ctx )
 
 
-class ReferralView(LoginRequiredMixin, View):
-    # display the referral form
+class PatientVisitView(LoginRequiredMixin, View):
+    # display the patient_visit form
     def get(self, request, *args, **kwargs):
-        form = ReferralForm()
+        form = PatientVisitForm()
         ctx = {"form": form, 'timezone': TIME_ZONE}
-        return render(request,"tracking/referral.html",ctx )
+        return render(request,"tracking/patient_visit.html",ctx )
 
     def post(self, request, *args, **kwargs):
-        form = ReferralForm(request.POST)
+        form = PatientVisitForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/add/referral/')
+            return HttpResponseRedirect('/add/patient_visit/')
         ctx = {"form": form, 'timezone': TIME_ZONE}
-        return render(request,"tracking/referral.html",ctx )
+        return render(request,"tracking/patient_visit.html",ctx )
 
-class GetReferralReport(LoginRequiredMixin, View):
+class GetPatientVisitReport(LoginRequiredMixin, View):
     """
-    Display a summary of referrals by Organization:provider:
+    Display a summary of patient_visits by Organization:provider:
     """
     def get(self, request, *args, **kwargs):
         all_orgs = Organization.objects.all().order_by('org_name')
@@ -227,7 +227,7 @@ class GetReferralReport(LoginRequiredMixin, View):
                 'orgs_counts': orgs_counts,
                 'total_counts': total_counts
             }
-        return render(request, "tracking/show_referral_report.html", ctx)
+        return render(request, "tracking/show_patient_visit_report.html", ctx)
 
 
 class LogoutView(LoginRequiredMixin, View):
@@ -237,59 +237,59 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('/')
 
 
-class GetReferralHistory(LoginRequiredMixin, View):
+class GetPatientVisitHistory(LoginRequiredMixin, View):
     """
-    Display a summary of referrals by Date:Physician:Organization:Count:
+    Display a summary of patient_visits by Date:ReferringEntity:Organization:Count:
     """
     def get(self, request, *args, **kwargs):
         today = date.today()
-        referrals = Referral.objects.filter(visit_date=today).order_by('-visit_date')
-        form = ReferralHistoryForm(initial={'from_date': today, 'to_date' : today})
+        patient_visits = PatientVisit.objects.filter(visit_date=today).order_by('-visit_date')
+        form = PatientVisitHistoryForm(initial={'from_date': today, 'to_date' : today})
         ctx = {
-                'referrals': referrals,
+                'patient_visits': patient_visits,
                 'timezone': TIME_ZONE,
                 "form": form
             }
-        return render(request,"tracking/show_referral_history.html",ctx )
+        return render(request,"tracking/show_patient_visit_history.html",ctx )
 
 
     def post(self, request, *args, **kwargs):
 
-        form = ReferralHistoryForm(request.POST)
+        form = PatientVisitHistoryForm(request.POST)
         if form.is_valid():
             cleaned_data = form.clean()
-            referrals = Referral.objects\
+            patient_visits = PatientVisit.objects\
                 .filter(visit_date__gte=cleaned_data['from_date'])\
                 .filter(visit_date__lte=cleaned_data['to_date'])\
                 .order_by('-visit_date')
-            if cleaned_data['physician']:
-                referrals = referrals.filter(physician__in=cleaned_data['physician'])
+            if cleaned_data['referring_entity']:
+                patient_visits = patient_visits.filter(referring_entity__in=cleaned_data['referring_entity'])
         else:
-            referrals = []
+            patient_visits = []
 
         ctx = {
-            'referrals': referrals,
+            'patient_visits': patient_visits,
             'timezone': TIME_ZONE,
             "form": form
         }
-        return render(request,"tracking/show_referral_history.html",ctx )
+        return render(request,"tracking/show_patient_visit_history.html",ctx )
 
 
 @login_required
-def edit_physician(request, physician_id):
-    physician = get_object_or_404(Physician, id=physician_id)
+def edit_referring_entity(request, referring_entity_id):
+    referring_entity = get_object_or_404(ReferringEntity, id=referring_entity_id)
     if request.method == 'POST':
-        form = PhysicianForm(request.POST, instance=physician)
+        form = ReferringEntityForm(request.POST, instance=referring_entity)
         if form.is_valid():
             form.save()
-            return render(request, 'tracking/physician_edit.html', {
+            return render(request, 'tracking/referring_entity_edit.html', {
                 'form': form,
                 'success': True})
 
     else:
-        form = PhysicianForm(instance=physician)
+        form = ReferringEntityForm(instance=referring_entity)
 
-    return render(request, 'tracking/physician_edit.html', {'form': form})
+    return render(request, 'tracking/referring_entity_edit.html', {'form': form})
 
 
 @login_required
@@ -316,8 +316,8 @@ class OrganizationListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
 
-class PhysicianListView(LoginRequiredMixin, ListView):
-    model = Physician
-    template_name = 'tracking/physician_list.html'
-    context_object_name = "physicians"
+class ReferringEntityListView(LoginRequiredMixin, ListView):
+    model = ReferringEntity
+    template_name = 'tracking/referring_entity_list.html'
+    context_object_name = "referring_entitys"
     paginate_by = 10

@@ -55,23 +55,23 @@
 			  	</td>
 		</tr>
 
-	{% for physician in org.get_physician %}
+	{% for referring_entity in org.get_referring_entity %}
 
 	<tr class="">
-			  <td class="active text-right"> {{physician}}
+			  <td class="active text-right"> {{referring_entity}}
 			  </td>
 			  <td class="current_month_date" >
-			  	{% get_physician_counts physician as counts %}{{counts}}
+			  	{% get_referring_entity_counts referring_entity as counts %}{{counts}}
 			  </td>
 			  <td class="last_month_date">
-			  	{% get_physician_counts_month_lastyear physician as counts %}{{counts}}
+			  	{% get_referring_entity_counts_month_lastyear referring_entity as counts %}{{counts}}
 			  </td>
 			  <td class="current_year">
-				{% get_physician_counts_year physician as counts %}
+				{% get_referring_entity_counts_year referring_entity as counts %}
 			  {{counts}}
 			  </td>
 			  <td class="last_year">
-			  	{% get_physician_counts_year_lastyear physician as counts %}{{counts}}
+			  	{% get_referring_entity_counts_year_lastyear referring_entity as counts %}{{counts}}
 			  </td>
 		</tr>
 	{% endfor %}

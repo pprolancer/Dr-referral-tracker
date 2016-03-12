@@ -1,7 +1,7 @@
 from django.test import TestCase
 from datetime import datetime , timedelta, date
 
-from tracking.models import Physician, Referral, Organization
+from tracking.models import ReferringEntity, PatientVisit, Organization
 
 
 class OrganizationTest(TestCase):
@@ -12,46 +12,46 @@ class OrganizationTest(TestCase):
 
         self.organization = Organization.objects.create(org_name='org1')
 
-    def test_get_physician_no_physician(self):
+    def test_get_referring_entity_no_referring_entity(self):
         ''' quantifiedcode: ignore it! '''
 
-        self.assertEqual(self.organization.get_physician().count(), 0)
+        self.assertEqual(self.organization.get_referring_entity().count(), 0)
 
-    def test_get_physician(self):
+    def test_get_referring_entity(self):
         ''' quantifiedcode: ignore it! '''
 
-        Physician.objects.create(
-            physician_name='phys1', organization_id=self.organization.id)
-        self.assertEqual(self.organization.get_physician().count(), 1)
+        ReferringEntity.objects.create(
+            entity_name='phys1', organization_id=self.organization.id)
+        self.assertEqual(self.organization.get_referring_entity().count(), 1)
 
-    def test_get_physician_sorting(self):
+    def test_get_referring_entity_sorting(self):
         ''' quantifiedcode: ignore it! '''
 
-        p1 = Physician.objects.create(
-            physician_name='phys2', organization_id=self.organization.id)
-        p2 = Physician.objects.create(
-            physician_name='Phys1', organization_id=self.organization.id)
-        p3 = Physician.objects.create(
-            physician_name='phys4', organization_id=self.organization.id)
-        p4 = Physician.objects.create(
-            physician_name='Phys3', organization_id=self.organization.id)
-        physicians = list(self.organization.get_physician().all())
-        self.assertEqual(len(physicians), 4)
-        self.assertEqual(physicians[0], p2)
-        self.assertEqual(physicians[-1], p3)
+        p1 = ReferringEntity.objects.create(
+            entity_name='phys2', organization_id=self.organization.id)
+        p2 = ReferringEntity.objects.create(
+            entity_name='Phys1', organization_id=self.organization.id)
+        p3 = ReferringEntity.objects.create(
+            entity_name='phys4', organization_id=self.organization.id)
+        p4 = ReferringEntity.objects.create(
+            entity_name='Phys3', organization_id=self.organization.id)
+        referring_entitys = list(self.organization.get_referring_entity().all())
+        self.assertEqual(len(referring_entitys), 4)
+        self.assertEqual(referring_entitys[0], p2)
+        self.assertEqual(referring_entitys[-1], p3)
 
 
-class PhysicianTest(TestCase):
-    ''' a testcases class for Physician model '''
+class ReferringEntityTest(TestCase):
+    ''' a testcases class for ReferringEntity model '''
 
     def setUp(self):
         ''' setup initial objects '''
 
         self.organization = Organization.objects.create(org_name='org1')
-        self.physician = Physician.objects.create(
-            physician_name='phys1', organization_id=self.organization.id)
+        self.referring_entity = ReferringEntity.objects.create(
+            entity_name='phys1', organization_id=self.organization.id)
 
-    def test_get_referral_no_referral(self):
+    def test_get_patient_visit_no_patient_visit(self):
         ''' quantifiedcode: ignore it! '''
 
         params = {
@@ -59,43 +59,43 @@ class PhysicianTest(TestCase):
             'from_date': (datetime.now() - timedelta(days=1)).date()
         }
 
-        self.assertEqual(self.physician.get_referral(params).count(), 0)
+        self.assertEqual(self.referring_entity.get_patient_visit(params).count(), 0)
 
-    def test_get_referral_today(self):
+    def test_get_patient_visit_today(self):
         ''' quantifiedcode: ignore it! '''
 
-        physician2 = Physician.objects.create(
-            physician_name='phys2', organization_id=self.organization.id)
-        referrals = [Referral.objects.create(physician=self.physician)
+        referring_entity2 = ReferringEntity.objects.create(
+            entity_name='phys2', organization_id=self.organization.id)
+        patient_visits = [PatientVisit.objects.create(referring_entity=self.referring_entity)
                      for _ in range(10)]
-        not_related_referral = Referral.objects.create(physician=physician2)
+        not_related_patient_visit = PatientVisit.objects.create(referring_entity=referring_entity2)
         today = datetime.now().date()
         params = {
             'to_date': today,
             'from_date': today
         }
-        p_referrals = self.physician.get_referral(params).all()
+        p_patient_visits = self.referring_entity.get_patient_visit(params).all()
 
-        self.assertEqual(len(p_referrals), 1)
-        self.assertEqual(p_referrals[0]['visit'], 10)
-        self.assertEqual(p_referrals[0]['visit_date'], today)
+        self.assertEqual(len(p_patient_visits), 1)
+        self.assertEqual(p_patient_visits[0]['visit'], 10)
+        self.assertEqual(p_patient_visits[0]['visit_date'], today)
 
-    def test_get_referral_10_days(self):
+    def test_get_patient_visit_10_days(self):
         ''' quantifiedcode: ignore it! '''
 
         today = datetime.now().date()
-        referrals = [
-            Referral.objects.create(physician=self.physician,
+        patient_visits = [
+            PatientVisit.objects.create(referring_entity=self.referring_entity,
                                     visit_date=today + timedelta(days=i))
             for i in range(10)]
-        referrals.reverse()
+        patient_visits.reverse()
         params = {
             'to_date': today + timedelta(days=10),
             'from_date': today
         }
-        p_referrals = self.physician.get_referral(params).all()
+        p_patient_visits = self.referring_entity.get_patient_visit(params).all()
 
-        self.assertEqual(len(p_referrals), 10)
-        self.assertSetEqual({p['visit'] for p in p_referrals}, {1})
-        self.assertListEqual([p['visit_date'] for p in p_referrals],
-                             [r.visit_date for r in referrals])
+        self.assertEqual(len(p_patient_visits), 10)
+        self.assertSetEqual({p['visit'] for p in p_patient_visits}, {1})
+        self.assertListEqual([p['visit_date'] for p in p_patient_visits],
+                             [r.visit_date for r in patient_visits])

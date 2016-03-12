@@ -11,12 +11,12 @@
 
 <div class="row" style="background-color: rgb(220, 234, 210);">
       <div class="col-md-2">
-        <h3>Referreral Tracker </h3>
+        <h3>Referral Tracker </h3>
         <a href=""> Thankyou E-Mails</a>
       </div>
 
     <div class="col-md-3">
-        <h4 style="text-align:center;">Record Referral </h4>
+        <h4 style="text-align:center;">Record Patient Visit </h4>
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
           {% for field in refform.visible_fields %}
@@ -25,13 +25,22 @@
               <div class="col-sm-9">
                 {% if field.name == 'visit_date' %}
                 <div class="form-group">
-                  <div class='input-group date datetimepicker2'>
+                  <div class='input-group date datetimepicker2' id="datetimepicker2">
                     {{ field }}
                     <span class="input-group-addon">
                       <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                   </div>
                 </div>
+                {% elif field.name == 'visit_appointment_time' or field.name == 'visit_actual_time' %}
+                <div class="form-group">
+                  <div class='input-group date datetimepicker2 timeonlypicker'>
+                    {{ field }}
+                    <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-time"></span>
+                    </span>
+                  </div>
+                </div>                
                 {% else %}
                 {{ field }}
                 {% endif %}
@@ -49,7 +58,7 @@
     </div>
 
     <div class="col-md-3">
-        <h4 style="text-align:center;">Create Practitioner </h4>
+        <h4 style="text-align:center;">Create Referring Entity </h4>
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
           {% for field in phyform.visible_fields %}
@@ -97,7 +106,7 @@
 <div class="col-md-3">
     <table class="table table-bordered">
         <tr class="" style="background-color: rgb(76, 215, 250);">
-         <td colspan = "4"> Referral Totals</td>
+         <td colspan = "4"> PatientVisit Totals</td>
         </tr>
 
         <tr class="">
@@ -106,12 +115,12 @@
          <th class="col-md-1">Year </th>
         </tr>
 
-       {% for referral in referrals %}
+       {% for patient_visit in patient_visits %}
         <tr>
-          {% get_referral_months referral.month as month_name %}
+          {% get_patient_visit_months patient_visit.month as month_name %}
           <td class="col-md-1">{{ month_name }}</td>
-          <td class="col-md-1">{{ referral.total_visit_count }}</td>
-          <td class="col-md-1">{{ referral.year_total }}</td>
+          <td class="col-md-1">{{ patient_visit.total_visit_count }}</td>
+          <td class="col-md-1">{{ patient_visit.year_total }}</td>
         </tr>
        {% endfor %}
     <br/>
@@ -120,14 +129,14 @@
 
     <table class="table table-bordered">
         <tr class="" style="background-color: rgb(76, 215, 250);">
-         <td colspan = "4"> Referral History:<br> From {{week_ago|date:"Y-m-d"}} to {{today|date:"Y-m-d"}}</td>
+         <td colspan = "4"> PatientVisit History:<br> From {{week_ago|date:"Y-m-d"}} to {{today|date:"Y-m-d"}}</td>
         </tr>
     </table>
-	  {% for pkey, physician in all_orgs.items %}
+	  {% for pkey, referring_entity in all_orgs.items %}
 	  {% if pkey %}
 	  <table class = "table table-bordered">
 		<caption style="font-size: 15px;color: #333;">
-		  for: {{ physician.name }}
+		  for: {{ referring_entity.name }}
 		</caption>
 		<thead>
 		  <tr>
@@ -136,10 +145,10 @@
 		  </tr>
 		</thead>
 		<tbody>
-		{% for referral in physician.refs %}
+		{% for patient_visit in referring_entity.refs %}
 		  <tr>
-			<td>{{ referral.visit_date|date:"Y-m-d" }}</td>
-			<td>{{ referral.visit }}</td>
+			<td>{{ patient_visit.visit_date|date:"Y-m-d" }}</td>
+			<td>{{ patient_visit.visit }}</td>
 		  </tr>
 		{% endfor %}
 		</tbody>
@@ -172,11 +181,11 @@
         <tr class="" style="background-color: rgb(76, 215, 250);">
          <td colspan = "3"> Top Doctors (Last 12 months)</td>
         </tr>
-       {% for physician in physician_visit_sum %}
+       {% for referring_entity in referring_entity_visit_sum %}
         <tr >
           <td class="col-md-1">{{ forloop.counter }}</td>
-          <td class="col-md-1">{{physician.physician_name}}</td>
-          <td class="col-md-1">{{ physician.total_visits }}</td>
+          <td class="col-md-1">{{referring_entity.entity_name}}</td>
+          <td class="col-md-1">{{ referring_entity.total_visits }}</td>
         </tr>
        {% endfor %}
     <br/>
@@ -209,15 +218,19 @@
  <script type="text/javascript">
     $( document ).ready(function() {
 
-    $('.datetimepicker2').datetimepicker({
+    $('#datetimepicker2').datetimepicker({
       showTodayButton: true,
       format: 'YYYY-MM-DD',
       timeZone: '{{timezone}}',
       ignoreReadonly: true,
       viewMode: 'days'
     });
+    
+    $('.timeonlypicker').datetimepicker({
+      format: 'HH:mm'
+    });    
 
-     $("#id_physician_name").addClass("capital");
+     $("#id_entity_name").addClass("capital");
      $("#id_org_name").addClass("capital");
      $("#id_org_contact_name").addClass("capital");
 

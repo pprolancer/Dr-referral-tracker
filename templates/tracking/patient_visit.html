@@ -3,9 +3,9 @@
 {% block content %}
 <div class="form col-sm-offset-2 col-sm-8">
 
-    <center><h2><strong>Record Referral</strong></h2></center>
+    <center><h2><strong>Record Patient Visit</strong></h2></center>
 
-      <form id="form-referral" method="POST" class="form-horizontal" action=".">
+      <form id="form-patient_visit" method="POST" class="form-horizontal" action=".">
       {% csrf_token %}
 
       {% for field in form.visible_fields %}
@@ -16,10 +16,19 @@
 
             {% if field.name == 'visit_date' %}
             <div class="form-group">
-              <div class='input-group date datetimepicker'>
+              <div class='input-group date datetimepicker' id="datetime">
                 {{ field }}
                 <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+              </div>
+            </div>
+            {% elif field.name == 'visit_appointment_time' or field.name == 'visit_actual_time' %}
+            <div class="form-group">
+              <div class='input-group date datetimepicker timeonlypicker'>
+                {{ field }}
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-time"></span>
                 </span>
               </div>
             </div>
@@ -53,17 +62,21 @@
  <script type="text/javascript">
     $( document ).ready(function() {
 
-    $('.datetimepicker').datetimepicker({
+    $('#datetimepicker').datetimepicker({
       showTodayButton: true,
       format: 'YYYY-MM-DD',
       timeZone: '{{timezone}}',
       ignoreReadonly: true,
       viewMode: 'days'
     });
+    
+    $('.timeonlypicker').datetimepicker({
+      format: 'HH:mm'
+    });       
 
     $("input[type='text']").addClass('form-control')
     $("input[type='number']").addClass('form-control')
-    $("#id_physician-wrapper input").css("width", "464px");
+    $("#id_referring_entity-wrapper input").css("width", "464px");
 });
         </script>
   {% endblock %}
