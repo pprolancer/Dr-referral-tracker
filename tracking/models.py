@@ -14,7 +14,20 @@ today = date.today()
 LAST_MONTH = date(day=1, month=today.month, year=today.year) - timedelta(days=1)
 LAST_12_MONTH = LAST_MONTH - timedelta(days=364)
 
-class Organization(models.Model):
+class TrackedModel(models.Model):
+    creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
+    modification_time = models.DateTimeField("Modification Timestamp", blank=True, null=True)
+    
+    class Meta:
+        abstract = True
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.creation_time = timezone.now()
+        modification_time = timezone.now()
+        super(TrackedModel, self).save(*args, **kwargs)    
+
+class Organization(TrackedModel):
     '''
     A ReferringEntity works for a Organization, (clinic, hospital, private practice...)
     Need a few "special Organizations"
@@ -60,7 +73,7 @@ class Organization(models.Model):
         return referring_entitys_sort
 
 
-class ReferringEntity(models.Model):
+class ReferringEntity(TrackedModel):
     """
     A ReferringEntity works for an Organization; clinic, hospital, private practice...
     Other patient_visit types for example; Other patient, google adds, website.....
@@ -85,7 +98,7 @@ class ReferringEntity(models.Model):
         patient_visit_sort = self.PatientVisit.filter(visit_date__range=(str(week_ago), str(today))).values('visit_date').annotate(visit=Sum('visit_count')).order_by('-visit_date')
         return patient_visit_sort
         
-class TreatingProvider(models.Model):
+class TreatingProvider(TrackedModel):
     PROVIDER_TYPE_PHYSICIAN_ASSISTANT = "PA"
     PROVIDER_TYPE_DOCTOR              = "D"
     PROVIDER_TYPE_NURSE               = "N"
@@ -106,7 +119,7 @@ class TreatingProvider(models.Model):
         return self.provider_name
 
 
-class PatientVisit(models.Model):
+class PatientVisit(TrackedModel):
     """
     PatientVisit is a patient visit referred to the clinic from a "ReferringEntity" that is part of an "Organization"
     Not sure how to do the multiple ForeignKey or if that is right.
@@ -119,7 +132,6 @@ class PatientVisit(models.Model):
     visit_appointment_time = models.TimeField("Appointment Time", blank=True, null=True, default=None)
     visit_actual_time = models.TimeField("Actual Time", blank=True, null=True, default=None)
     visit_count = models.IntegerField("Visit Count", default=1)
-    record_date = models.DateTimeField("Record Date", default=timezone.now)
 
     def __str__(self):
         return self.referring_entity.organization.org_name

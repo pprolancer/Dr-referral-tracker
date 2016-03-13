@@ -59,7 +59,7 @@
             </tr>
             {% for patient_visit in patient_visits %}
                 <tr>
-                    <td>{{ patient_visit.record_date }}</td>
+                    <td>{{ patient_visit.creation_time }}</td>
                     <td>{{ patient_visit.visit_date }}</td>
                     <td>{{ patient_visit.visit_appointment_time|default_if_none:"" }}</td>
                     <td>{{ patient_visit.visit_actual_time|default_if_none:"" }}</td>
