@@ -1,32 +1,25 @@
 {% extends "base.html" %}
 
+{% load bootstrap3 %}
+
 {% block content %}
 <div class="form col-sm-offset-2 col-sm-8">
       <a class="btn btn-primary pull-right" href="{% url 'add-organization' %}" role="button">
       Add Organization</a>
-      <center><h2><strong>Create Referring Entity</strong></h2></center>
-
-      <form id="form-referring_entity" method="POST" class="form-horizontal" action=".">
+      <div class="col-sm-9">
+        <center><h2><strong>Create Referring Entity</strong></h2></center>
+  
+        <form id="form-referring_entity" method="POST" class="form-horizontal" action=".">
+          {% if success %}
+              <div class="alert alert-success" role="alert">
+                  Changes saved succesfully
+              </div>
+          {% endif %}
           {% csrf_token %}
-
-          {% for field in form.visible_fields %}
-
-          <div class="form-group">
-              <label for="{{field.id_for_label}}" class="col-sm-2 control-label">{{field.label}}</label>
-              <div class="col-sm-6">
-                {{ field }}
-                {{ field.errors }}
-                {{ field.help_text }}
-              </div>
-          </div>
-
-          {% endfor %}
-          <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-6">
-                <button type="submit" class="btn btn-primary btn-lg">save</button>
-              </div>
-          </div>
-    </form>
+          {% bootstrap_form form %}
+          {% buttons submit='Save' %}{% endbuttons %}
+        </form>
+        </div>
 
       <hr>
 </div>

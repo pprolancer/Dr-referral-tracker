@@ -11,7 +11,9 @@
       {% for field in form.visible_fields %}
 
       <div class="form-group">
-          <label for="{{field.id_for_label}}" class="col-sm-2 control-label">{{field.label}}</label>
+          <label for="{{field.id_for_label}}" class="col-sm-2 control-label">
+            {{field.label}}{% if field.field.required %}*{% endif %}
+          </label>
           <div class="col-sm-6">
 
             {% if field.name == 'visit_date' %}
@@ -77,6 +79,8 @@
     $("input[type='text']").addClass('form-control')
     $("input[type='number']").addClass('form-control')
     $("#id_referring_entity-wrapper input").css("width", "464px");
+    
+    $('select').addClass("form-control");
 });
         </script>
   {% endblock %}

@@ -116,8 +116,8 @@ class PatientVisit(models.Model):
     treating_provider = models.ForeignKey(
         TreatingProvider, related_name="TreatingProvider",verbose_name="Treating Provider", null=True)
     visit_date = models.DateField("Visit Date", default=date.today)
-    visit_appointment_time = models.TimeField("Appointment Time", null=True, default=None)
-    visit_actual_time = models.TimeField("Actual Time", null=True, default=None)
+    visit_appointment_time = models.TimeField("Appointment Time", blank=True, null=True, default=None)
+    visit_actual_time = models.TimeField("Actual Time", blank=True, null=True, default=None)
     visit_count = models.IntegerField("Visit Count", default=1)
     record_date = models.DateTimeField("Record Date", default=timezone.now)
 

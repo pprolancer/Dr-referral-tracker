@@ -21,8 +21,16 @@
           {% csrf_token %}
           {% for field in refform.visible_fields %}
           <div class="form-group">
-              <label for="inputEmail3" class="col-sm-3 control-label">{{field.label}}</label>
-              <div class="col-sm-9">
+              {% if field.name == 'visit_appointment_time' %}
+                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">
+                  Appoint. Time
+                </label>
+              {% else %}
+                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">
+                  {{field.label}}{% if field.field.required %}*{% endif %}
+                </label>
+              {% endif %}
+              <div class="col-md-8">
                 {% if field.name == 'visit_date' %}
                 <div class="form-group">
                   <div class='input-group date datetimepicker2' id="datetimepicker2">
@@ -63,7 +71,9 @@
           {% csrf_token %}
           {% for field in phyform.visible_fields %}
           <div class="form-group">
-              <label for="inputEmail3" class="col-md-6 control-label">{{field.label}}</label>
+              <label for="{{ field.id_for_label }}" class="col-md-6 control-label">
+                {{field.label}}{% if field.field.required %}*{% endif %}
+              </label>
               <div class="col-md-4">
                 {{ field }}
                 {{ field.errors }}
@@ -85,7 +95,9 @@
           {% csrf_token %}
           {% for field in orgform.visible_fields %}
           <div class="form-group">
-              <label for="inputEmail3" class="col-md-6 control-label">{{field.label}}</label>
+              <label for="{{ field.id_for_label }}" class="col-md-6 control-label">
+                {{field.label}}{% if field.field.required %}*{% endif %}
+              </label>
               <div class="col-md-5">
                 {{ field }}
                 {{ field.errors }}
@@ -233,6 +245,8 @@
      $("#id_entity_name").addClass("capital");
      $("#id_org_name").addClass("capital");
      $("#id_org_contact_name").addClass("capital");
+     
+     $('select').addClass("form-control");
 
 });
         </script>

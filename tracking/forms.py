@@ -9,7 +9,9 @@ class OrganizationForm(forms.ModelForm):
     Check for duplicates
     Offer new NewReferringEntity creation in same form.
     """
-
+    
+    required_css_class = 'required'
+    
     class Meta:
         model = Organization
         exclude = []
@@ -27,6 +29,8 @@ class ReferringEntityForm(autocomplete_light.ModelForm):
     Offer new NewReferringEntity creation
     """
 
+    required_css_class = 'required'
+
     class Meta:
         model = ReferringEntity
         exclude = []
@@ -40,6 +44,8 @@ class PatientVisitForm(autocomplete_light.ModelForm):
     Assume today's date
     """
 
+    required_css_class = 'required'
+
     class Meta:
         model = PatientVisit
         exclude = ['record_date']
@@ -49,6 +55,8 @@ class TreatingProviderForm(autocomplete_light.ModelForm):
     record a new treating_provider
     autocomplete TreatingProvider
     """
+
+    required_css_class = 'required'
 
     class Meta:
         model = TreatingProvider
@@ -62,6 +70,8 @@ class PatientVisitHistoryForm(forms.Form):
     Don't need blank for Org
     Assume today's date
     """
+
+    required_css_class = 'required'
 
     referring_entity = autocomplete_light.ModelMultipleChoiceField('ReferringEntityAutocomplete', required=False)
     from_date = forms.DateField(widget=forms.TextInput(attrs={'readonly' : 'readonly'}))

@@ -1,30 +1,21 @@
 {% extends "base.html" %}
 
+{% load bootstrap3 %}
+
 {% block content %}
-<div class="form col-sm-offset-2 col-sm-8">
+<div class="form col-sm-offset-2 col-sm-6">
       <center><h2><strong>Create Treating Provider</strong></h2></center>
 
       <form id="form-treating_provider" method="POST" class="form-horizontal" action=".">
-          {% csrf_token %}
-
-          {% for field in form.visible_fields %}
-
-          <div class="form-group">
-              <label for="{{field.id_for_label}}" class="col-sm-2 control-label">{{field.label}}</label>
-              <div class="col-sm-6">
-                {{ field }}
-                {{ field.errors }}
-                {{ field.help_text }}
-              </div>
-          </div>
-
-          {% endfor %}
-          <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-6">
-                <button type="submit" class="btn btn-primary btn-lg">save</button>
-              </div>
-          </div>
-    </form>
+        {% if success %}
+            <div class="alert alert-success" role="alert">
+                Changes saved succesfully
+            </div>
+        {% endif %}
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons submit='Save Changes' %}{% endbuttons %}
+      </form>
 
       <hr>
 </div>
@@ -40,7 +31,7 @@ $(document).ready(function () {
   $("#id_organization-wrapper input").css("width", "464px");
 
   $("#id_entity_name").addClass("capital");
-
+  
 });
 </script>
 

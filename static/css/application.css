@@ -102,3 +102,5 @@
     height: 30px;
     width: 133px;
 }
+
+.required label:after { content: '*' }
