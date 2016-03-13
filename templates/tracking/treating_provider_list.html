@@ -1,24 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if physicians %}
+{% if treating_providers %}
     <table class="table">
         <tr>
             <th>Name</th>
-            <th>Organization</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Special</th>
+            <th>Title</th>
+            <th>Type</th>
         </tr>
-        {% for physician in physicians %}
+        {% for treating_provider in treating_providers %}
             <tr>
-                <td><a href="/edit/physician/{{ physician.id }}/">
-                    {{ physician.physician_name }}
+                <td><a href="/edit/treating_provider/{{ treating_provider.id }}/">
+                    {{ treating_provider.provider_name }}
                 </a></td>
-                <td>{{ physician.organization.org_name }}</td>
-                <td>{{ physician.physician_phone }}</td>
-                <td>{{ physician.physician_email }}</td>
-                <td>{{ physician.referral_special }}</td>
+                <td>{{ treating_provider.provider_title }}</td>
+                <td>{{ treating_provider.get_provider_type_display }}</td>
             </tr>
         {% endfor %}
     </table>
@@ -50,6 +46,6 @@
         </nav>
     {% endif %}
 {% else %}
-    <p>No physicians found.</p>
+    <p>No treating providers found.</p>
 {% endif %}
 {% endblock content %}

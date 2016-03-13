@@ -1,26 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if organizations %}
+{% if referring_entitys %}
     <table class="table">
         <tr>
             <th>Name</th>
-            <th>Type</th>
-            <th>Contact Name</th>
+            <th>Organization</th>
             <th>Phone</th>
             <th>Email</th>
             <th>Special</th>
         </tr>
-        {% for organization in organizations %}
+        {% for referring_entity in referring_entitys %}
             <tr>
-                <td><a href="/edit/organization/{{ organization.id }}/">
-                    {{ organization.org_name }}
+                <td><a href="/edit/referring_entity/{{ referring_entity.id }}/">
+                    {{ referring_entity.entity_name }}
                 </a></td>
-                <td>{{ organization.get_org_type_display }}</td>
-                <td>{{ organization.org_contact_name }}</td>
-                <td>{{ organization.org_phone }}</td>
-                <td>{{ organization.org_email }}</td>
-                <td>{{ organization.org_special }}</td>
+                <td>{{ referring_entity.organization.org_name }}</td>
+                <td>{{ referring_entity.entity_phone }}</td>
+                <td>{{ referring_entity.entity_email }}</td>
+                <td>{{ referring_entity.entity_special }}</td>
             </tr>
         {% endfor %}
     </table>
@@ -52,6 +50,6 @@
         </nav>
     {% endif %}
 {% else %}
-    <p>No organizations found.</p>
+    <p>No referring_entitys found.</p>
 {% endif %}
 {% endblock content %}

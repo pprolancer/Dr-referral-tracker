@@ -3,10 +3,13 @@
 {% load bootstrap3 %}
 
 {% block content %}
-  <div class="form col-sm-offset-2 col-sm-6">
-      <center><h2><strong>Create Group</strong></h2></center>
-
-        <form id="form-organization" method="POST" class="form-horizontal" action="." >
+<div class="form col-sm-offset-2 col-sm-8">
+      <a class="btn btn-primary pull-right" href="{% url 'add-organization' %}" role="button">
+      Add Organization</a>
+      <div class="col-sm-9">
+        <center><h2><strong>Create Referring Entity</strong></h2></center>
+  
+        <form id="form-referring_entity" method="POST" class="form-horizontal" action=".">
           {% if success %}
               <div class="alert alert-success" role="alert">
                   Changes saved succesfully
@@ -16,9 +19,12 @@
           {% bootstrap_form form %}
           {% buttons submit='Save' %}{% endbuttons %}
         </form>
-        <hr>
-  </div>
+        </div>
+
+      <hr>
+</div>
 {% endblock content %}
+
 
 {% block javascript %}
 {{ block.super }}
@@ -26,11 +32,9 @@
 $(document).ready(function () {
   $("input[type='text']").addClass('form-control')
   $("input[type='email']").addClass('form-control')
+  $("#id_organization-wrapper input").css("width", "464px");
 
-  $("#id_org_name").addClass("capital");
-  $("#id_org_contact_name").addClass("capital");
-  
-  $('select').addClass("form-control");
+  $("#id_entity_name").addClass("capital");
 
 });
 </script>
