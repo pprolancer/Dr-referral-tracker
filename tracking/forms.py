@@ -1,5 +1,6 @@
 from django import forms
 import autocomplete_light
+from datetime import date
 from tracking.models import *
 
 
@@ -9,13 +10,13 @@ class OrganizationForm(forms.ModelForm):
     Check for duplicates
     Offer new NewReferringEntity creation in same form.
     """
-    
+
     required_css_class = 'required'
-    
+
     class Meta:
         model = Organization
         exclude = ['creation_time','modification_time']
-        
+
     def __init__(self, *args, **kwargs):
         super(OrganizationForm, self).__init__(*args, **kwargs)
         self.fields['org_type'].required = True
@@ -49,7 +50,16 @@ class PatientVisitForm(autocomplete_light.ModelForm):
     class Meta:
         model = PatientVisit
         exclude = ['creation_time','modification_time']
-        
+
+    def clean_visit_date(self):
+        ''' check visit_date for greater than today '''
+        visit_date = self.cleaned_data.get('visit_date')
+        if visit_date and (visit_date > date.today()):
+            raise forms.ValidationError(
+                'visit_date cannot be greater than today')
+        return visit_date
+
+
 class TreatingProviderForm(autocomplete_light.ModelForm):
     """
     record a new treating_provider
@@ -60,7 +70,7 @@ class TreatingProviderForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = TreatingProvider
-        exclude = ['creation_time','modification_time']        
+        exclude = ['creation_time','modification_time']
 
 
 class PatientVisitHistoryForm(forms.Form):
