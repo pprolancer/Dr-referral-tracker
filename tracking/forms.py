@@ -52,7 +52,8 @@ class PatientVisitForm(autocomplete_light.ModelForm):
         exclude = ['creation_time','modification_time']
 
     def clean_visit_date(self):
-        visit_date = self.cleaned_data.get('visit_date', None)
+        ''' check visit_date for greater than today '''
+        visit_date = self.cleaned_data.get('visit_date')
         if visit_date and (visit_date > date.today()):
             raise forms.ValidationError(
                 'visit_date cannot be greater than today')
