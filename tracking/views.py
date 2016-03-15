@@ -35,7 +35,10 @@ class LoginRequiredMixin(object):
 class IndexView(LoginRequiredMixin, View):
     # display the Organization form
     # template_name = "index.html"
-    def _get_context(self, initial_ctx=None):
+    @staticmethod
+    def get_context(initial_ctx=None):
+        '''create context structure for both get and post handlers'''
+
         orgform = OrganizationForm()
         phyform = ReferringEntityForm()
         refform = PatientVisitForm()
@@ -65,7 +68,7 @@ class IndexView(LoginRequiredMixin, View):
             try:
                 patient_visits = patient_visits.extra(select={'month': 'STRFTIME("%m",visit_date)'})
                 print (patient_visits[0].month)
-            except:
+            except Exception:
                 patient_visits = patient_visits.extra(select={'month': 'EXTRACT(month FROM visit_date)'})
             patient_visits = patient_visits.values('month').annotate(total_visit_count=Sum('visit_count'))
 
@@ -112,7 +115,7 @@ class IndexView(LoginRequiredMixin, View):
         return ctx
 
     def get(self, request, *args, **kwargs):
-        ctx = self._get_context()
+        ctx = self.get_context()
         return render(request, "index.html", ctx)
 
     def post(self, request, *args, **kwargs):
@@ -139,7 +142,7 @@ class IndexView(LoginRequiredMixin, View):
                 refform.save()
                 return redirect(reverse('index'))
 
-        ctx = self._get_context(initial_ctx={
+        ctx = self.get_context(initial_ctx={
             "orgform": orgform,
             "phyform": phyform,
             "refform": refform,
