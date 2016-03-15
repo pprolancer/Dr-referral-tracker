@@ -4,8 +4,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from tracking.models import Organization, ReferringEntity, PatientVisit
-
+from tracking.models import Organization, ReferringEntity, TreatingProvider, PatientVisit
 
 def date2str(d):
     '''convert date to string format like 2016-01-03 01:01:01'''
@@ -90,6 +89,7 @@ class IndexViewTest(LoginBaseTest):
         data = {
             'orgform': 'submit',
             'org_name': 'org1',
+            'org_type': 'MAR',
             'org_contact_name': 'contact1',
             'org_phone': '+442083661177',
             'org_email': 'test@email.com',
@@ -142,12 +142,14 @@ class PatientVisitViewTest(LoginBaseTest):
         organization = Organization.objects.create(org_name='org1')
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization)
+        treating_provider = TreatingProvider.objects.create(
+            provider_name='prov1', provider_type='D')
         today = timezone.now()
         data = {
             'referring_entity': referring_entity.id,
+            'treating_provider': treating_provider.id,
             'visit_date': str(today.date()),
-            'visit_count': 1,
-            'visit_date': str(today)
+            'visit_count': 1
         }
         response = self.client.post(reverse('add-patient-visit'), data)
         self.assertEqual(response.status_code, 302)
@@ -156,11 +158,9 @@ class PatientVisitViewTest(LoginBaseTest):
         self.assertEqual(len(patient_visits), 1)
         created_ref = patient_visits[0]
         self.assertEqual(created_ref.referring_entity, referring_entity)
+        self.assertEqual(created_ref.treating_provider, treating_provider)
         self.assertEqual(created_ref.visit_count, data['visit_count'])
         self.assertEqual(created_ref.visit_date, today.date())
-        self.assertEqual(date2str(created_ref.visit_date),
-                         date2str(today))
-
 
 class GetPatientVisitReportViewTest(LoginBaseTest):
     ''' testcases class for GetPatientVisitReportView '''
@@ -255,11 +255,12 @@ class EditOrganizationViewTest(LoginBaseTest):
         ''' quantifiedcode: ignore it! '''
 
         organization = Organization.objects.create(
-            org_name='phys1', org_contact_name="contact1",
+            org_name='phys1', org_type='MAR', org_contact_name="contact1",
             org_email='test@email.com', org_phone='+442083660000',
             org_special=False)
         data = {
             'org_name': 'new_name',
+            'org_type': 'INS',
             'org_contact_name': 'new_contact',
             'org_phone': '+442083661177',
             'org_email': 'new_email@email.com',
@@ -271,6 +272,7 @@ class EditOrganizationViewTest(LoginBaseTest):
         self.assertEqual(response.status_code, 200)
         organization = Organization.objects.get(id=organization.id)
         self.assertEqual(organization.org_name, data['org_name'])
+        self.assertEqual(organization.org_type, data['org_type'])
         self.assertEqual(organization.org_contact_name,
                          data['org_contact_name'])
         self.assertEqual(organization.org_phone, data['org_phone'])
