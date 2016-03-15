@@ -10,12 +10,7 @@
 </div> -->
 
 <div class="row" style="background-color: rgb(220, 234, 210);">
-      <div class="col-md-2">
-        <h3>Referral Tracker </h3>
-        <a href=""> Thankyou E-Mails</a>
-      </div>
-
-    <div class="col-md-3">
+    <div class="col-md-5">
         <h4 style="text-align:center;">Record Patient Visit </h4>
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
@@ -48,7 +43,7 @@
                       <span class="glyphicon glyphicon-time"></span>
                     </span>
                   </div>
-                </div>                
+                </div>
                 {% else %}
                 {{ field }}
                 {% endif %}
@@ -237,15 +232,15 @@
       ignoreReadonly: true,
       viewMode: 'days'
     });
-    
+
     $('.timeonlypicker').datetimepicker({
       format: 'HH:mm'
-    });    
+    });
 
      $("#id_entity_name").addClass("capital");
      $("#id_org_name").addClass("capital");
      $("#id_org_contact_name").addClass("capital");
-     
+
      $('select').addClass("form-control");
 
 });
