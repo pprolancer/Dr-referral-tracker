@@ -104,3 +104,10 @@
 }
 
 .required label:after { content: '*' }
+
+.box1 {
+    background-color: rgb(220, 234, 210);
+/*    margin-top: -20px;
+    padding-top: 20px;
+    margin-left: 0px;*/
+}
