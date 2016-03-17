@@ -35,7 +35,9 @@ class LoginRequiredMixin(object):
 class IndexView(LoginRequiredMixin, View):
     # display the Organization form
     # template_name = "index.html"
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get_context(initial_ctx=None):
+        '''create context structure for both get and post handlers'''
 
         orgform = OrganizationForm()
         phyform = ReferringEntityForm()
@@ -66,7 +68,7 @@ class IndexView(LoginRequiredMixin, View):
             try:
                 patient_visits = patient_visits.extra(select={'month': 'STRFTIME("%m",visit_date)'})
                 print (patient_visits[0].month)
-            except:
+            except Exception:
                 patient_visits = patient_visits.extra(select={'month': 'EXTRACT(month FROM visit_date)'})
             patient_visits = patient_visits.values('month').annotate(total_visit_count=Sum('visit_count'))
 
@@ -103,13 +105,18 @@ class IndexView(LoginRequiredMixin, View):
             "referring_entity_visit_sum": referring_entity_visit_sum,
             "org_visit_sum": org_visit_sum,
             "special_visit_sum": special_visit_sum,
-            "patient_visits":patient_visits,
-            "all_orgs" : all_ref,
+            "patient_visits": patient_visits,
+            "all_orgs": all_ref,
             'today': today,
-            'week_ago' : week_ago,
+            'week_ago': week_ago,
             'timezone': TIME_ZONE,
-            }
-        return render(request,"index.html",ctx )
+        }
+        ctx.update(initial_ctx or {})
+        return ctx
+
+    def get(self, request, *args, **kwargs):
+        ctx = self.get_context()
+        return render(request, "index.html", ctx)
 
     def post(self, request, *args, **kwargs):
 
@@ -135,14 +142,14 @@ class IndexView(LoginRequiredMixin, View):
                 refform.save()
                 return redirect(reverse('index'))
 
-        ctx = {
+        ctx = self.get_context(initial_ctx={
             "orgform": orgform,
             "phyform": phyform,
             "refform": refform,
-            'timezone': TIME_ZONE,
-          }
+        })
 
-        return render(request,"index.html",ctx )
+        return render(request, "index.html", ctx)
+
 
 class OrganizationView(LoginRequiredMixin, View):
     # display the Organization form
@@ -177,7 +184,7 @@ class ReferringEntityView(LoginRequiredMixin, View):
 
         ctx = {"form": form}
         return render(request,"tracking/referring_entity.html",ctx )
-        
+
 class TreatingProviderView(LoginRequiredMixin, View):
     # display the treating_provider form
     def get(self, request, *args, **kwargs):
@@ -193,7 +200,7 @@ class TreatingProviderView(LoginRequiredMixin, View):
             form = TreatingProviderForm()
 
         ctx = {"form": form}
-        return render(request,"tracking/treating_provider.html",ctx )        
+        return render(request,"tracking/treating_provider.html",ctx )
 
 
 class PatientVisitView(LoginRequiredMixin, View):
@@ -324,7 +331,7 @@ def edit_referring_entity(request, referring_entity_id):
         form = ReferringEntityForm(instance=referring_entity)
 
     return render(request, 'tracking/referring_entity_edit.html', {'form': form})
-    
+
 
 @login_required
 def edit_treating_provider(request, treating_provider_id):
@@ -340,7 +347,7 @@ def edit_treating_provider(request, treating_provider_id):
     else:
         form = TreatingProviderForm(instance=treating_provider)
 
-    return render(request, 'tracking/treating_provider_edit.html', {'form': form})    
+    return render(request, 'tracking/treating_provider_edit.html', {'form': form})
 
 
 class OrganizationListView(LoginRequiredMixin, ListView):
@@ -355,9 +362,9 @@ class ReferringEntityListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/referring_entity_list.html'
     context_object_name = "referring_entitys"
     paginate_by = 10
-    
+
 class TreatingProviderListView(LoginRequiredMixin, ListView):
     model = TreatingProvider
     template_name = 'tracking/treating_provider_list.html'
     context_object_name = "treating_providers"
-    paginate_by = 10    
+    paginate_by = 10
