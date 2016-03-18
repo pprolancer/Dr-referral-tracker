@@ -1,0 +1,31 @@
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Confirm Delete?</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <form method="post" _action="{% url delete_url_name '0' %}">
+                    {% csrf_token %}
+                    <button type="submit" data-dismiss="modal" class="btn btn-primary" id="confirm-submit-btn">Yes</button>
+                    <button type="button" data-dismiss="modal" class="btn">Cancel</button>
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script>
+    $('button[data-delete-modal]').on('click', function(e) {
+        e.preventDefault();
+        var form=$('#confirm-modal form'),
+            entityId = $(this).attr('data-delete-modal');
+        form[0].action = form.attr('_action').replace('0' , entityId);
+        $('#confirm-modal').modal({ backdrop: 'static', keyboard: false }).one('click', '#confirm-submit-btn', function (e) {
+            form.trigger('submit');
+        });
+    });
+</script>

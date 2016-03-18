@@ -15,6 +15,7 @@ urlpatterns = patterns(
     url(r'^edit/organization/([0-9]+)/$', edit_organization, name="edit-organization"),
     url(r'^edit/referring_entity/([0-9]+)/$', edit_referring_entity, name="edit-referring-entity"),
     url(r'^edit/treating_provider/([0-9]+)/$', edit_treating_provider, name="edit-treating-provider"),
+    url(r'^delete/referring_entity/([0-9]+)/$', delete_referring_entity, name="delete-referring-entity"),
     url(r'^view/organizations/$', OrganizationListView.as_view(), name="view-organizations"),
     url(r'^view/referring_entities/$', ReferringEntityListView.as_view(), name="view-referring-entities"),
     url(r'^view/treating_provider/$', TreatingProviderListView.as_view(), name="view-treating-providers"),

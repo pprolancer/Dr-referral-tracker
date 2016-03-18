@@ -1,6 +1,7 @@
 from .forms import *
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.edit import FormView
+from django.contrib import messages
 
 import calendar
 from django.db.models import Sum,Count
@@ -8,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from datetime import datetime , timedelta, date
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import render_to_response, render, redirect, get_object_or_404
 from tracking.models import PatientVisit,ReferringEntity, Organization, LAST_MONTH, LAST_12_MONTH
 from django.contrib.auth.decorators import login_required
@@ -348,6 +350,24 @@ def edit_treating_provider(request, treating_provider_id):
         form = TreatingProviderForm(instance=treating_provider)
 
     return render(request, 'tracking/treating_provider_edit.html', {'form': form})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_referring_entity(request, referring_entity_id):
+    ''' delete a referring_entity '''
+
+    referring_entity = get_object_or_404(ReferringEntity,
+                                         id=referring_entity_id)
+    form = GenericDeleteForm(request.POST)
+    if form.is_valid():
+        referring_entity.delete()
+        messages.success(request, 'Entity deleted successfully.')
+
+    next = request.META.get('HTTP_REFERER') or \
+        reverse('view-referring-entities')
+
+    return redirect(next)
 
 
 class OrganizationListView(LoginRequiredMixin, ListView):
