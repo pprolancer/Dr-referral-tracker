@@ -89,4 +89,7 @@ class PatientVisitHistoryForm(forms.Form):
 
 
 class GenericDeleteForm(forms.Form):
+    '''
+    generic form for delete entities. we use this to have csrf validation
+    '''
     pass
