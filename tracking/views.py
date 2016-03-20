@@ -38,33 +38,45 @@ class IndexView(LoginRequiredMixin, View):
     # display the Organization form
     # template_name = "index.html"
     @staticmethod
-    def get_context(initial_ctx=None):
+    def get_context(request, initial_ctx=None):
         '''create context structure for both get and post handlers'''
+        clinic = Clinic.get_from_user(self.request.user)
 
         orgform = OrganizationForm()
         phyform = ReferringEntityForm()
         refform = PatientVisitForm()
+        
+        phyform.fields['organization'].queryset = Organization.objects.filter(
+                                                    clinic=clinic)
+        refform.fields['referring_entity'].queryset = ReferringEntity.objects.filter(
+                                                    organization__clinic=clinic)
+        refform.fields['treating_provider'].queryset = TreatingProvider.objects.filter(
+                                                    clinic=clinic)
 
         today_date = datetime.now().date()
         start_date = today_date - timedelta(days=365)
         end_date = today_date - timedelta(days=1)
-
+        
         referring_entity_visit_sum = ReferringEntity.objects.filter(
+            organization__clinic=clinic,
             PatientVisit__visit_date__range=(start_date,end_date)).annotate(
             total_visits=Sum('PatientVisit__visit_count')
             ).order_by('-total_visits')[:10]
 
         org_visit_sum =  Organization.objects.filter(
+            clinic=clinic,
             ReferringEntity__PatientVisit__visit_date__range=(start_date,end_date)).annotate(
             total_org_visits=Sum('ReferringEntity__PatientVisit__visit_count')
             ).order_by('-total_org_visits')[:5]
 
         special_visit_sum =  Organization.objects.filter(org_special=True).filter(
+            clinic=clinic,
             ReferringEntity__PatientVisit__visit_date__range=(start_date,end_date)).annotate(
             total_org_special_visits=Sum('ReferringEntity__PatientVisit__visit_count')
             ).order_by('-total_org_special_visits')[:5]
 
-        patient_visits = PatientVisit.objects.filter(visit_date__range=[LAST_12_MONTH,LAST_MONTH])
+        patient_visits = PatientVisit.objects.filter(treating_provider__clinic=clinic,
+                                                     visit_date__range=[LAST_12_MONTH,LAST_MONTH])
 
         if patient_visits:
             try:
@@ -89,10 +101,12 @@ class IndexView(LoginRequiredMixin, View):
                 patient_visit['year_to'] = current_month
         today = date.today()
         week_ago = today - timedelta(days=7)
-        all_orgs = ReferringEntity.objects.order_by('entity_name')
+        all_orgs = ReferringEntity.objects.filter(organization__clinic=clinic).order_by('entity_name')
         all_ref = {}
         for phys in all_orgs :
-            phys_ref = phys.get_patient_visit({'from_date' : week_ago, 'to_date' : today});
+            phys_ref = phys.get_patient_visit(
+                params={'from_date' : week_ago, 'to_date' : today},
+                clinic=clinic);
             if phys_ref.count() :
                 for ref in phys_ref :
                     if not phys.id in all_ref :
@@ -117,7 +131,7 @@ class IndexView(LoginRequiredMixin, View):
         return ctx
 
     def get(self, request, *args, **kwargs):
-        ctx = self.get_context()
+        ctx = self.get_context(request)
         return render(request, "index.html", ctx)
 
     def post(self, request, *args, **kwargs):
@@ -135,7 +149,9 @@ class IndexView(LoginRequiredMixin, View):
         elif 'orgform' in request.POST:
             orgform = OrganizationForm(request.POST)
             if orgform.is_valid():
-                orgform.save()
+                organization = orgform.save(commit=False)
+                organization.clinic = Clinic.get_from_user(self.request.user)
+                organization.save()
                 return redirect(reverse('index'))
 
         elif 'refform' in request.POST:
@@ -144,7 +160,7 @@ class IndexView(LoginRequiredMixin, View):
                 refform.save()
                 return redirect(reverse('index'))
 
-        ctx = self.get_context(initial_ctx={
+        ctx = self.get_context(request, initial_ctx={
             "orgform": orgform,
             "phyform": phyform,
             "refform": refform,
@@ -164,7 +180,9 @@ class OrganizationView(LoginRequiredMixin, View):
         form = OrganizationForm(request.POST)
         ctx = {"form": form}
         if form.is_valid():
-            form.save()
+            organization = form.save(commit=False)
+            organization.clinic = Clinic.get_from_user(self.request.user)
+            organization.save()
             return redirect(reverse('add-referring-entity'))
 
         return render(request,"tracking/organization.html",ctx )
@@ -174,6 +192,8 @@ class ReferringEntityView(LoginRequiredMixin, View):
     # display the referring_entity form
     def get(self, request, *args, **kwargs):
         form = ReferringEntityForm()
+        form.fields['organization'].queryset = Organization.objects.filter(
+                                 clinic=Clinic.get_from_user(self.request.user))
         ctx = {"form": form}
         return render(request,"tracking/referring_entity.html",ctx )
 
@@ -198,7 +218,9 @@ class TreatingProviderView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = TreatingProviderForm(request.POST)
         if form.is_valid():
-            form.save()
+            treating_provider = form.save(commit=False)
+            treating_provider.clinic = Clinic.get_from_user(self.request.user)
+            treating_provider.save()
             form = TreatingProviderForm()
 
         ctx = {"form": form}
@@ -208,7 +230,12 @@ class TreatingProviderView(LoginRequiredMixin, View):
 class PatientVisitView(LoginRequiredMixin, View):
     # display the patient_visit form
     def get(self, request, *args, **kwargs):
+        clinic = Clinic.get_from_user(self.request.user)
         form = PatientVisitForm()
+        form.fields['referring_entity'].queryset = ReferringEntity.objects.filter(
+                                                    organization__clinic=clinic)
+        form.fields['treating_provider'].queryset = TreatingProvider.objects.filter(
+                                                    clinic=clinic)        
         ctx = {"form": form, 'timezone': TIME_ZONE}
         return render(request,"tracking/patient_visit.html",ctx )
 
@@ -225,7 +252,8 @@ class GetPatientVisitReport(LoginRequiredMixin, View):
     Display a summary of patient_visits by Organization:provider:
     """
     def get(self, request, *args, **kwargs):
-        all_orgs = Organization.objects.all().order_by('org_name')
+        all_orgs = Organization.objects.filter(
+            clinic=Clinic.get_from_user(self.request.user)).order_by('org_name')
         today = datetime.now().date()
         last_year = today.year - 1
         orgs_counts = {}
@@ -269,8 +297,13 @@ class GetPatientVisitHistory(LoginRequiredMixin, View):
     """
     def get(self, request, *args, **kwargs):
         today = date.today()
-        patient_visits = PatientVisit.objects.filter(visit_date=today).order_by('-visit_date')
+        clinic = Clinic.get_from_user(self.request.user)
+        patient_visits = PatientVisit.objects.filter(
+            treating_provider__clinic=clinic,
+            visit_date=today).order_by('-visit_date')
         form = PatientVisitHistoryForm(initial={'from_date': today, 'to_date' : today})
+        form.fields['referring_entity'].queryset = ReferringEntity.objects.filter(
+                                                    organization__clinic=clinic)
         ctx = {
                 'patient_visits': patient_visits,
                 'timezone': TIME_ZONE,
@@ -285,8 +318,10 @@ class GetPatientVisitHistory(LoginRequiredMixin, View):
         if form.is_valid():
             cleaned_data = form.clean()
             patient_visits = PatientVisit.objects\
-                .filter(visit_date__gte=cleaned_data['from_date'])\
-                .filter(visit_date__lte=cleaned_data['to_date'])\
+                .filter(
+                    treating_provider__clinic=Clinic.get_from_user(self.request.user),
+                    visit_date__gte=cleaned_data['from_date'],
+                    visit_date__lte=cleaned_data['to_date'])\
                 .order_by('-visit_date')
             if cleaned_data['referring_entity']:
                 patient_visits = patient_visits.filter(referring_entity__in=cleaned_data['referring_entity'])
@@ -307,7 +342,9 @@ def edit_organization(request, organization_id):
     if request.method == 'POST':
         form = OrganizationForm(request.POST, instance=organization)
         if form.is_valid():
-            form.save()
+            organization = form.save(commit=False)
+            organization.clinic = Clinic.get_from_user(request.user)
+            organization.save()
             return render(request, 'tracking/organization_edit.html', {
                 'form': form,
                 'success': True})
@@ -331,6 +368,8 @@ def edit_referring_entity(request, referring_entity_id):
 
     else:
         form = ReferringEntityForm(instance=referring_entity)
+        form.fields['organization'].queryset = Organization.objects.filter(
+                                 clinic=Clinic.get_from_user(request.user))
 
     return render(request, 'tracking/referring_entity_edit.html', {'form': form})
 
@@ -341,7 +380,9 @@ def edit_treating_provider(request, treating_provider_id):
     if request.method == 'POST':
         form = TreatingProviderForm(request.POST, instance=treating_provider)
         if form.is_valid():
-            form.save()
+            treating_provider = form.save(commit=False)
+            treating_provider.clinic = Clinic.get_from_user(request.user)
+            treating_provider.save()
             return render(request, 'tracking/treating_provider_edit.html', {
                 'form': form,
                 'success': True})
@@ -447,21 +488,26 @@ class OrganizationListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/organization_list.html'
     context_object_name = "organizations"
     paginate_by = 10
-
+    
+    def get_queryset(self):
+        qs = super(OrganizationListView, self).get_queryset()
+        return qs.filter(clinic=Clinic.get_from_user(self.request.user))
 
 class ReferringEntityListView(LoginRequiredMixin, ListView):
     model = ReferringEntity
     template_name = 'tracking/referring_entity_list.html'
     context_object_name = "referring_entitys"
     paginate_by = 10
-
+    
+    def get_queryset(self):
+        qs = super(ReferringEntityListView, self).get_queryset()
+        return qs.filter(organization__clinic=Clinic.get_from_user(self.request.user))
 
 class TreatingProviderListView(LoginRequiredMixin, ListView):
     model = TreatingProvider
     template_name = 'tracking/treating_provider_list.html'
     context_object_name = "treating_providers"
     paginate_by = 10
-
 
 class PatientVisitListView(LoginRequiredMixin, ListView):
     ''' A view to show list of PatientVisit '''
@@ -470,3 +516,7 @@ class PatientVisitListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/patient_visit_list.html'
     context_object_name = "patient_visits"
     paginate_by = 10
+    
+    def get_queryset(self):
+        qs = super(TreatingProviderListView, self).get_queryset()
+        return qs.filter(clinic=Clinic.get_from_user(self.request.user))

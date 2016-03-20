@@ -9,8 +9,14 @@
   {% endif %}
 </div> -->
 
-<div class="row box1 col-md-12">
-    <div class="col-md-4">
+<div class="row" style="background-color: rgb(220, 234, 210);">
+      <div class="col-md-2">
+        <h3>Referral Tracker </h3>
+        <h4>Clinic: {{ clinic.name }}</h4>
+        <a href=""> Thankyou E-Mails</a>
+      </div>
+
+    <div class="col-md-3">
         <h4 style="text-align:center;">Record Patient Visit </h4>
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
