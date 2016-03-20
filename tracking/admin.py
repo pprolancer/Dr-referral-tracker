@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 
 from .models import *
 
+admin.site.register(Clinic)
+admin.site.register(ClinicUser)
 admin.site.register(Organization)
 admin.site.register(ReferringEntity)
 admin.site.register(TreatingProvider)
@@ -22,6 +24,17 @@ class UserAdmin(admin.ModelAdmin):
                     'is_active')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     actions = [user_activate]
+    
+    def save_model(self, request, obj, form, change):
+        # Override this to set the password to the value in the field if it's
+        # changed.
+        if obj.pk:
+            orig_obj = User.objects.get(pk=obj.pk)
+            if obj.password != orig_obj.password:
+                obj.set_password(obj.password)
+        else:
+            obj.set_password(obj.password)
+        obj.save()    
 
 
 admin.site.unregister(User)

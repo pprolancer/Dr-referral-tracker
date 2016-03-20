@@ -27,6 +27,29 @@ class TrackedModel(models.Model):
         modification_time = timezone.now()
         super(TrackedModel, self).save(*args, **kwargs)    
 
+class Clinic(TrackedModel):
+    '''
+    Top level entity, each entity will be linked to one, 
+    which might have one or more Users registered. 
+    Those Users are added through the admin interface.
+    '''
+    clinic_name = models.CharField(                   
+        "Clinic Name", max_length=254, unique=True, blank=False, null=True)
+    
+    def __str__(self):
+        return self.name
+        
+    @staticmethod    
+    def get_from_user(user):
+        return ClinicUser.objects.filter(user=user).first().clinic
+
+class ClinicUser(TrackedModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    clinic = models.ForeignKey("Clinic")
+    
+    def __str__(self):
+        return self.user.username    
+    
 class Organization(TrackedModel):
     '''
     A ReferringEntity works for a Organization, (clinic, hospital, private practice...)
@@ -50,6 +73,7 @@ class Organization(TrackedModel):
         (ORG_TYPE_WORKCOMP         , "Work comp."         ), 
         (ORG_TYPE_HEATHCAREPROVIDER, "Healthcare Provider")
     )
+    clinic = models.ForeignKey("Clinic")
     org_name = models.CharField(                   
         "Group Name", max_length=254, unique=True, blank=False, null=True)
     org_type = models.CharField(
@@ -92,10 +116,12 @@ class ReferringEntity(TrackedModel):
     def __str__(self):
         return self.entity_name
 
-    def get_patient_visit(self, params):
+    def get_patient_visit(self, params, clinic):
         today = params['to_date']
         week_ago = params['from_date']
-        patient_visit_sort = self.PatientVisit.filter(visit_date__range=(str(week_ago), str(today))).values('visit_date').annotate(visit=Sum('visit_count')).order_by('-visit_date')
+        patient_visit_sort = self.PatientVisit.filter(
+            treating_provider__clinic=clinic,
+            visit_date__range=(str(week_ago), str(today))).values('visit_date').annotate(visit=Sum('visit_count')).order_by('-visit_date')
         return patient_visit_sort
         
 class TreatingProvider(TrackedModel):
@@ -109,6 +135,7 @@ class TreatingProvider(TrackedModel):
         (PROVIDER_TYPE_NURSE              , "Nurse"),
         (PROVIDER_TYPE_NURSE_PRACTITIONER , "Nurse Practitioner"),
     )
+    clinic = models.ForeignKey("Clinic")
     provider_name = models.CharField(
         "Name", max_length=254, unique=True, blank=False, null=True)   
     provider_title = models.CharField("Title", max_length=50, blank=True)

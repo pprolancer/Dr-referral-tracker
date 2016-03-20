@@ -14,7 +14,7 @@ class OrganizationForm(forms.ModelForm):
     
     class Meta:
         model = Organization
-        exclude = ['creation_time','modification_time']
+        exclude = ['creation_time','modification_time','clinic']
         
     def __init__(self, *args, **kwargs):
         super(OrganizationForm, self).__init__(*args, **kwargs)
@@ -60,7 +60,7 @@ class TreatingProviderForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = TreatingProvider
-        exclude = ['creation_time','modification_time']        
+        exclude = ['creation_time','modification_time','clinic']        
 
 
 class PatientVisitHistoryForm(forms.Form):
