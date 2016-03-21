@@ -354,6 +354,8 @@ def edit_treating_provider(request, treating_provider_id):
 
 @login_required
 def edit_patient_visit(request, patient_visit_id):
+    ''' A view to edit PatientVisit '''
+
     patient_visit = get_object_or_404(PatientVisit, id=patient_visit_id)
     if request.method == 'POST':
         form = PatientVisitForm(request.POST, instance=patient_visit)
@@ -409,6 +411,8 @@ class TreatingProviderListView(LoginRequiredMixin, ListView):
 
 
 class PatientVisitListView(LoginRequiredMixin, ListView):
+    ''' A view to show list of PatientVisit '''
+
     model = PatientVisit
     template_name = 'tracking/patient_visit_list.html'
     context_object_name = "patient_visits"
