@@ -1,24 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if referring_entitys %}
+{% if patient_visits %}
     <table class="table">
         <tr>
-            <th>Name</th>
-            <th>Organization</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Special</th>
+            <th>Referring Entity</th>
+            <th>Treating Provider</th>
+            <th>Visit Date</th>
+            <th>Appointment Time</th>
+            <th>Actual Time</th>
+            <th>Visit Count</th>
+            <th style="width: 100px;">Actions</th>
         </tr>
-        {% for referring_entity in referring_entitys %}
+        {% for patient_visit in patient_visits %}
             <tr>
-                <td><a href="{% url 'edit-referring-entity' referring_entity.id %}">
-                    {{ referring_entity.entity_name }}
+                <td><a href="{% url 'edit-patient-visit' patient_visit.id %}">
+                    {{ patient_visit.referring_entity.entity_name }}
                 </a></td>
-                <td>{{ referring_entity.organization.org_name }}</td>
-                <td>{{ referring_entity.entity_phone }}</td>
-                <td>{{ referring_entity.entity_email }}</td>
-                <td>{{ referring_entity.entity_special }}</td>
+                <td>{{ patient_visit.treating_provider.provider_name}}</td>
+                <td>{{ patient_visit.visit_date }}</td>
+                <td>{{ patient_visit.visit_appointment_time }}</td>
+                <td>{{ patient_visit.visit_actual_time }}</td>
+                <td>{{ patient_visit.visit_count }}</td>
+                <td>
+                    <a href="{% url 'edit-patient-visit' patient_visit.id %}" class="btn btn-warning" title="Edit"><span class="fa fa-pencil"></span></a>
+                    <button class="btn btn-danger delete-action" data-delete-modal="{{patient_visit.id}}" title="Delete"><span class="fa fa-trash"></span></button>
+                </td>
             </tr>
         {% endfor %}
     </table>
@@ -50,6 +57,9 @@
         </nav>
     {% endif %}
 {% else %}
-    <p>No referring_entitys found.</p>
+    <p>No treating providers found.</p>
 {% endif %}
 {% endblock content %}
+{% block javascript %}
+{% include "delete-modal.html" with delete_url_name="delete-patient-visit" %}
+{% endblock %}

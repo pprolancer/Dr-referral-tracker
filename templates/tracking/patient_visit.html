@@ -18,7 +18,7 @@
 
             {% if field.name == 'visit_date' %}
             <div class="form-group">
-              <div class='input-group date datetimepicker' id="datetime">
+              <div class='input-group date datetimepicker' id="visit_date_picker">
                 {{ field }}
                 <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
@@ -48,7 +48,7 @@
 
       <div class="form-group">
           <div class="col-sm-offset-2 col-sm-6">
-            <button type="submit" class="btn btn-primary btn-lg">submit</button>
+            <button type="submit" class="btn btn-primary">Save</button>
           </div>
       </div>
 
@@ -64,22 +64,22 @@
  <script type="text/javascript">
     $( document ).ready(function() {
 
-    $('#datetimepicker').datetimepicker({
+    $('#visit_date_picker').datetimepicker({
       showTodayButton: true,
       format: 'YYYY-MM-DD',
       timeZone: '{{timezone}}',
       ignoreReadonly: true,
       viewMode: 'days'
     });
-    
+
     $('.timeonlypicker').datetimepicker({
       format: 'HH:mm'
-    });       
+    });
 
     $("input[type='text']").addClass('form-control')
     $("input[type='number']").addClass('form-control')
     $("#id_referring_entity-wrapper input").css("width", "464px");
-    
+
     $('select').addClass("form-control");
 });
         </script>

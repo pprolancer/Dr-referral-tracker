@@ -353,19 +353,36 @@ def edit_treating_provider(request, treating_provider_id):
 
 
 @login_required
-@require_http_methods(["POST"])
-def delete_referring_entity(request, referring_entity_id):
-    ''' delete a referring_entity '''
+def edit_patient_visit(request, patient_visit_id):
+    patient_visit = get_object_or_404(PatientVisit, id=patient_visit_id)
+    if request.method == 'POST':
+        form = PatientVisitForm(request.POST, instance=patient_visit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Changes saved successfully.')
+            return render(request, 'tracking/patient_visit_edit.html', {
+                'form': form})
 
-    referring_entity = get_object_or_404(ReferringEntity,
-                                         id=referring_entity_id)
+    else:
+        form = PatientVisitForm(instance=patient_visit)
+
+    return render(request, 'tracking/patient_visit_edit.html',
+                  {'form': form})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_patient_visit(request, patient_visit_id):
+    ''' delete a patient_visit '''
+
+    patient_visit = get_object_or_404(PatientVisit, id=patient_visit_id)
     form = GenericDeleteForm(request.POST)
     if form.is_valid():
-        referring_entity.delete()
+        patient_visit.delete()
         messages.success(request, 'Entity deleted successfully.')
 
     next = request.META.get('HTTP_REFERER') or \
-        reverse('view-referring-entities')
+        reverse('view-patient-visits')
 
     return redirect(next)
 
@@ -383,8 +400,16 @@ class ReferringEntityListView(LoginRequiredMixin, ListView):
     context_object_name = "referring_entitys"
     paginate_by = 10
 
+
 class TreatingProviderListView(LoginRequiredMixin, ListView):
     model = TreatingProvider
     template_name = 'tracking/treating_provider_list.html'
     context_object_name = "treating_providers"
+    paginate_by = 10
+
+
+class PatientVisitListView(LoginRequiredMixin, ListView):
+    model = PatientVisit
+    template_name = 'tracking/patient_visit_list.html'
+    context_object_name = "patient_visits"
     paginate_by = 10

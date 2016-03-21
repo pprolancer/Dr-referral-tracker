@@ -39,14 +39,15 @@
                             <li><a href="{% url 'view-organizations' %}">Organizations</a></li>
                             <li><a href="{% url 'view-referring-entities' %}">Referring Entities</a></li>
                             <li><a href="{% url 'view-treating-providers' %}">Treating Providers</a></li>
+                            <li><a href="{% url 'view-patient-visits' %}">Patient Visit</a></li>
                         </ul>
                     </li>
-				{%endif%}		
+				{%endif%}
 				</ul>
 		</div>
 
 		<!-- Collect the nav links, forms, and other content for toggling -->
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">      
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav navbar-right">
 				{% if user.is_authenticated %}
 					<li><a href="/logout">Logout</a></li>
@@ -56,4 +57,4 @@
 				</ul>
 			</div><!-- /.navbar-collapse -->
 	</div><!-- /.container-fluid -->
-</nav>  	
+</nav>
