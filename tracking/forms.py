@@ -86,3 +86,10 @@ class PatientVisitHistoryForm(forms.Form):
     referring_entity = autocomplete_light.ModelMultipleChoiceField('ReferringEntityAutocomplete', required=False)
     from_date = forms.DateField(widget=forms.TextInput(attrs={'readonly' : 'readonly'}))
     to_date = forms.DateField(widget=forms.TextInput(attrs={'readonly' : 'readonly'}))
+
+
+class GenericDeleteForm(forms.Form):
+    '''
+    generic form for delete entities. we use this to have csrf validation
+    '''
+    pass
