@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'add-referring-entity' %}" class="btn btn-success new-btn"> <span class="glyphicon-plus"></span> New</a>
 {% if referring_entitys %}
     <table class="table">
         <tr>
@@ -9,6 +10,7 @@
             <th>Phone</th>
             <th>Email</th>
             <th>Special</th>
+            <th style="width: 100px;">Actions</th>
         </tr>
         {% for referring_entity in referring_entitys %}
             <tr>
@@ -19,6 +21,10 @@
                 <td>{{ referring_entity.entity_phone }}</td>
                 <td>{{ referring_entity.entity_email }}</td>
                 <td>{{ referring_entity.entity_special }}</td>
+                <td>
+                    <a href="{% url 'edit-referring-entity' referring_entity.id %}" class="btn btn-warning" title="Edit"><span class="fa fa-pencil"></span></a>
+                    <button class="btn btn-danger delete-action" data-delete-modal="{{referring_entity.id}}" title="Delete"><span class="fa fa-trash"></span></button>
+                </td>
             </tr>
         {% endfor %}
     </table>
@@ -53,3 +59,6 @@
     <p>No referring_entitys found.</p>
 {% endif %}
 {% endblock content %}
+{% block javascript %}
+{% include "delete-modal.html" with delete_url_name="delete-referring-entity" %}
+{% endblock %}
