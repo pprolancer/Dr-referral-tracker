@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'add-patient-visit' %}" class="btn btn-success new-btn"> <span class="glyphicon-plus"></span> New</a>
 {% if patient_visits %}
     <table class="table">
         <tr>

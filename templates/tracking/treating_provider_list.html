@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'add-treating-provider' %}" class="btn btn-success new-btn"> <span class="glyphicon-plus"></span> New</a>
 {% if treating_providers %}
     <table class="table">
         <tr>
             <th>Name</th>
             <th>Title</th>
             <th>Type</th>
+            <th style="width: 100px;">Actions</th>
         </tr>
         {% for treating_provider in treating_providers %}
             <tr>
-                <td><a href="/edit/treating_provider/{{ treating_provider.id }}/">
+                <td><a href="{% url 'edit-treating-provider' treating_provider.id %}">
                     {{ treating_provider.provider_name }}
                 </a></td>
                 <td>{{ treating_provider.provider_title }}</td>
                 <td>{{ treating_provider.get_provider_type_display }}</td>
+                <td>
+                    <a href="{% url 'edit-treating-provider' treating_provider.id %}" class="btn btn-warning" title="Edit"><span class="fa fa-pencil"></span></a>
+                    <button class="btn btn-danger delete-action" data-delete-modal="{{treating_provider.id}}" title="Delete"><span class="fa fa-trash"></span></button>
+                </td>
             </tr>
         {% endfor %}
     </table>
@@ -22,7 +28,7 @@
         <nav>
             <ul class="pagination">
                 {% if page_obj.has_previous %}
-                        <li><a href="?page={{ page_obj.previous_page_number }}" 
+                        <li><a href="?page={{ page_obj.previous_page_number }}"
                                aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a></li>
@@ -37,7 +43,7 @@
                     {% endif %}
                 {% endfor %}
                 {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}" 
+                        <li><a href="?page={{ page_obj.next_page_number }}"
                                aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a></li>
@@ -49,3 +55,6 @@
     <p>No treating providers found.</p>
 {% endif %}
 {% endblock content %}
+{% block javascript %}
+{% include "delete-modal.html" with delete_url_name="delete-treating-provider" %}
+{% endblock %}

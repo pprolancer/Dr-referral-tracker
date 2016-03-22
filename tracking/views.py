@@ -363,13 +363,13 @@ def edit_patient_visit(request, patient_visit_id):
             form.save()
             messages.success(request, 'Changes saved successfully.')
             return render(request, 'tracking/patient_visit_edit.html', {
-                'form': form})
+                'form': form, 'timezone': TIME_ZONE})
 
     else:
         form = PatientVisitForm(instance=patient_visit)
 
     return render(request, 'tracking/patient_visit_edit.html',
-                  {'form': form})
+                  {'form': form, 'timezone': TIME_ZONE})
 
 
 @login_required
@@ -385,6 +385,59 @@ def delete_patient_visit(request, patient_visit_id):
 
     next = request.META.get('HTTP_REFERER') or \
         reverse('view-patient-visits')
+
+    return redirect(next)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_organization(request, organization_id):
+    ''' delete an organization '''
+
+    organization = get_object_or_404(Organization, id=organization_id)
+    form = GenericDeleteForm(request.POST)
+    if form.is_valid():
+        organization.delete()
+        messages.success(request, 'Entity deleted successfully.')
+
+    next = request.META.get('HTTP_REFERER') or \
+        reverse('view-organizations')
+
+    return redirect(next)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_referring_entity(request, referring_entity_id):
+    ''' delete a referring_entity '''
+
+    referring_entity = get_object_or_404(ReferringEntity,
+                                         id=referring_entity_id)
+    form = GenericDeleteForm(request.POST)
+    if form.is_valid():
+        referring_entity.delete()
+        messages.success(request, 'Entity deleted successfully.')
+
+    next = request.META.get('HTTP_REFERER') or \
+        reverse('view-referring-entities')
+
+    return redirect(next)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_treating_provider(request, treating_provider_id):
+    ''' delete an treating_provider '''
+
+    treating_provider = get_object_or_404(TreatingProvider,
+                                          id=treating_provider_id)
+    form = GenericDeleteForm(request.POST)
+    if form.is_valid():
+        treating_provider.delete()
+        messages.success(request, 'Entity deleted successfully.')
+
+    next = request.META.get('HTTP_REFERER') or \
+        reverse('view-treating-providers')
 
     return redirect(next)
 
