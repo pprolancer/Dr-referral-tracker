@@ -120,3 +120,16 @@
     margin-top: -10px;
     margin-bottom: 5px;
 }
+
+#more-fields {
+    cursor: pointer;
+    cursor: hand;
+}
+
+#more-fields-group {
+    display: none;
+}
+
+.pad-left-15 {
+    padding-left: 15px !important;
+}

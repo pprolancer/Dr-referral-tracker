@@ -15,16 +15,12 @@
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
           {% for field in refform.visible_fields %}
+          {% if field.name != 'visit_appointment_time' and field.name != 'visit_actual_time' %}
+
           <div class="form-group">
-              {% if field.name == 'visit_appointment_time' %}
-                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">
-                  Appoint. Time
-                </label>
-              {% else %}
-                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">
-                  {{field.label}}{% if field.field.required %}*{% endif %}
-                </label>
-              {% endif %}
+              <label for="{{ field.id_for_label }}" class="col-md-4 control-label">
+                {{field.label}}{% if field.field.required %}*{% endif %}
+              </label>
               <div class="col-md-8">
                 {% if field.name == 'visit_date' %}
                 <div class="form-group">
@@ -35,15 +31,6 @@
                     </span>
                   </div>
                 </div>
-                {% elif field.name == 'visit_appointment_time' or field.name == 'visit_actual_time' %}
-                <div class="form-group">
-                  <div class='input-group date datetimepicker2 timeonlypicker'>
-                    {{ field }}
-                    <span class="input-group-addon">
-                      <span class="glyphicon glyphicon-time"></span>
-                    </span>
-                  </div>
-                </div>
                 {% else %}
                 {{ field }}
                 {% endif %}
@@ -51,7 +38,41 @@
                 {{ field.help_text }}
               </div>
           </div>
+          {% endif %}
           {% endfor %}
+          <div class="form-group">
+            <label class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+              <div class="divider10"></div>
+              <a id="more-fields" class="link">More fields</a>
+            </div>
+          </div>
+          <div id="more-fields-group">
+            <div class="form-group">
+              <label for="{{ refform.visit_appointment_time.id_for_label }}" class="col-md-4 control-label">
+                Appoint. Time
+              </label>
+              <div class='input-group pad-left-15 date datetimepicker2 timeonlypicker'>
+                {{ refform.visit_appointment_time }}
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-time"></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="{{ refform.visit_appointment_time.id_for_label }}" class="col-md-4 control-label">
+              {{refform.visit_actual_time.label}}
+              </label>
+              <div class='input-group pad-left-15 date datetimepicker2 timeonlypicker '>
+                {{ refform.visit_actual_time }}
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-time"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
               <div class="col-sm-offset-6 col-sm-8">
                 <input type="submit" name="refform" value="submit" class="btn btn-default">
@@ -224,6 +245,17 @@
 
  <script type="text/javascript">
     $( document ).ready(function() {
+
+    $('#more-fields').click(function() {
+      $('#more-fields-group').fadeToggle('fast', function() {
+        if ($(this).is(':visible')) {
+          $(this).find(":input").removeAttr("disabled");
+        } else {
+          $(this).find(":input").attr("disabled", "disabled").val('');
+        }
+      });
+      return false;
+    });
 
     $('#datetimepicker2').datetimepicker({
       showTodayButton: true,
