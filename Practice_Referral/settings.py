@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'djcelery',
     'Practice_Referral',
+    'rest_framework',
 )
 
 
@@ -80,11 +81,18 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissions'
+    ]
+}
+
 ROOT_URLCONF = 'Practice_Referral.urls'
 
 WSGI_APPLICATION = 'Practice_Referral.wsgi.application'
 
 LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/home/'
 
 # SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/'
 SOCIAL_AUTH_LOGIN_URL = '/'
