@@ -24,8 +24,9 @@ class UserAdmin(admin.ModelAdmin):
                     'is_active')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     actions = [user_activate]
-    
-    def save_model(self, request, obj, form, change):
+   
+    @staticmethod   
+    def save_model(request, obj, form, change):
         # Override this to set the password to the value in the field if it's
         # changed.
         if obj.pk:
