@@ -12,5 +12,5 @@ urlpatterns = patterns('',
     url(r'^', include('tracking.urls')),
     url(r'^', include('social.apps.django_app.urls', namespace='social')),
     url(r'^', include('users.urls')),
-
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 )

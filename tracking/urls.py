@@ -1,5 +1,10 @@
+from rest_framework import routers
 from django.conf.urls import patterns, include, url
 from tracking.views import *
+from tracking.rest_api.views import OrganizationViewSet
+
+rest_router = routers.DefaultRouter()
+rest_router.register(r'organization', OrganizationViewSet)
 
 
 urlpatterns = patterns(
@@ -24,6 +29,7 @@ urlpatterns = patterns(
     url(r'^view/referring_entities/$', ReferringEntityListView.as_view(), name="view-referring-entities"),
     url(r'^view/treating_provider/$', TreatingProviderListView.as_view(), name="view-treating-providers"),
     url(r'^view/patient_visits/$', PatientVisitListView.as_view(), name="view-patient-visits"),
+    url(r'^api/v1/', include(rest_router.urls)),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 )
