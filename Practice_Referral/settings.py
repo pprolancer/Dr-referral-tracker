@@ -84,7 +84,9 @@ AUTHENTICATION_BACKENDS = (
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissions'
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'Practice_Referral.CustomPagination',
+    'PAGE_SIZE': 10,
 }
 
 ROOT_URLCONF = 'Practice_Referral.urls'
