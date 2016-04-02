@@ -521,3 +521,7 @@ class PatientVisitListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/patient_visit_list.html'
     context_object_name = "patient_visits"
     paginate_by = 10
+    
+    def get_queryset(self):
+        qs = super(PatientVisitListView, self).get_queryset()
+        return qs.filter(treating_provider__clinic=Clinic.get_from_user(self.request.user))
