@@ -40,7 +40,7 @@ class IndexView(LoginRequiredMixin, View):
     @staticmethod
     def get_context(request, initial_ctx=None):
         '''create context structure for both get and post handlers'''
-        clinic = Clinic.get_from_user(self.request.user)
+        clinic = Clinic.get_from_user(request.user)
 
         orgform = OrganizationForm()
         phyform = ReferringEntityForm()
@@ -126,6 +126,7 @@ class IndexView(LoginRequiredMixin, View):
             'today': today,
             'week_ago': week_ago,
             'timezone': TIME_ZONE,
+            'clinic': clinic
         }
         ctx.update(initial_ctx or {})
         return ctx
@@ -508,6 +509,10 @@ class TreatingProviderListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/treating_provider_list.html'
     context_object_name = "treating_providers"
     paginate_by = 10
+    
+    def get_queryset(self):
+        qs = super(TreatingProviderListView, self).get_queryset()
+        return qs.filter(clinic=Clinic.get_from_user(self.request.user))    
 
 class PatientVisitListView(LoginRequiredMixin, ListView):
     ''' A view to show list of PatientVisit '''
@@ -516,7 +521,3 @@ class PatientVisitListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/patient_visit_list.html'
     context_object_name = "patient_visits"
     paginate_by = 10
-    
-    def get_queryset(self):
-        qs = super(TreatingProviderListView, self).get_queryset()
-        return qs.filter(clinic=Clinic.get_from_user(self.request.user))
