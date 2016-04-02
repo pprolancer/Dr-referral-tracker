@@ -5,8 +5,11 @@ from rest_framework.response import Response
 
 
 class CustomPagination(pagination.PageNumberPagination):
+    ''' Custom Pagination to be used in rest api'''
 
     def get_paginated_response(self, data):
+        ''' override pagination structure in list rest api '''
+
         next_page = self.page.next_page_number() if \
             self.page.has_next() else None
         previous_page = self.page.previous_page_number() if \

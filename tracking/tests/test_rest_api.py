@@ -51,8 +51,8 @@ class OrganizationTests(LoginBaseTest):
     def test_get(self):
         ''' get api test '''
 
-        org1 = Organization.objects.create(org_name='org1')
         self._login()
+        org1 = Organization.objects.create(org_name='org1')
         url = reverse('organization-detail', args=(org1.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -69,8 +69,8 @@ class OrganizationTests(LoginBaseTest):
     def test_update(self):
         ''' update api test '''
 
-        org1 = Organization.objects.create(org_name='org1')
         self._login()
+        org1 = Organization.objects.create(org_name='org1')
         url = reverse('organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
         response = self.client.put(url, data)
