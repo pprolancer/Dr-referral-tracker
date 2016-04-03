@@ -29,13 +29,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='clinic',
-            field=models.ForeignKey(default=2, to='tracking.Clinic'),
+            field=models.ForeignKey(default=1, to='tracking.Clinic'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='treatingprovider',
             name='clinic',
-            field=models.ForeignKey(default=2, to='tracking.Clinic'),
+            field=models.ForeignKey(default=1, to='tracking.Clinic'),
             preserve_default=False,
         ),
     ]
