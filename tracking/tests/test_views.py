@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from tracking.models import Organization, ReferringEntity, TreatingProvider, PatientVisit
+from tracking.models import Clinic, ClinicUser, Organization, ReferringEntity, TreatingProvider, PatientVisit
 
 def date2str(d):
     '''convert date to string format like 2016-01-03 01:01:01'''
@@ -19,6 +19,10 @@ class LoginBaseTest(TestCase):
         self.default_pass = 'pass1234'
         self.user = User.objects.create_user(username='user1',
                                              password=self.default_pass)
+        self.clinic = Clinic.objects.create(clinic_name="clinic1")
+        self.clinic_user = ClinicUser.objects.create(
+            clinic = self.clinic,
+            user = self.user)
 
     def _login(self):
         ''' do login on client '''
@@ -57,7 +61,7 @@ class IndexViewTest(LoginBaseTest):
     def test_post_phyform(self):
         ''' quantifiedcode: ignore it! '''
 
-        org = Organization.objects.create(org_name='org1')
+        org = Organization.objects.create(org_name='org1', clinic=self.clinic)
         self._login()
         data = {
             'phyform': 'submit',
@@ -88,6 +92,7 @@ class IndexViewTest(LoginBaseTest):
         self._login()
         data = {
             'orgform': 'submit',
+            'clinic_id': self.clinic.id,
             'org_name': 'org1',
             'org_type': 'MAR',
             'org_contact_name': 'contact1',
@@ -101,6 +106,7 @@ class IndexViewTest(LoginBaseTest):
         organizations = Organization.objects.all()
         self.assertEqual(len(organizations), 1)
         created_org = organizations[0]
+        self.assertEqual(created_org.clinic_id, data['clinic_id'])
         self.assertEqual(created_org.org_name, data['org_name'])
         self.assertEqual(created_org.org_contact_name,
                          data['org_contact_name'])
@@ -139,11 +145,14 @@ class PatientVisitViewTest(LoginBaseTest):
         ''' quantifiedcode: ignore it! '''
 
         self._login()
-        organization = Organization.objects.create(org_name='org1')
+        organization = Organization.objects.create(
+            org_name='org1', clinic=self.clinic)
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization)
         treating_provider = TreatingProvider.objects.create(
-            provider_name='prov1', provider_type='D')
+            clinic=self.clinic,
+            provider_name='prov1', 
+            provider_type='D')
         today = timezone.now()
         data = {
             'referring_entity': referring_entity.id,
@@ -189,13 +198,18 @@ class GetPatientVisitHistoryViewTest(LoginBaseTest):
     def test_post(self):
         ''' quantifiedcode: ignore it! '''
 
-        organization = Organization.objects.create(org_name='org1')
+        organization = Organization.objects.create(
+            org_name='org1', clinic=self.clinic)
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization)
+        treating_provider = TreatingProvider.objects.create(
+            clinic=self.clinic, provider_name="ent1", provider_type="D") 
         today = datetime.now().date()
         patient_visits = [
-            PatientVisit.objects.create(referring_entity=referring_entity,
-                                    visit_date=today + timedelta(days=i))
+            PatientVisit.objects.create(
+                referring_entity=referring_entity,
+                treating_provider=treating_provider,
+                visit_date=today + timedelta(days=i))
             for i in range(10)]
 
         self._login()
@@ -225,7 +239,8 @@ class EditReferringEntityViewTest(LoginBaseTest):
     def test_edit(self):
         ''' quantifiedcode: ignore it! '''
 
-        organization = Organization.objects.create(org_name='org1')
+        organization = Organization.objects.create(
+            org_name='org1', clinic=self.clinic)
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization,
             entity_email='test@email.com', entity_phone='+442083660000',
@@ -255,6 +270,7 @@ class EditOrganizationViewTest(LoginBaseTest):
         ''' quantifiedcode: ignore it! '''
 
         organization = Organization.objects.create(
+            clinic=self.clinic,
             org_name='phys1', org_type='MAR', org_contact_name="contact1",
             org_email='test@email.com', org_phone='+442083660000',
             org_special=False)
