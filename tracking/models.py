@@ -39,7 +39,7 @@ class Clinic(TrackedModel):
         "Clinic Name", max_length=254, unique=True, blank=False, null=True)
     
     def __str__(self):
-        return self.name
+        return self.clinic_name
         
     @staticmethod    
     def get_from_user(user):
