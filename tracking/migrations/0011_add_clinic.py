@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('creation_time', models.DateTimeField(verbose_name='Creation Timestamp', null=True, blank=True)),
                 ('modification_time', models.DateTimeField(verbose_name='Modification Timestamp', null=True, blank=True)),
-                ('name', models.CharField(verbose_name='Clinic Name', null=True, max_length=254, unique=True)),
+                ('clinic_name', models.CharField(verbose_name='Clinic Name', null=True, max_length=254, unique=True)),
             ],
             options={
                 'abstract': False,
