@@ -10,8 +10,11 @@ class SessionView(views.APIView):
     rest view set for Session
     '''
     class SessionPermission(permissions.BasePermission):
+        ''' custom class to check permissions for sessions '''
 
         def has_permission(self, request, view):
+            ''' check request permissions '''
+
             if request.method == 'POST':
                 return True
             return request.user.is_authenticated()
@@ -20,9 +23,13 @@ class SessionView(views.APIView):
     serializer_class = SessionSerializer
 
     def get(self, request, format=None):
+        ''' api to get current session '''
+
         return Response(UserSerializer(request.user).data)
 
     def post(self, request):
+        ''' api to login '''
+
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.filter(
@@ -36,6 +43,8 @@ class SessionView(views.APIView):
         return Response(UserSerializer(request.user).data)
 
     def delete(self, request):
+        ''' api to logout '''
+
         user_id = request.user.id
         logout(request)
         return Response({'id': user_id})
