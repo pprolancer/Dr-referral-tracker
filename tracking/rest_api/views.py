@@ -3,7 +3,7 @@ from tracking.models import Organization
 from .serializers import OrganizationSerializer
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationView(viewsets.ModelViewSet):
     '''
     rest view set for Organization resource
     '''

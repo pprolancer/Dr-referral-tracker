@@ -30,7 +30,7 @@ class OrganizationTests(LoginBaseTest):
         ''' add api test '''
 
         self._login()
-        url = reverse('organization-list')
+        url = reverse('rest_api:organization-list')
         data = {'org_name': 'org1'}
         self.assertEqual(Organization.objects.count(), 0)
         response = self.client.post(url, data)
@@ -41,7 +41,7 @@ class OrganizationTests(LoginBaseTest):
     def test_add_not_authorized(self):
         ''' call add api while not authorized '''
 
-        url = reverse('organization-list')
+        url = reverse('rest_api:organization-list')
         data = {'org_name': 'org1'}
         self.assertEqual(Organization.objects.count(), 0)
         response = self.client.post(url, data)
@@ -53,7 +53,7 @@ class OrganizationTests(LoginBaseTest):
 
         self._login()
         org1 = Organization.objects.create(org_name='org1')
-        url = reverse('organization-detail', args=(org1.id,))
+        url = reverse('rest_api:organization-detail', args=(org1.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['org_name'], 'org1')
@@ -62,7 +62,7 @@ class OrganizationTests(LoginBaseTest):
         ''' call get api while not authorized '''
 
         org1 = Organization.objects.create(org_name='org1')
-        url = reverse('organization-detail', args=(org1.id,))
+        url = reverse('rest_api:organization-detail', args=(org1.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -71,7 +71,7 @@ class OrganizationTests(LoginBaseTest):
 
         self._login()
         org1 = Organization.objects.create(org_name='org1')
-        url = reverse('organization-detail', args=(org1.id,))
+        url = reverse('rest_api:organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
         response = self.client.put(url, data)
         org1 = Organization.objects.get(id=org1.id)
@@ -83,7 +83,7 @@ class OrganizationTests(LoginBaseTest):
         ''' call update api while not authorized '''
 
         org1 = Organization.objects.create(org_name='org1')
-        url = reverse('organization-detail', args=(org1.id,))
+        url = reverse('rest_api:organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -94,7 +94,7 @@ class OrganizationTests(LoginBaseTest):
         orgs = [Organization.objects.create(org_name='org{0}'.format(i))
                 for i in range(5)]
         self._login()
-        url = reverse('organization-list')
+        url = reverse('rest_api:organization-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data['results']
@@ -103,6 +103,6 @@ class OrganizationTests(LoginBaseTest):
     def test_list_not_authorized(self):
         ''' call list api while not authorized '''
 
-        url = reverse('organization-list')
+        url = reverse('rest_api:organization-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
