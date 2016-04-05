@@ -25,7 +25,7 @@ class SessionTests(LoginBaseTest):
     ''' testcases class for Session Rest api '''
 
     def test_login(self):
-        ''' add api test '''
+        ''' login api test '''
         url = reverse('rest_api:session-list')
         data = {'username': self.user.username, 'password': self.default_pass}
         response = self.client.post(url, data)
@@ -33,14 +33,14 @@ class SessionTests(LoginBaseTest):
         self.assertEqual(response.data['id'], self.user.id)
 
     def test_login_fail(self):
-        ''' add api test '''
+        ''' login api test fail '''
         url = reverse('rest_api:session-list')
         data = {'username': self.user.username, 'password': 'Invalid'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_inactive_user(self):
-        ''' add api test '''
+        ''' login api test inactive user '''
         url = reverse('rest_api:session-list')
 
         inactive_user = User.objects.create_superuser(
@@ -55,7 +55,7 @@ class SessionTests(LoginBaseTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get(self):
-        ''' get api test '''
+        ''' get session api test '''
 
         self._login()
         url = reverse('rest_api:session-list')
@@ -71,6 +71,8 @@ class SessionTests(LoginBaseTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_logout(self):
+        ''' logout api test '''
+
         self._login()
         self.assertEqual(self.client.session.get('_auth_user_id'),
                          str(self.user.id))
@@ -81,7 +83,7 @@ class SessionTests(LoginBaseTest):
         self.assertIsNone(self.client.session.get('_auth_user_id'))
 
     def test_logout_not_authorized(self):
-        ''' call get api while not authorized '''
+        ''' call logout api while not authorized '''
 
         url = reverse('rest_api:session-list')
         response = self.client.delete(url)
