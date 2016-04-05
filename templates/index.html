@@ -9,7 +9,7 @@
   {% endif %}
 </div> -->
 
-<div class="row" style="background-color: rgb(220, 234, 210);">
+<div class="row col-md-12 box1">
       <div class="col-md-2">
         <h3>Referral Tracker </h3>
         <h4>Clinic: {{ clinic.clinic_name }}</h4>
@@ -111,7 +111,7 @@
         </form>
     </div>
 
-    <div class="col-md-4" style="">
+    <div class="col-md-3" style="">
         <h4 style="text-align:center;">Create Group </h4>
           <form method="POST" class="form-horizontal" action=".">
           {% csrf_token %}
