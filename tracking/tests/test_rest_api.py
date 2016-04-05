@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
-from tracking.models import Organization
+from tracking.models import Organization, Clinic, ClinicUser
 
 
 class LoginBaseTest(APITestCase):
@@ -15,6 +15,10 @@ class LoginBaseTest(APITestCase):
         self.user = User.objects.create_superuser(username='user1',
                                                   email='user1@email.com',
                                                   password=self.default_pass)
+        self.clinic = Clinic.objects.create(clinic_name="clinic1")
+        self.clinic_user = ClinicUser.objects.create(
+            clinic=self.clinic,
+            user=self.user)
 
     def _login(self):
         ''' do login on client '''
@@ -31,7 +35,7 @@ class OrganizationTests(LoginBaseTest):
 
         self._login()
         url = reverse('rest_api:organization-list')
-        data = {'org_name': 'org1'}
+        data = {'org_name': 'org1', 'clinic': self.clinic.id}
         self.assertEqual(Organization.objects.count(), 0)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -42,7 +46,7 @@ class OrganizationTests(LoginBaseTest):
         ''' call add api while not authorized '''
 
         url = reverse('rest_api:organization-list')
-        data = {'org_name': 'org1'}
+        data = {'org_name': 'org1', 'clinic': self.clinic.id}
         self.assertEqual(Organization.objects.count(), 0)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -52,7 +56,7 @@ class OrganizationTests(LoginBaseTest):
         ''' get api test '''
 
         self._login()
-        org1 = Organization.objects.create(org_name='org1')
+        org1 = Organization.objects.create(org_name='org1', clinic=self.clinic)
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -61,7 +65,7 @@ class OrganizationTests(LoginBaseTest):
     def test_get_not_authorized(self):
         ''' call get api while not authorized '''
 
-        org1 = Organization.objects.create(org_name='org1')
+        org1 = Organization.objects.create(org_name='org1', clinic=self.clinic)
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -70,28 +74,29 @@ class OrganizationTests(LoginBaseTest):
         ''' update api test '''
 
         self._login()
-        org1 = Organization.objects.create(org_name='org1')
+        org1 = Organization.objects.create(org_name='org1', clinic=self.clinic)
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
-        response = self.client.put(url, data)
-        org1 = Organization.objects.get(id=org1.id)
+        response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Organization.objects.count(), 1)
+        org1 = Organization.objects.get(id=org1.id)
         self.assertEqual(org1.org_name, 'org2')
 
     def test_update_not_authorized(self):
         ''' call update api while not authorized '''
 
-        org1 = Organization.objects.create(org_name='org1')
+        org1 = Organization.objects.create(org_name='org1', clinic=self.clinic)
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
-        response = self.client.put(url, data)
+        response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list(self):
         ''' list api test '''
 
-        orgs = [Organization.objects.create(org_name='org{0}'.format(i))
+        orgs = [Organization.objects.create(org_name='org{0}'.format(i),
+                                            clinic=self.clinic)
                 for i in range(5)]
         self._login()
         url = reverse('rest_api:organization-list')
