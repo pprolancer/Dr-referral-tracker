@@ -11,8 +11,8 @@ admin.site.register(Organization)
 admin.site.register(ReferringEntity)
 admin.site.register(TreatingProvider)
 admin.site.register(PatientVisit)
-admin.site.register(ThankyouMails)
-admin.site.register(EmailReport)
+admin.site.register(ReferringReportSetting)
+
 
 def user_activate(modeladmin, request, queryset):
     queryset.update(is_active=True)
@@ -24,8 +24,8 @@ class UserAdmin(admin.ModelAdmin):
                     'is_active')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     actions = [user_activate]
-   
-    @staticmethod   
+
+    @staticmethod
     def save_model(request, obj, form, change):
         # Override this to set the password to the value in the field if it's
         # changed.
@@ -35,7 +35,7 @@ class UserAdmin(admin.ModelAdmin):
                 obj.set_password(obj.password)
         else:
             obj.set_password(obj.password)
-        obj.save()    
+        obj.save()
 
 
 admin.site.unregister(User)
