@@ -1,6 +1,7 @@
-import os
-import glob
+import sys
+import pkgutil
 import logging
+import importlib
 from django.template import Template, Context
 from django.template.loader import render_to_string
 
@@ -12,18 +13,29 @@ class InvalidReportException(Exception):
 class ReportManager(object):
     _report_registry = {}
 
-    @staticmethod
-    def get_report_cls(report_type, name):
-        klass = (ReportManager._report_registry.get(report_type) or {}
+    @classmethod
+    def get_report_cls(cls, report_type, name):
+        klass = (cls._report_registry.get(report_type) or {}
                  ).get(name)
         if klass is None:
             raise InvalidReportException(
-                'Invalid ReferringReport with name "%s"' % name)
+                'Invalid ReferringReport with name "{}"'.format(name))
         return klass
 
-    @staticmethod
-    def get_registered_reports(report_type):
-        return (ReportManager._report_registry.get(report_type) or {}).keys()
+    @classmethod
+    def get_registered_reports(cls, report_type):
+        return (cls._report_registry.get(report_type) or {}).keys()
+
+    @classmethod
+    def register_report(cls, report_type, report_name, klass):
+        report_type_registry = ReportManager._report_registry.setdefault(
+            report_type, {})
+        if report_name in report_type_registry:
+            raise AssertionError('Report with type={} and name={} already '
+                                 'exists'.format(report_type, report_name))
+        report_type_registry[report_name] = klass
+        klass.name = report_name
+        return klass
 
 
 def register_report(report_type, name=None):
@@ -34,14 +46,8 @@ def register_report(report_type, name=None):
         assert issubclass(cls, Report), \
             'cls should be subclass of ReferringReport'
         report_name = name or cls.__name__
-        report_type_registry = ReportManager._report_registry.setdefault(
-            report_type, {})
-        if report_name in report_type_registry:
-            raise AssertionError('Report with type=%s and name=%s '
-                                 'already exists' % (report_type, report_name))
-        cls.name = report_name
-        report_type_registry[report_name] = cls
-        return cls
+        return ReportManager.register_report(report_type, report_name, cls)
+
     return decorator
 
 
@@ -72,7 +78,7 @@ class Report(object):
     def skipped(self):
         return self._skip
 
-    def get_extra_context():
+    def get_extra_context(self):
         '''
         get extra context to be inject in body.
         this can be implemented in child classes
@@ -113,10 +119,18 @@ class TemplateFileReport(Report):
         return render_to_string(self.template_file, self.context)
 
 
+def import_submodules(package_name):
+    """ Import all submodules of a module, recursively
+
+    :param package_name: Package name
+    :type package_name: str
+    :rtype: dict[types.ModuleType]
+    """
+    package = sys.modules[package_name]
+    return {
+        name: importlib.import_module(package_name + '.' + name)
+        for loader, name, is_pkg in pkgutil.walk_packages(package.__path__)
+    }
+
 __all__ = [TemplateFileReport, Report, ReportManager, register_report]
-files = glob.glob(os.path.dirname(__file__) + "/*.py")
-for f in files:
-    if os.path.isfile(f) and not os.path.basename(f).startswith('_'):
-        mod = os.path.basename(f)[:-3]
-        exec("from . import %s" % mod)
-        __all__.append(mod)
+__all__.extend(import_submodules(__name__).keys())
