@@ -11,7 +11,11 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from datetime import datetime , timedelta, date
 from django.db.models import Sum
-from tracking.reports.referring_reports import ReportManager
+from tracking.reports import ReportManager
+from tracking.reports.referring_reports import REPORT_TYPE \
+    as REFERRING_REPORT_TYPE
+from tracking.reports.clinic_user_reports import REPORT_TYPE \
+    as CLINIC_USER_REPORT_TYPE
 
 
 today = date.today()
@@ -169,7 +173,10 @@ class PatientVisit(TrackedModel):
         return self.referring_entity.organization.org_name
 
 
-class ReferringReportSetting(TrackedModel):
+class ReportSetting(TrackedModel):
+    class Meta:
+        abstract = True
+
     PERIOD_DAILY = 'daily'
     PERIOD_WEEKLY = 'weekly'
     PERIOD_MONTHLY = 'monthly'
@@ -183,20 +190,36 @@ class ReferringReportSetting(TrackedModel):
         (PERIOD_QUARTERLY, 'Quarterly'),
         (PERIOD_YEARLY, 'Yearly'),
     )
-    REPORTS_CHOICES = tuple(
-        (r, r) for r in ReportManager.get_registered_reports())
-    referring_entity = models.ForeignKey(ReferringEntity, blank=False,
-                                         null=False, on_delete=models.CASCADE)
-    report_name = models.CharField("Report Name", max_length=64,
-                                   choices=REPORTS_CHOICES, blank=False,
-                                   null=False)
     enabled = models.BooleanField("Enabled", default=True)
     period = models.CharField("Report Period", max_length=16,
                               default=PERIOD_DAILY, choices=PERIOD_CHOICES,
                               blank=False, null=False)
 
+    def __str__(self):
+        return str(self.report_name)
+
+
+class ReferringReportSetting(ReportSetting):
+    REPORTS_CHOICES = tuple((r, r) for r in ReportManager.get_registered_reports(REFERRING_REPORT_TYPE))
+
+    referring_entity = models.ForeignKey(ReferringEntity, blank=False,
+                                         null=False, on_delete=models.CASCADE)
+    report_name = models.CharField("Report Name", max_length=64,
+                                   choices=REPORTS_CHOICES, blank=False,
+                                   null=False)
+
     class Meta:
         unique_together = (("referring_entity", "report_name"),)
 
-    def __str__(self):
-        return str(self.report_name)
+
+class ClinicUserReportSetting(ReportSetting):
+    REPORTS_CHOICES = tuple((r, r) for r in ReportManager.get_registered_reports(CLINIC_USER_REPORT_TYPE))
+
+    clinic_user = models.ForeignKey(ClinicUser, blank=False,
+                                    null=False, on_delete=models.CASCADE)
+    report_name = models.CharField("Report Name", max_length=64,
+                                   choices=REPORTS_CHOICES, blank=False,
+                                   null=False)
+
+    class Meta:
+        unique_together = (("clinic_user", "report_name"),)

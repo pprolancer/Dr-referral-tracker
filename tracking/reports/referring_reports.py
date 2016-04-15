@@ -1,121 +1,26 @@
-import logging
 from django.db.models import Sum
 from datetime import date, timedelta
-from django.template import Template, Context
-from django.template.loader import render_to_string
+from . import TemplateFileReport, register_report
+
+REPORT_TYPE = 'referring_entity'
+TEMPLATE_DIR = 'tracking/reports/referring_entity'
 
 
-class InvalidReportException(Exception):
-    pass
-
-
-class ReportManager(object):
-    _report_registry = {}
-
-    @staticmethod
-    def get_report_cls(name):
-        klass = ReportManager._report_registry.get(name)
-        if klass is None:
-            raise InvalidReportException(
-                'Invalid ReferringReport with name "%s"' % name)
-        return klass
-
-    @staticmethod
-    def get_registered_reports():
-        return ReportManager._report_registry.keys()
-
-
-def register_report(name=None):
-    '''
-    a decorator to register a report with a name to system
-    '''
-    def decorator(cls):
-        assert issubclass(cls, ReferringReport), \
-            'cls should be subclass of ReferringReport'
-        report_name = name or cls.__name__
-        if report_name in ReportManager._report_registry:
-            raise AssertionError('ReferringReport with name=%s '
-                                 'already exists' % report_name)
-        cls.name = report_name
-        ReportManager._report_registry[report_name] = cls
-        return cls
-    return decorator
-
-
-class ReferringReport(object):
+class ReferringReport(TemplateFileReport):
     ''' Base class for Email Reports'''
 
-    name = None
-    subject_tpl = 'Report: {{REPORT_NAME}}'
-    body_tpl = ''
-    _skip = False  # you can skip this email report by setting this flag
-
-    @staticmethod
-    def render_string_template(s, ctx):
-        t = Template(s)
-        c = Context(ctx or {})
-        return t.render(c)
-
     def __init__(self, referring_entity=None, logger=None):
-        self.logger = logger or logging
         self.referring_entity = referring_entity
-        self.context = dict(referring_entity=referring_entity,
-                            REPORT_NAME=self.name)
-        self.context.update(self.get_extra_context() or {})
-
-    def skip(self, status=True):
-        ''' set this report as a skipped '''
-
-        self._skip = status
-
-    def skipped(self):
-        return self._skip
-
-    def get_extra_context():
-        '''
-        get extra context to be inject in body.
-        this can be implemented in child classes
-        '''
-
-        return {}
-
-    def get_subject(self):
-        '''
-        get subject of report
-        this can be implemented in child classes
-        '''
-
-        return self.render_string_template(self.subject_tpl, self.context)
-
-    def get_body(self):
-        '''
-        get subject of report
-        this can be implemented in child classes
-        '''
-
-        return self.render_string_template(self.body_tpl, self.context)
+        super(ReferringReport, self).__init__(logger=logger)
 
     def __str__(self):
-        return '<{0}(setting={1}>'.format(self.name, self.referring_entity)
+        return '<{0}(setting={1}>)'.format(self.name, self.referring_entity)
 
 
-class TemplateFileReferringReport(ReferringReport):
-    ''' Base class for Email Report to use a template file to generate body '''
-
-    template_file = None
-
-    def __init__(self, *args, **kwargs):
-        assert self.template_file is not None, 'should specify template_file'
-        super(TemplateFileReferringReport, self).__init__(*args, **kwargs)
-
-    def get_body(self):
-        return render_to_string(self.template_file, self.context)
-
-
-@register_report(name='thankyou')
-class ThankyouReport(TemplateFileReferringReport):
+@register_report(REPORT_TYPE, name='thankyou')
+class ThankyouReport(ReferringReport):
     subject_tpl = 'Patient refferal status'
-    template_file = 'tracking/reports/thankyou.html'
+    template_file = '{}/thankyou.html'.format(TEMPLATE_DIR)
 
     def get_extra_context(self):
         from tracking.models import PatientVisit
