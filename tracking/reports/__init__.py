@@ -28,10 +28,10 @@ class ReportManager(object):
 
     @classmethod
     def register_report(cls, report_type, report_name, klass):
-        report_type_registry = ReportManager._report_registry.setdefault(
+        report_type_registry = cls._report_registry.setdefault(
             report_type, {})
         if report_name in report_type_registry:
-            raise AssertionError('Report with type={} and name={} already '
+            raise AssertionError('Report with type={0} and name={1} already '
                                  'exists'.format(report_type, report_name))
         report_type_registry[report_name] = klass
         klass.name = report_name
