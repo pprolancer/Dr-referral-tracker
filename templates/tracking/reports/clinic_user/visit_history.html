@@ -1,0 +1,21 @@
+<h2>Last patient visit history ({{visit_date}})</h2>
+<p><br /></p>
+<table width="100%" border="1" cellspacing="0" cellpadding="8" align="center">
+    <tr>
+        <th bgcolor="gray">Reffering Entity</th>
+        <th bgcolor="gray">Organization</th>
+        <th bgcolor="gray">Treating Provider</th>
+        <th bgcolor="gray">Count</th>
+    </tr>
+    {% for patient_visit in patient_visits %}
+    <tr>
+        <td>{{ patient_visit.referring_entity.entity_name }}</td>
+        <td>{{ patient_visit.referring_entity.organization.org_name }}</td>
+        <td>{{ patient_visit.treating_provider.provider_name }}</td>
+        <td>{{ patient_visit.visit_count }}</td>
+    </tr>
+    {% endfor %}
+    {% if not patient_visits.count %}
+    <tr><td colspan="4" style="text-align: center; color: gray;"><i>NO RECORD</i></td></tr>
+    {% endif %}
+</table>
