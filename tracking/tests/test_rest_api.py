@@ -185,7 +185,8 @@ class ReferringReportSettingTest(LoginBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(ReferringReportSetting.objects.count(), 2)
         rs = ReferringReportSetting.objects.all()
-        self.assertSetEqual({r.id for r in rs}, {ref1.id, ref2.id})
+        self.assertSetEqual({r.referring_entity.id for r in rs},
+                            {ref1.id, ref2.id})
 
 
 class ClinicUserReportSettingTest(LoginBaseTest):
@@ -246,5 +247,5 @@ class ClinicUserReportSettingTest(LoginBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(ClinicUserReportSetting.objects.count(), 2)
         rs = ClinicUserReportSetting.objects.all()
-        self.assertSetEqual({r.id for r in rs}, {self.clinic_user.id,
-                                                 clinic_user2.id})
+        self.assertSetEqual({r.clinic_user.id for r in rs},
+                            {self.clinic_user.id, clinic_user2.id})
