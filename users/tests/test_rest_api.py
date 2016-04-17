@@ -21,7 +21,7 @@ class LoginBaseTest(APITestCase):
                                  password=self.default_pass)
 
 
-class SessionTests(LoginBaseTest):
+class SessionTest(LoginBaseTest):
     ''' testcases class for Session Rest api '''
 
     def test_login(self):

@@ -86,7 +86,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissions'
     ],
     'DEFAULT_PAGINATION_CLASS': 'Practice_Referral.CustomPagination',
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',
+                                'rest_framework.filters.OrderingFilter'),
     'PAGE_SIZE': 10,
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 ROOT_URLCONF = 'Practice_Referral.urls'
@@ -127,7 +130,7 @@ TEMPLATE_DIRS = (
 
 # celery specific settings
 
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 BROKER_URL = 'django://'

@@ -2,13 +2,17 @@ import autocomplete_light
 from rest_framework import routers
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from tracking.rest_api.views import OrganizationView
+from tracking.rest_api.views import OrganizationView, \
+    ReferringReportSettingView, ClinicUserReportSettingView
 from users.rest_api.views import SessionView
 
 # register all rest views here
 rest_router = routers.DefaultRouter()
 rest_router.register(r'session', SessionView, base_name='session')
 rest_router.register(r'organization', OrganizationView)
+rest_router.register(r'report_setting/referring', ReferringReportSettingView)
+rest_router.register(r'report_setting/clinic_user',
+                     ClinicUserReportSettingView)
 
 
 urlpatterns = patterns('',

@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
-from tracking.models import Organization, Clinic, ClinicUser
+from tracking.models import Organization, Clinic, ClinicUser, \
+    ReferringEntity, ReferringReportSetting, ClinicUserReportSetting
 
 
 class LoginBaseTest(APITestCase):
@@ -27,7 +28,7 @@ class LoginBaseTest(APITestCase):
                                  password=self.default_pass)
 
 
-class OrganizationTests(LoginBaseTest):
+class OrganizationTest(LoginBaseTest):
     ''' testcases class for Organization Rest api '''
 
     def test_add(self):
@@ -111,3 +112,139 @@ class OrganizationTests(LoginBaseTest):
         url = reverse('rest_api:organization-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ReferringReportSettingTest(LoginBaseTest):
+    ''' testcases class for Organization Rest api '''
+
+    def test_add(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:referringreportsetting-list')
+        organization = Organization.objects.create(
+            org_name='org1',
+            clinic_id=self.clinic.id)
+        referring_entity = ReferringEntity.objects.create(
+            entity_name='phys1', organization_id=organization.id)
+
+        data = {'enabled': True,
+                'period': ReferringReportSetting.PERIOD_DAILY,
+                'report_name': 'thankyou',
+                'referring_entity': referring_entity.id}
+        self.assertEqual(ReferringReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ReferringReportSetting.objects.count(), 1)
+        rs = ReferringReportSetting.objects.get()
+        self.assertEqual(rs.enabled, True)
+        self.assertEqual(rs.period, ReferringReportSetting.PERIOD_DAILY)
+        self.assertEqual(rs.report_name, 'thankyou')
+        self.assertEqual(rs.referring_entity, referring_entity)
+
+    def test_add_invalid(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:referringreportsetting-list')
+        organization = Organization.objects.create(
+            org_name='org1',
+            clinic_id=self.clinic.id)
+        referring_entity = ReferringEntity.objects.create(
+            entity_name='phys1', organization_id=organization.id)
+
+        data = {'enabled': True,
+                'period': 'Invalid',
+                'report_name': 'thankyou',
+                'referring_entity': referring_entity.id}
+        self.assertEqual(ReferringReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_bulk(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:referringreportsetting-list')
+        organization = Organization.objects.create(
+            org_name='org1',
+            clinic_id=self.clinic.id)
+        ref1 = ReferringEntity.objects.create(
+            entity_name='phys1', organization_id=organization.id)
+
+        ref2 = ReferringEntity.objects.create(
+            entity_name='phys2', organization_id=organization.id)
+
+        data = {'enabled': True,
+                'period': ReferringReportSetting.PERIOD_DAILY,
+                'report_name': 'thankyou',
+                'referring_entity': '*',
+                'bulk': True}
+        self.assertEqual(ReferringReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ReferringReportSetting.objects.count(), 2)
+        rs = ReferringReportSetting.objects.all()
+        self.assertSetEqual({r.id for r in rs}, {ref1.id, ref2.id})
+
+
+class ClinicUserReportSettingTest(LoginBaseTest):
+    ''' testcases class for Organization Rest api '''
+
+    def test_add(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:clinicuserreportsetting-list')
+
+        data = {'enabled': True,
+                'period': ClinicUserReportSetting.PERIOD_DAILY,
+                'report_name': 'visit_history',
+                'clinic_user': self.clinic_user.id}
+        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ClinicUserReportSetting.objects.count(), 1)
+        rs = ClinicUserReportSetting.objects.get()
+        self.assertEqual(rs.enabled, True)
+        self.assertEqual(rs.period, ClinicUserReportSetting.PERIOD_DAILY)
+        self.assertEqual(rs.report_name, 'visit_history')
+        self.assertEqual(rs.clinic_user, self.clinic_user)
+
+    def test_add_invalid(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:clinicuserreportsetting-list')
+        data = {'enabled': True,
+                'period': 'Invalid',
+                'report_name': 'visit_history',
+                'clinic_user': self.clinic_user.id}
+        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_bulk(self):
+        ''' add api test '''
+
+        self._login()
+        url = reverse('rest_api:clinicuserreportsetting-list')
+        user2 = User.objects.create_user(username='user2',
+                                         email='user1@email.com',
+                                         password=self.default_pass)
+        clinic_user2 = ClinicUser.objects.create(
+            clinic=self.clinic,
+            user=user2)
+
+        data = {'enabled': True,
+                'period': ClinicUserReportSetting.PERIOD_DAILY,
+                'report_name': 'visit_history',
+                'clinic_user': '*',
+                'bulk': True}
+        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ClinicUserReportSetting.objects.count(), 2)
+        rs = ClinicUserReportSetting.objects.all()
+        self.assertSetEqual({r.id for r in rs}, {self.clinic_user.id,
+                                                 clinic_user2.id})

@@ -32,7 +32,7 @@ class TrackedModel(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.creation_time = timezone.now()
-        modification_time = timezone.now()
+        self.modification_time = timezone.now()
         super(TrackedModel, self).save(*args, **kwargs)
 
 class Clinic(TrackedModel):
@@ -49,6 +49,8 @@ class Clinic(TrackedModel):
 
     @staticmethod
     def get_from_user(user):
+        if not user.id:
+            return None
         return ClinicUser.objects.filter(user=user).first().clinic
 
 class ClinicUser(TrackedModel):
