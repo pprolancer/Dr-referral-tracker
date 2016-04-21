@@ -8,6 +8,7 @@ from users.rest_api.views import SessionView
 
 # register all rest views here
 rest_router = routers.DefaultRouter()
+rest_router.trailing_slash = "/?"  # added to support both / and slashless
 rest_router.register(r'session', SessionView, base_name='session')
 rest_router.register(r'organization', OrganizationView)
 rest_router.register(r'report_setting/referring', ReferringReportSettingView)
