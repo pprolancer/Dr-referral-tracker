@@ -22,41 +22,41 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clinicuserreportsetting',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AddField(
             model_name='patientvisit',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AddField(
             model_name='referringentity',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AddField(
             model_name='referringreportsetting',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AlterField(
             model_name='clinic',
             name='clinic_name',
-            field=models.CharField(max_length=254, default='main', unique=True, verbose_name='Clinic Name'),
+            field=models.CharField(max_length=254, default='main', verbose_name='Clinic Name', unique=True),
         ),
         migrations.AlterField(
             model_name='clinicuser',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AlterField(
             model_name='organization',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
         migrations.AlterField(
             model_name='treatingprovider',
             name='clinic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic', null=True),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, default=tracking.middlewares.get_current_clinic_id, to='tracking.Clinic'),
         ),
     ]

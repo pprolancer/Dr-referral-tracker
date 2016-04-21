@@ -20,42 +20,7 @@ LAST_MONTH = date(day=1, month=today.month, year=today.year) - timedelta(days=1)
 LAST_12_MONTH = LAST_MONTH - timedelta(days=364)
 
 
-class Clinic(models.Model):
-    '''
-    Top level entity, each entity will be linked to one,
-    which might have one or more Users registered.
-    Those Users are added through the admin interface.
-    '''
-    clinic_name = models.CharField(
-        "Clinic Name", max_length=254, unique=True, blank=False, null=False,
-        default="main")
-    creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
-    modification_time = models.DateTimeField("Modification Timestamp", blank=True, null=True)
-
-    def __str__(self):
-        return self.clinic_name
-
-    @staticmethod
-    def get_from_user(user):
-        if not user.id:
-            return None
-        cu = ClinicUser.objects.filter(user=user).first()
-        return cu and cu.clinic
-
-
-class ClinicBaseModel(models.Model):
-    """
-    This is a base class for all our clinic models.
-    all clinic models should be a inherited from this model.
-    """
-    clinic = models.ForeignKey("Clinic", default=get_current_clinic_id,
-                               null=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        abstract = True
-
-
-class TrackedModel(ClinicBaseModel):
+class TrackedModel(models.Model):
     creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
     modification_time = models.DateTimeField("Modification Timestamp", blank=True, null=True)
 
@@ -69,13 +34,46 @@ class TrackedModel(ClinicBaseModel):
         super(TrackedModel, self).save(*args, **kwargs)
 
 
-class ClinicUser(TrackedModel):
+class Clinic(TrackedModel):
+    '''
+    Top level entity, each entity will be linked to one,
+    which might have one or more Users registered.
+    Those Users are added through the admin interface.
+    '''
+    clinic_name = models.CharField(
+        "Clinic Name", max_length=254, unique=True, blank=False, null=False,
+        default="main")
+
+    def __str__(self):
+        return self.clinic_name
+
+    @staticmethod
+    def get_from_user(user):
+        if not user.id:
+            return None
+        cu = ClinicUser.objects.filter(user=user).first()
+        return cu and cu.clinic
+
+
+class ClinicBaseModel(TrackedModel):
+    """
+    This is a base class for all our clinic models.
+    all clinic models should be a inherited from this model.
+    """
+    clinic = models.ForeignKey("Clinic", default=get_current_clinic_id,
+                               null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        abstract = True
+
+
+class ClinicUser(ClinicBaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.username
 
-class Organization(TrackedModel):
+class Organization(ClinicBaseModel):
     '''
     A ReferringEntity works for a Organization, (clinic, hospital, private practice...)
     Need a few "special Organizations"
@@ -121,7 +119,7 @@ class Organization(TrackedModel):
         return referring_entitys_sort
 
 
-class ReferringEntity(TrackedModel):
+class ReferringEntity(ClinicBaseModel):
     """
     A ReferringEntity works for an Organization; clinic, hospital, private practice...
     Other patient_visit types for example; Other patient, google adds, website.....
@@ -148,7 +146,7 @@ class ReferringEntity(TrackedModel):
             visit_date__range=(str(week_ago), str(today))).values('visit_date').annotate(visit=Sum('visit_count')).order_by('-visit_date')
         return patient_visit_sort
 
-class TreatingProvider(TrackedModel):
+class TreatingProvider(ClinicBaseModel):
     PROVIDER_TYPE_PHYSICIAN_ASSISTANT = "PA"
     PROVIDER_TYPE_DOCTOR              = "D"
     PROVIDER_TYPE_NURSE               = "N"
@@ -169,7 +167,7 @@ class TreatingProvider(TrackedModel):
         return self.provider_name
 
 
-class PatientVisit(TrackedModel):
+class PatientVisit(ClinicBaseModel):
     """
     PatientVisit is a patient visit referred to the clinic from a "ReferringEntity" that is part of an "Organization"
     Not sure how to do the multiple ForeignKey or if that is right.
@@ -188,7 +186,7 @@ class PatientVisit(TrackedModel):
         return self.referring_entity.organization.org_name
 
 
-class ReportSetting(TrackedModel):
+class ReportSetting(ClinicBaseModel):
     class Meta:
         abstract = True
 
