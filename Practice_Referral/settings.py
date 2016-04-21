@@ -46,6 +46,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # app middlewares
+    'tracking.middlewares.CurrentClinicMiddleware',
 )
 
 SOCIAL_AUTH_PIPELINE = (

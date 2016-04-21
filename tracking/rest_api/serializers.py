@@ -1,7 +1,7 @@
 import inspect
 import sys
 from tracking.models import Organization, ReferringReportSetting, \
-    ClinicUserReportSetting, TrackedModel
+    ClinicUserReportSetting, TrackedModel, ClinicBaseModel
 from rest_framework import serializers
 
 
@@ -48,8 +48,8 @@ class BulkClinicUserReportSettingSerializer(serializers.ModelSerializer):
 
 
 # #############################################################################
-# dont touch this section we need this to set datetime fields of
-# TrackedModel serializers as a readonly
+# dont touch this section we need this section to hack some serializers
+# to inject some data
 # #############################################################################
 def _perd(c):
     return inspect.isclass(c) and c.__module__ == _perd.__module__
@@ -57,12 +57,16 @@ def _perd(c):
 classes = inspect.getmembers(sys.modules[__name__], _perd)
 read_only_fields = ('creation_time', 'modification_time')
 for class_name, klass in classes:
-    if issubclass(klass, serializers.Serializer):
+    if issubclass(klass, serializers.ModelSerializer):
         meta = getattr(klass, 'Meta', None)
         if not meta:
             continue
         model = getattr(klass.Meta, 'model', None)
-        if not model or not issubclass(model, TrackedModel):
+        if not model:
             continue
-        klass.Meta.read_only_fields = (getattr(klass.Meta, 'read_only_fields',
-                                               None) or ()) + read_only_fields
+        if issubclass(model, TrackedModel):
+            rof = tuple(getattr(klass.Meta, 'read_only_fields', None) or ())
+            klass.Meta.read_only_fields = rof + read_only_fields
+        if issubclass(model, ClinicBaseModel):
+            exclude = tuple(getattr(klass.Meta, 'exclude', None) or ())
+            klass.Meta.exclude = exclude + ('clinic',)

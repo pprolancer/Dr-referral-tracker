@@ -1,28 +1,61 @@
-
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from django.forms.widgets import NumberInput
 
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from datetime import datetime , timedelta, date
+from datetime import timedelta, date
 from django.db.models import Sum
 from tracking.reports import ReportManager
 from tracking.reports.referring_reports import REPORT_TYPE \
     as REFERRING_REPORT_TYPE
 from tracking.reports.clinic_user_reports import REPORT_TYPE \
     as CLINIC_USER_REPORT_TYPE
+from tracking.middlewares import get_current_clinic_id
 
 
 today = date.today()
 LAST_MONTH = date(day=1, month=today.month, year=today.year) - timedelta(days=1)
 LAST_12_MONTH = LAST_MONTH - timedelta(days=364)
 
-class TrackedModel(models.Model):
+
+class Clinic(models.Model):
+    '''
+    Top level entity, each entity will be linked to one,
+    which might have one or more Users registered.
+    Those Users are added through the admin interface.
+    '''
+    clinic_name = models.CharField(
+        "Clinic Name", max_length=254, unique=True, blank=False, null=False,
+        default="main")
+    creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
+    modification_time = models.DateTimeField("Modification Timestamp", blank=True, null=True)
+
+    def __str__(self):
+        return self.clinic_name
+
+    @staticmethod
+    def get_from_user(user):
+        if not user.id:
+            return None
+        cu = ClinicUser.objects.filter(user=user).first()
+        return cu and cu.clinic
+
+
+class ClinicBaseModel(models.Model):
+    """
+    This is a base class for all our clinic models.
+    all clinic models should be a inherited from this model.
+    """
+    clinic = models.ForeignKey("Clinic", default=get_current_clinic_id,
+                               null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        abstract = True
+
+
+class TrackedModel(ClinicBaseModel):
     creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
     modification_time = models.DateTimeField("Modification Timestamp", blank=True, null=True)
 
@@ -35,27 +68,9 @@ class TrackedModel(models.Model):
         self.modification_time = timezone.now()
         super(TrackedModel, self).save(*args, **kwargs)
 
-class Clinic(TrackedModel):
-    '''
-    Top level entity, each entity will be linked to one,
-    which might have one or more Users registered.
-    Those Users are added through the admin interface.
-    '''
-    clinic_name = models.CharField(
-        "Clinic Name", max_length=254, unique=True, blank=False, null=True)
-
-    def __str__(self):
-        return self.clinic_name
-
-    @staticmethod
-    def get_from_user(user):
-        if not user.id:
-            return None
-        return ClinicUser.objects.filter(user=user).first().clinic
 
 class ClinicUser(TrackedModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    clinic = models.ForeignKey("Clinic")
 
     def __str__(self):
         return self.user.username
@@ -83,7 +98,6 @@ class Organization(TrackedModel):
         (ORG_TYPE_WORKCOMP         , "Work comp."         ),
         (ORG_TYPE_HEATHCAREPROVIDER, "Healthcare Provider")
     )
-    clinic = models.ForeignKey("Clinic")
     org_name = models.CharField(
         "Group Name", max_length=254, unique=True, blank=False, null=True)
     org_type = models.CharField(
@@ -145,7 +159,6 @@ class TreatingProvider(TrackedModel):
         (PROVIDER_TYPE_NURSE              , "Nurse"),
         (PROVIDER_TYPE_NURSE_PRACTITIONER , "Nurse Practitioner"),
     )
-    clinic = models.ForeignKey("Clinic")
     provider_name = models.CharField(
         "Name", max_length=254, unique=True, blank=False, null=True)
     provider_title = models.CharField("Title", max_length=50, blank=True)

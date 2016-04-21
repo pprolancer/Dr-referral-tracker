@@ -45,7 +45,7 @@ class IndexView(LoginRequiredMixin, View):
         orgform = OrganizationForm()
         phyform = ReferringEntityForm()
         refform = PatientVisitForm()
-        
+
         phyform.fields['organization'].queryset = Organization.objects.filter(
                                                     clinic=clinic)
         refform.fields['referring_entity'].queryset = ReferringEntity.objects.filter(
@@ -56,7 +56,7 @@ class IndexView(LoginRequiredMixin, View):
         today_date = datetime.now().date()
         start_date = today_date - timedelta(days=365)
         end_date = today_date - timedelta(days=1)
-        
+
         referring_entity_visit_sum = ReferringEntity.objects.filter(
             organization__clinic=clinic,
             PatientVisit__visit_date__range=(start_date,end_date)).annotate(
@@ -236,7 +236,7 @@ class PatientVisitView(LoginRequiredMixin, View):
         form.fields['referring_entity'].queryset = ReferringEntity.objects.filter(
                                                     organization__clinic=clinic)
         form.fields['treating_provider'].queryset = TreatingProvider.objects.filter(
-                                                    clinic=clinic)        
+                                                    clinic=clinic)
         ctx = {"form": form, 'timezone': TIME_ZONE}
         return render(request,"tracking/patient_visit.html",ctx )
 
@@ -489,7 +489,7 @@ class OrganizationListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/organization_list.html'
     context_object_name = "organizations"
     paginate_by = 10
-    
+
     def get_queryset(self):
         qs = super(OrganizationListView, self).get_queryset()
         return qs.filter(clinic=Clinic.get_from_user(self.request.user))
@@ -499,7 +499,7 @@ class ReferringEntityListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/referring_entity_list.html'
     context_object_name = "referring_entitys"
     paginate_by = 10
-    
+
     def get_queryset(self):
         qs = super(ReferringEntityListView, self).get_queryset()
         return qs.filter(organization__clinic=Clinic.get_from_user(self.request.user))
@@ -509,10 +509,10 @@ class TreatingProviderListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/treating_provider_list.html'
     context_object_name = "treating_providers"
     paginate_by = 10
-    
+
     def get_queryset(self):
         qs = super(TreatingProviderListView, self).get_queryset()
-        return qs.filter(clinic=Clinic.get_from_user(self.request.user))    
+        return qs.filter(clinic=Clinic.get_from_user(self.request.user))
 
 class PatientVisitListView(LoginRequiredMixin, ListView):
     ''' A view to show list of PatientVisit '''
@@ -521,7 +521,7 @@ class PatientVisitListView(LoginRequiredMixin, ListView):
     template_name = 'tracking/patient_visit_list.html'
     context_object_name = "patient_visits"
     paginate_by = 10
-    
+
     def get_queryset(self):
         qs = super(PatientVisitListView, self).get_queryset()
         return qs.filter(treating_provider__clinic=Clinic.get_from_user(self.request.user))

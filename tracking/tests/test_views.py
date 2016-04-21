@@ -66,6 +66,7 @@ class IndexViewTest(LoginBaseTest):
         data = {
             'phyform': 'submit',
             'organization': org.id,
+            'clinic': self.clinic.id,
             'entity_name': 'phys1',
             'entity_phone': '+442083661177',
             'entity_email': 'test@email.com',
@@ -148,13 +149,14 @@ class PatientVisitViewTest(LoginBaseTest):
         organization = Organization.objects.create(
             org_name='org1', clinic=self.clinic)
         referring_entity = ReferringEntity.objects.create(
-            entity_name='phys1', organization=organization)
+            clinic=self.clinic, entity_name='phys1', organization=organization)
         treating_provider = TreatingProvider.objects.create(
             clinic=self.clinic,
-            provider_name='prov1', 
+            provider_name='prov1',
             provider_type='D')
         today = timezone.now()
         data = {
+            'clinic': self.clinic.id,
             'referring_entity': referring_entity.id,
             'treating_provider': treating_provider.id,
             'visit_date': str(today.date()),
@@ -203,7 +205,7 @@ class GetPatientVisitHistoryViewTest(LoginBaseTest):
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization)
         treating_provider = TreatingProvider.objects.create(
-            clinic=self.clinic, provider_name="ent1", provider_type="D") 
+            clinic=self.clinic, provider_name="ent1", provider_type="D")
         today = datetime.now().date()
         patient_visits = [
             PatientVisit.objects.create(
@@ -247,6 +249,7 @@ class EditReferringEntityViewTest(LoginBaseTest):
             entity_special=False)
         data = {
             'organization': organization.id,
+            'clinic': self.clinic.id,
             'entity_name': 'new_name',
             'entity_phone': '+442083661177',
             'entity_email': 'new_email@email.com',
