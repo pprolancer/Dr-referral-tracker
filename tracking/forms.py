@@ -16,7 +16,7 @@ class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
         exclude = ['creation_time','modification_time','clinic']
-        
+
     def __init__(self, *args, **kwargs):
         super(OrganizationForm, self).__init__(*args, **kwargs)
         self.fields['org_type'].required = True
@@ -34,7 +34,7 @@ class ReferringEntityForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = ReferringEntity
-        exclude = ['creation_time','modification_time']
+        exclude = ['creation_time','modification_time', 'clinic']
 
 
 class PatientVisitForm(autocomplete_light.ModelForm):
@@ -49,7 +49,7 @@ class PatientVisitForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = PatientVisit
-        exclude = ['creation_time','modification_time']
+        exclude = ['creation_time','modification_time', 'clinic']
 
     def clean_visit_date(self):
         ''' check visit_date for greater than today '''
@@ -70,7 +70,7 @@ class TreatingProviderForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = TreatingProvider
-        exclude = ['creation_time','modification_time','clinic']        
+        exclude = ['creation_time','modification_time','clinic']
 
 
 class PatientVisitHistoryForm(forms.Form):
