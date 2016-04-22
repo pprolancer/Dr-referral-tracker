@@ -1,26 +1,24 @@
-
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from django.forms.widgets import NumberInput
 
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from datetime import datetime , timedelta, date
+from datetime import timedelta, date
 from django.db.models import Sum
 from tracking.reports import ReportManager
 from tracking.reports.referring_reports import REPORT_TYPE \
     as REFERRING_REPORT_TYPE
 from tracking.reports.clinic_user_reports import REPORT_TYPE \
     as CLINIC_USER_REPORT_TYPE
+from tracking.middlewares import get_current_clinic_id
 
 
 today = date.today()
 LAST_MONTH = date(day=1, month=today.month, year=today.year) - timedelta(days=1)
 LAST_12_MONTH = LAST_MONTH - timedelta(days=364)
+
 
 class TrackedModel(models.Model):
     creation_time = models.DateTimeField("Creation Timestamp", blank=True, null=True)
@@ -35,6 +33,7 @@ class TrackedModel(models.Model):
         self.modification_time = timezone.now()
         super(TrackedModel, self).save(*args, **kwargs)
 
+
 class Clinic(TrackedModel):
     '''
     Top level entity, each entity will be linked to one,
@@ -42,7 +41,8 @@ class Clinic(TrackedModel):
     Those Users are added through the admin interface.
     '''
     clinic_name = models.CharField(
-        "Clinic Name", max_length=254, unique=True, blank=False, null=True)
+        "Clinic Name", max_length=254, unique=True, blank=False, null=False,
+        default="main")
 
     def __str__(self):
         return self.clinic_name
@@ -51,16 +51,29 @@ class Clinic(TrackedModel):
     def get_from_user(user):
         if not user.id:
             return None
-        return ClinicUser.objects.filter(user=user).first().clinic
+        cu = ClinicUser.objects.filter(user=user).first()
+        return cu and cu.clinic
 
-class ClinicUser(TrackedModel):
+
+class ClinicBaseModel(TrackedModel):
+    """
+    This is a base class for all our clinic models.
+    all clinic models should be a inherited from this model.
+    """
+    clinic = models.ForeignKey("Clinic", default=get_current_clinic_id,
+                               null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        abstract = True
+
+
+class ClinicUser(ClinicBaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    clinic = models.ForeignKey("Clinic")
 
     def __str__(self):
         return self.user.username
 
-class Organization(TrackedModel):
+class Organization(ClinicBaseModel):
     '''
     A ReferringEntity works for a Organization, (clinic, hospital, private practice...)
     Need a few "special Organizations"
@@ -83,7 +96,6 @@ class Organization(TrackedModel):
         (ORG_TYPE_WORKCOMP         , "Work comp."         ),
         (ORG_TYPE_HEATHCAREPROVIDER, "Healthcare Provider")
     )
-    clinic = models.ForeignKey("Clinic")
     org_name = models.CharField(
         "Group Name", max_length=254, unique=True, blank=False, null=True)
     org_type = models.CharField(
@@ -107,7 +119,7 @@ class Organization(TrackedModel):
         return referring_entitys_sort
 
 
-class ReferringEntity(TrackedModel):
+class ReferringEntity(ClinicBaseModel):
     """
     A ReferringEntity works for an Organization; clinic, hospital, private practice...
     Other patient_visit types for example; Other patient, google adds, website.....
@@ -134,7 +146,7 @@ class ReferringEntity(TrackedModel):
             visit_date__range=(str(week_ago), str(today))).values('visit_date').annotate(visit=Sum('visit_count')).order_by('-visit_date')
         return patient_visit_sort
 
-class TreatingProvider(TrackedModel):
+class TreatingProvider(ClinicBaseModel):
     PROVIDER_TYPE_PHYSICIAN_ASSISTANT = "PA"
     PROVIDER_TYPE_DOCTOR              = "D"
     PROVIDER_TYPE_NURSE               = "N"
@@ -145,7 +157,6 @@ class TreatingProvider(TrackedModel):
         (PROVIDER_TYPE_NURSE              , "Nurse"),
         (PROVIDER_TYPE_NURSE_PRACTITIONER , "Nurse Practitioner"),
     )
-    clinic = models.ForeignKey("Clinic")
     provider_name = models.CharField(
         "Name", max_length=254, unique=True, blank=False, null=True)
     provider_title = models.CharField("Title", max_length=50, blank=True)
@@ -156,7 +167,7 @@ class TreatingProvider(TrackedModel):
         return self.provider_name
 
 
-class PatientVisit(TrackedModel):
+class PatientVisit(ClinicBaseModel):
     """
     PatientVisit is a patient visit referred to the clinic from a "ReferringEntity" that is part of an "Organization"
     Not sure how to do the multiple ForeignKey or if that is right.
@@ -175,7 +186,7 @@ class PatientVisit(TrackedModel):
         return self.referring_entity.organization.org_name
 
 
-class ReportSetting(TrackedModel):
+class ReportSetting(ClinicBaseModel):
     class Meta:
         abstract = True
 

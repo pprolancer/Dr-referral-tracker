@@ -19,7 +19,7 @@ class OrganizationView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return super(OrganizationView, self).get_queryset()\
-            .filter(clinic=Clinic.get_from_user(self.request.user))
+            .filter(clinic=self.request.clinic)
 
 
 class ReferringReportSettingView(viewsets.ModelViewSet):
@@ -34,9 +34,8 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        clinic = Clinic.get_from_user(self.request.user)
         return super(ReferringReportSettingView, self).get_queryset()\
-            .filter(referring_entity__organization__clinic=clinic)
+            .filter(referring_entity__organization__clinic=self.request.clinic)
 
     def create(self, request, *args, **kwargs):
         bulk = (request.data or {}).pop('bulk', False)
@@ -49,9 +48,9 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
         serializer_class = BulkReferringReportSettingSerializer
         data = request.data
         referring_entities = data.pop('referring_entity', None)
-        clinic = Clinic.get_from_user(self.request.user)
 
-        ref_query = ReferringEntity.objects.filter(organization__clinic=clinic)
+        ref_query = ReferringEntity.objects.filter(
+            organization__clinic=self.request.clinic)
         if referring_entities == '*':
             pass
         elif isinstance(referring_entities, list):
@@ -82,9 +81,8 @@ class ClinicUserReportSettingView(viewsets.ModelViewSet):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        clinic = Clinic.get_from_user(self.request.user)
         return super(ClinicUserReportSettingView, self).get_queryset()\
-            .filter(clinic_user__clinic=clinic)
+            .filter(clinic_user__clinic=self.request.clinic)
 
     def create(self, request, *args, **kwargs):
         bulk = (request.data or {}).pop('bulk', False)
@@ -97,9 +95,8 @@ class ClinicUserReportSettingView(viewsets.ModelViewSet):
         serializer_class = BulkClinicUserReportSettingSerializer
         data = request.data
         clinic_users = data.pop('clinic_user', None)
-        clinic = Clinic.get_from_user(self.request.user)
 
-        cu_query = ClinicUser.objects.filter(clinic=clinic)
+        cu_query = ClinicUser.objects.filter(clinic=self.request.clinic)
         if clinic_users == '*':
             pass
         elif isinstance(clinic_users, list):

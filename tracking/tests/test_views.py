@@ -92,7 +92,6 @@ class IndexViewTest(LoginBaseTest):
         self._login()
         data = {
             'orgform': 'submit',
-            'clinic_id': self.clinic.id,
             'org_name': 'org1',
             'org_type': 'MAR',
             'org_contact_name': 'contact1',
@@ -106,7 +105,6 @@ class IndexViewTest(LoginBaseTest):
         organizations = Organization.objects.all()
         self.assertEqual(len(organizations), 1)
         created_org = organizations[0]
-        self.assertEqual(created_org.clinic_id, data['clinic_id'])
         self.assertEqual(created_org.org_name, data['org_name'])
         self.assertEqual(created_org.org_contact_name,
                          data['org_contact_name'])
@@ -148,10 +146,10 @@ class PatientVisitViewTest(LoginBaseTest):
         organization = Organization.objects.create(
             org_name='org1', clinic=self.clinic)
         referring_entity = ReferringEntity.objects.create(
-            entity_name='phys1', organization=organization)
+            clinic=self.clinic, entity_name='phys1', organization=organization)
         treating_provider = TreatingProvider.objects.create(
             clinic=self.clinic,
-            provider_name='prov1', 
+            provider_name='prov1',
             provider_type='D')
         today = timezone.now()
         data = {
@@ -203,7 +201,7 @@ class GetPatientVisitHistoryViewTest(LoginBaseTest):
         referring_entity = ReferringEntity.objects.create(
             entity_name='phys1', organization=organization)
         treating_provider = TreatingProvider.objects.create(
-            clinic=self.clinic, provider_name="ent1", provider_type="D") 
+            clinic=self.clinic, provider_name="ent1", provider_type="D")
         today = datetime.now().date()
         patient_visits = [
             PatientVisit.objects.create(
