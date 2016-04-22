@@ -66,7 +66,6 @@ class IndexViewTest(LoginBaseTest):
         data = {
             'phyform': 'submit',
             'organization': org.id,
-            'clinic': self.clinic.id,
             'entity_name': 'phys1',
             'entity_phone': '+442083661177',
             'entity_email': 'test@email.com',
@@ -93,7 +92,6 @@ class IndexViewTest(LoginBaseTest):
         self._login()
         data = {
             'orgform': 'submit',
-            'clinic_id': self.clinic.id,
             'org_name': 'org1',
             'org_type': 'MAR',
             'org_contact_name': 'contact1',
@@ -107,7 +105,6 @@ class IndexViewTest(LoginBaseTest):
         organizations = Organization.objects.all()
         self.assertEqual(len(organizations), 1)
         created_org = organizations[0]
-        self.assertEqual(created_org.clinic_id, data['clinic_id'])
         self.assertEqual(created_org.org_name, data['org_name'])
         self.assertEqual(created_org.org_contact_name,
                          data['org_contact_name'])
@@ -156,7 +153,6 @@ class PatientVisitViewTest(LoginBaseTest):
             provider_type='D')
         today = timezone.now()
         data = {
-            'clinic': self.clinic.id,
             'referring_entity': referring_entity.id,
             'treating_provider': treating_provider.id,
             'visit_date': str(today.date()),
@@ -249,7 +245,6 @@ class EditReferringEntityViewTest(LoginBaseTest):
             entity_special=False)
         data = {
             'organization': organization.id,
-            'clinic': self.clinic.id,
             'entity_name': 'new_name',
             'entity_phone': '+442083661177',
             'entity_email': 'new_email@email.com',
