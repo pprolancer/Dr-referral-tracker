@@ -114,8 +114,8 @@ def daily_reports_handler():
         logger.exception(e)
 
 
-@periodic_task(run_every=crontab(minute='*/1'))
-# @periodic_task(run_every=crontab(hour=0, minute=0, day_of_week=1))
+# @periodic_task(run_every=crontab(minute='*/1'))
+@periodic_task(run_every=crontab(hour=0, minute=0, day_of_week=1))
 def weekly_reports_handler():
     '''
     weekly reports handler
@@ -133,6 +133,7 @@ def weekly_reports_handler():
         logger.exception(e)
 
 
+# @periodic_task(run_every=crontab(minute='*/1'))
 @periodic_task(run_every=crontab(hour=0, minute=0, day_of_month=1))
 def monthly_reports_handler():
     '''

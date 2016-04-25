@@ -1,0 +1,35 @@
+<h2>Monthly visit report ({{from_date}} - {{to_date}})</h2>
+<p><br /></p>
+<table width="100%" border="1" cellspacing="0" cellpadding="8" align="center">
+    <tr>
+        <th bgcolor="#3D4A53"><font color="#fafbfb">Providers</font></th>
+        {% for month in year_months %}
+        <th bgcolor="#3D4A53"><font color="#fafbfb">{{month|date:"M"}}</font></th>
+        {% endfor %}
+        <th bgcolor="#3D4A53"><font color="#fafbfb">{{ current_year }}</font></th>
+        <th bgcolor="#3D4A53"><font color="#fafbfb">{{ previous_year }}</font></th>
+    </tr>
+
+    {% for record in records %}
+    <tr><td colspan="{{record|length}}" bgcolor="#FB5557"><b><font color="#FEF2F3">{{record.0}}</font></b></td></tr>
+    <tr>
+        <td><i>Total patients</i></td>
+        {% for vals in record|slice:"1:" %}
+            <td>{{vals.2}}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <td><i>Current patients</i></td>
+        {% for vals in record|slice:"1:" %}
+            <td>{{vals.0}}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <td><i>New patients</i></td>
+        {% for vals in record|slice:"1:" %}
+            <td>{{vals.1}}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+</table>
