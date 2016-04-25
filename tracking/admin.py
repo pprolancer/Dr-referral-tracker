@@ -12,7 +12,7 @@ admin.site.register(ReferringEntity)
 admin.site.register(TreatingProvider)
 admin.site.register(PatientVisit)
 admin.site.register(ReferringReportSetting)
-admin.site.register(ClinicUserReportSetting)
+admin.site.register(ClinicReportSetting)
 
 
 def user_activate(modeladmin, request, queryset):

@@ -10,7 +10,7 @@ from django.db.models import Sum
 from tracking.reports import ReportManager
 from tracking.reports.referring_reports import REPORT_TYPE \
     as REFERRING_REPORT_TYPE
-from tracking.reports.clinic_user_reports import REPORT_TYPE \
+from tracking.reports.clinic_reports import REPORT_TYPE \
     as CLINIC_USER_REPORT_TYPE
 from tracking.middlewares import get_current_clinic_id
 
@@ -225,7 +225,7 @@ class ReferringReportSetting(ReportSetting):
         unique_together = (("referring_entity", "report_name"),)
 
 
-class ClinicUserReportSetting(ReportSetting):
+class ClinicReportSetting(ReportSetting):
     REPORTS_CHOICES = tuple((r, r) for r in ReportManager.get_registered_reports(CLINIC_USER_REPORT_TYPE))
 
     clinic_user = models.ForeignKey(ClinicUser, blank=False,
