@@ -1,10 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from tracking.models import Clinic, Organization, ReferringReportSetting, \
-    ReferringEntity, ClinicUserReportSetting, ClinicUser
+    ReferringEntity, ClinicReportSetting, ClinicUser
 from .serializers import OrganizationSerializer, \
     ReferringReportSettingSerializer, BulkReferringReportSettingSerializer, \
-    ClinicUserReportSettingSerializer, BulkClinicUserReportSettingSerializer
+    ClinicReportSettingSerializer, BulkClinicReportSettingSerializer
 
 
 class OrganizationView(viewsets.ModelViewSet):
@@ -70,29 +70,29 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
         return Response({'ids': ids})
 
 
-class ClinicUserReportSettingView(viewsets.ModelViewSet):
+class ClinicReportSettingView(viewsets.ModelViewSet):
     '''
-    rest view for ClinicUserReportSetting resource
+    rest view for ClinicReportSetting resource
     '''
 
-    queryset = ClinicUserReportSetting.objects.all()
-    serializer_class = ClinicUserReportSettingSerializer
+    queryset = ClinicReportSetting.objects.all()
+    serializer_class = ClinicReportSettingSerializer
     filter_fields = ('period', 'report_name', 'enabled', 'clinic_user')
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        return super(ClinicUserReportSettingView, self).get_queryset()\
+        return super(ClinicReportSettingView, self).get_queryset()\
             .filter(clinic_user__clinic=self.request.clinic)
 
     def create(self, request, *args, **kwargs):
         bulk = (request.data or {}).pop('bulk', False)
         if bulk:
             return self.__bulk_create(request)
-        return super(ClinicUserReportSettingView, self).create(request, *args,
+        return super(ClinicReportSettingView, self).create(request, *args,
                                                                **kwargs)
 
     def __bulk_create(self, request):
-        serializer_class = BulkClinicUserReportSettingSerializer
+        serializer_class = BulkClinicReportSettingSerializer
         data = request.data
         clinic_users = data.pop('clinic_user', None)
 
@@ -109,7 +109,7 @@ class ClinicUserReportSettingView(viewsets.ModelViewSet):
             serializer = serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
             report_name = serializer.data['report_name']
-            obj, created = ClinicUserReportSetting.objects.update_or_create(
+            obj, created = ClinicReportSetting.objects.update_or_create(
                 report_name=report_name, clinic_user=cu,
                 defaults=serializer.data)
             ids.append(obj.id)

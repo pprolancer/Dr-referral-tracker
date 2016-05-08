@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
 from tracking.models import Organization, Clinic, ClinicUser, \
-    ReferringEntity, ReferringReportSetting, ClinicUserReportSetting
+    ReferringEntity, ReferringReportSetting, ClinicReportSetting
 
 
 class LoginBaseTest(APITestCase):
@@ -189,26 +189,26 @@ class ReferringReportSettingTest(LoginBaseTest):
                             {ref1.id, ref2.id})
 
 
-class ClinicUserReportSettingTest(LoginBaseTest):
+class ClinicReportSettingTest(LoginBaseTest):
     ''' testcases class for Organization Rest api '''
 
     def test_add(self):
         ''' add api test '''
 
         self._login()
-        url = reverse('rest_api:clinicuserreportsetting-list')
+        url = reverse('rest_api:clinicreportsetting-list')
 
         data = {'enabled': True,
-                'period': ClinicUserReportSetting.PERIOD_DAILY,
+                'period': ClinicReportSetting.PERIOD_DAILY,
                 'report_name': 'visit_history',
                 'clinic_user': self.clinic_user.id}
-        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        self.assertEqual(ClinicReportSetting.objects.count(), 0)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(ClinicUserReportSetting.objects.count(), 1)
-        rs = ClinicUserReportSetting.objects.get()
+        self.assertEqual(ClinicReportSetting.objects.count(), 1)
+        rs = ClinicReportSetting.objects.get()
         self.assertEqual(rs.enabled, True)
-        self.assertEqual(rs.period, ClinicUserReportSetting.PERIOD_DAILY)
+        self.assertEqual(rs.period, ClinicReportSetting.PERIOD_DAILY)
         self.assertEqual(rs.report_name, 'visit_history')
         self.assertEqual(rs.clinic_user, self.clinic_user)
 
@@ -216,12 +216,12 @@ class ClinicUserReportSettingTest(LoginBaseTest):
         ''' add api test '''
 
         self._login()
-        url = reverse('rest_api:clinicuserreportsetting-list')
+        url = reverse('rest_api:clinicreportsetting-list')
         data = {'enabled': True,
                 'period': 'Invalid',
                 'report_name': 'visit_history',
                 'clinic_user': self.clinic_user.id}
-        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        self.assertEqual(ClinicReportSetting.objects.count(), 0)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -229,7 +229,7 @@ class ClinicUserReportSettingTest(LoginBaseTest):
         ''' add api test '''
 
         self._login()
-        url = reverse('rest_api:clinicuserreportsetting-list')
+        url = reverse('rest_api:clinicreportsetting-list')
         user2 = User.objects.create_user(username='user2',
                                          email='user1@email.com',
                                          password=self.default_pass)
@@ -238,14 +238,14 @@ class ClinicUserReportSettingTest(LoginBaseTest):
             user=user2)
 
         data = {'enabled': True,
-                'period': ClinicUserReportSetting.PERIOD_DAILY,
+                'period': ClinicReportSetting.PERIOD_DAILY,
                 'report_name': 'visit_history',
                 'clinic_user': '*',
                 'bulk': True}
-        self.assertEqual(ClinicUserReportSetting.objects.count(), 0)
+        self.assertEqual(ClinicReportSetting.objects.count(), 0)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(ClinicUserReportSetting.objects.count(), 2)
-        rs = ClinicUserReportSetting.objects.all()
+        self.assertEqual(ClinicReportSetting.objects.count(), 2)
+        rs = ClinicReportSetting.objects.all()
         self.assertSetEqual({r.clinic_user.id for r in rs},
                             {self.clinic_user.id, clinic_user2.id})

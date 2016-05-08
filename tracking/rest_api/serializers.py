@@ -1,7 +1,7 @@
 import inspect
 import sys
 from tracking.models import Organization, ReferringReportSetting, \
-    ClinicUserReportSetting, TrackedModel, ClinicBaseModel
+    ClinicReportSetting, TrackedModel, ClinicBaseModel
 from rest_framework import serializers
 
 
@@ -30,20 +30,20 @@ class BulkReferringReportSettingSerializer(serializers.ModelSerializer):
         exclude = ('id', 'referring_entity',)
 
 
-class ClinicUserReportSettingSerializer(serializers.ModelSerializer):
+class ClinicReportSettingSerializer(serializers.ModelSerializer):
     '''
-    a serializer for ClinicUserReportSetting resource
-    '''
-    class Meta:
-        model = ClinicUserReportSetting
-
-
-class BulkClinicUserReportSettingSerializer(serializers.ModelSerializer):
-    '''
-    a serializer for bulk ClinicUserReportSetting resource
+    a serializer for ClinicReportSetting resource
     '''
     class Meta:
-        model = ClinicUserReportSetting
+        model = ClinicReportSetting
+
+
+class BulkClinicReportSettingSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for bulk ClinicReportSetting resource
+    '''
+    class Meta:
+        model = ClinicReportSetting
         exclude = ('id', 'clinic_user',)
 
 

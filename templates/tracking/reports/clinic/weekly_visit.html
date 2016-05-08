@@ -1,0 +1,47 @@
+<h2>Weekly visit report ({{from_date}} - {{to_date}})</h2>
+<p><br /></p>
+<table width="100%" border="1" cellspacing="0" cellpadding="8" align="center">
+    <tr>
+        <th bgcolor="#3D4A53"><font color="#fafbfb">Providers</font></th>
+        {% for day in week_days %}
+        <th bgcolor="#3D4A53"><font color="#fafbfb">{{day|date:"D d-m"}}</font></th>
+        {% endfor %}
+        <th bgcolor="#3D4A53"><font color="#fafbfb">Week</font></th>
+        <th bgcolor="#3D4A53"><font color="#fafbfb">Month</font></th>
+    </tr>
+
+    {% for r in records %}
+    <tr><td colspan="8" bgcolor="#FB5557"><b><font color="#FEF2F3">{{r.0}}</font></b></td></tr>
+    <tr>
+        <td><i>Total patients</i></td>
+        <td>{{ r.1.2 }}</td>
+        <td>{{ r.2.2 }}</td>
+        <td>{{ r.3.2 }}</td>
+        <td>{{ r.4.2 }}</td>
+        <td>{{ r.5.2 }}</td>
+        <td><b>{{ r.1.2|add:r.2.2|add:r.3.2|add:r.4.2|add:r.5.2 }}</b></td>
+        <td><b>{{ r.6.2 }}</b></td>
+    </tr>
+    <tr>
+        <td><i>Current patients</i></td>
+        <td>{{ r.1.0 }}</td>
+        <td>{{ r.2.0 }}</td>
+        <td>{{ r.3.0 }}</td>
+        <td>{{ r.4.0 }}</td>
+        <td>{{ r.5.0 }}</td>
+        <td><b>{{ r.1.0|add:r.2.0|add:r.3.0|add:r.4.0|add:r.5.0 }}</b></td>
+        <td><b>{{ r.6.0 }}</b></td>
+    </tr>
+    <tr>
+        <td><i>New patients</i></td>
+        <td>{{ r.1.1 }}</td>
+        <td>{{ r.2.1 }}</td>
+        <td>{{ r.3.1 }}</td>
+        <td>{{ r.4.1 }}</td>
+        <td>{{ r.5.1 }}</td>
+        <td><b>{{ r.1.1|add:r.2.1|add:r.3.1|add:r.4.1|add:r.5.1 }}</b></td>
+        <td><b>{{ r.6.1 }}</b></td>
+    </tr>
+    {% endfor %}
+
+</table>
