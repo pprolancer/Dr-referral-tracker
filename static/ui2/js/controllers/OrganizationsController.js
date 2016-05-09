@@ -36,6 +36,8 @@ MetronicApp.controller('OrganizationsController', function($rootScope, $scope, $
     });
 	$scope.orgData  = orgData;
 	
+	
+	
 	$scope.modalData = {}
 	$scope.errorData = {}
 	$scope.postRequestType = false
@@ -251,7 +253,24 @@ MetronicApp.controller('OrganizationsController', function($rootScope, $scope, $
 	$timeout(function() {
 		
 		$scope.validateForm($("#orgCreaterForm"))
-
+		 $('#orgTable').DataTable( {
+        	"pagingType": "full_numbers",
+			"lengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+			"pageLength": 5,
+			"columnDefs": [{ // set default column settings
+                'orderable': true,
+                'targets': [0]
+            }, {
+                "searchable": true,
+                "targets": [0]
+            }],
+            "order": [
+                [0, "asc"]
+            ] // set first column as a default sort by asc
+   		 } );
 		//TableEditable.init(); 
 	},0);
 	
