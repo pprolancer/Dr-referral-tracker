@@ -1,0 +1,22 @@
+/* CSS Document */
+
+#orgForm label.error{
+	font-size:10px;
+	font-color:#F00;
+}
+
+#orgModal .label {
+}
+#orgModal .form-control{
+	font-size="12px"
+}
+
+input.error{
+	color:#F30;
+}
+label.error , label.server-error{
+	color:#F30;
+	font-size:12px;
+	display: inline;
+	
+}
