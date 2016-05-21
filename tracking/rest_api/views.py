@@ -16,6 +16,7 @@ class OrganizationView(viewsets.ModelViewSet):
     filter_fields = ('org_name', 'org_type', 'org_contact_name', 'org_phone',
                      'org_email', 'org_special')
     ordering_fields = '__all__'
+    ordering = ('id',)
 
     def get_queryset(self):
         return super(OrganizationView, self).get_queryset()\

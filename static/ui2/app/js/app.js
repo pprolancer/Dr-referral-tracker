@@ -1,11 +1,7 @@
-var app = angular.module("drReferral", ['ui.router']);
+var app = angular.module("drReferral", ['ui.router', 'ui.grid', 'ui.grid.pagination']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
-    //
-    // For any unmatched url, redirect to /state1
     $urlRouterProvider.otherwise("/dashboard");
-    //
-    // Now set up the states
     $stateProvider
     .state('dashboard', {
         url: "/dashboard",
@@ -36,8 +32,7 @@ app.config(['$controllerProvider', '$httpProvider', function($controllerProvider
     $.ajaxSetup({
         headers: { "X-CSRFToken": getCookie("csrftoken") }
     });
-    function getCookie(c_name)
-    {
+    function getCookie(c_name) {
         if (document.cookie.length > 0)
         {
             c_start = document.cookie.indexOf(c_name + "=");
@@ -51,23 +46,9 @@ app.config(['$controllerProvider', '$httpProvider', function($controllerProvider
         }
         return "";
     }
-  $httpProvider.defaults.xsrfCookieName = 'csrftoken';
-  $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 }]);
-
-// app.config(['$httpProvider', function($httpProvider) {
-//  $httpProvider.interceptors.push('noCacheInterceptor');
-// }]).factory('noCacheInterceptor', function () {
-//     return {
-//         request: function (config) {
-//             if(config.method=='GET'){
-//                 var separator = config.url.indexOf('?') === -1 ? '?' : '&';
-//                 config.url = config.url+separator+'noCache=' + new Date().getTime();
-//             }
-//             return config;
-//        }
-//    };
-// });
 
 app.utils = {
     showMessage: function(msg, type, delay) {
