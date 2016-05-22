@@ -5,8 +5,8 @@
             <a href="#/">Home</a>
             <i class="fa fa-angle-right"></i>
         </li>
-        <li ng-show="$state.current.data.pageInfo.back.location">
-            <a href="{{$state.current.data.pageInfo.back.location}}">{{$state.current.data.pageInfo.back.title}}</a>
+        <li ng-show="$state.current.data.pageInfo.back">
+            <a href="{{$state.href($state.current.data.pageInfo.back)}}">{{$state.get($state.current.data.pageInfo.back).data.pageInfo.title}}</a>
             <i class="fa fa-angle-right"></i>
         </li>
         <li>
