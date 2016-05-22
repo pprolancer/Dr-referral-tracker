@@ -1,0 +1,31 @@
+            <div class="form-group">
+                <label class="control-label">Name(*)</label>
+                <input type="text" placeholder="Name of organization" class="form-control" data-ng-model="selectedRecord.org_name" required />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Type</label>
+                <select data-ng-model="selectedRecord.org_type" class="form-control">
+                  <option value="MAR">Marketing</option>
+                  <option value="INS">Insurance</option>
+                  <option value="INT">Internal</option>
+                  <option value="WKC">Work comp.</option>
+                  <option value="HCP">Healthcare Provider</option>
+                </select>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Contact Name</label>
+                <input type="text" placeholder="Contact Name of Organization" class="form-control" data-ng-model="selectedRecord.org_contact_name" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Phone (format: +xxxxxxxxxxxx):</label>
+                <input type="tel" placeholder="Phone of Organization" class="form-control" pattern="^\+\d{11,12}$" data-ng-model="selectedRecord.org_phone" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Email</label>
+                <input type="email" placeholder="Email of Organization" class="form-control" data-ng-model="selectedRecord.org_email"/>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Is Special?</label>
+                <input type="checkbox" data-ng-model="selectedRecord.org_special"/>
+            </div>

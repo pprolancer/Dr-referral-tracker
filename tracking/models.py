@@ -97,7 +97,7 @@ class Organization(ClinicBaseModel):
         (ORG_TYPE_HEATHCAREPROVIDER, "Healthcare Provider")
     )
     org_name = models.CharField(
-        "Group Name", max_length=254, unique=True, blank=False, null=True)
+        "Group Name", max_length=254, unique=True, blank=False, null=False)
     org_type = models.CharField(
         "Group Type", max_length=3, choices=ORG_TYPE_CHOICES, blank=True)
     org_contact_name = models.CharField(

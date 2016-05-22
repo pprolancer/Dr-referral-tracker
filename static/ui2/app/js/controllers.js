@@ -1,4 +1,11 @@
-app.controller("MainCtrl", ['$scope', '$rootScope', '$http', '$window', function($scope, $rootScope, $http, $window) {
+app.controller('PageContentController', function($scope) {
+
+    $scope.$on('$includeContentLoaded', function() {
+        Layout.fixContentHeight();
+    });
+});
+
+app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
     // load current user
     $rootScope.currentUser = {};
     $rootScope.pageLoaded = false;
@@ -17,7 +24,7 @@ app.controller("MainCtrl", ['$scope', '$rootScope', '$http', '$window', function
         if (response.status == 403) {
             $window.location.href = '/';
         } else {
-            app.utils.showDefaultServerError(response)
+            Utils.showDefaultServerError(response)
         }
     });
 
@@ -27,7 +34,7 @@ app.controller("MainCtrl", ['$scope', '$rootScope', '$http', '$window', function
         then(function(response) {
             $window.location.href = '/';
         }, function(response) {
-            app.utils.showDefaultServerError(response)
+            Utils.showDefaultServerError(response)
         });
     }
 
@@ -35,24 +42,26 @@ app.controller("MainCtrl", ['$scope', '$rootScope', '$http', '$window', function
         return $rootScope.$state.current.name == pageName? 'active': '';
     }
 
-}]);
+});
 
-app.controller("DashboardCtrl", ['$scope', '$rootScope', '$http', function($scope, $rootScope, $http) {
+app.controller("DashboardCtrl", function($scope, $rootScope) {
     // $scope.$on('$viewContentLoaded', function() {
     // });
-}]);
+});
 
-app.controller("OrganizationCtrl", ['$scope', '$rootScope', '$http', 'uiGridConstants', function($scope, $rootScope, $http, uiGridConstants) {
+app.controller("OrganizationListCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, GeneralUiGrid, $uibModal) {
+    $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
     $scope.paginationOptions = {
         page: 1,
-    }
-    $scope.organizationGridOpt = {
+    };
+    $scope.gridOptions = {
         paginationPageSizes: [10],
         paginationPageSize: 10,
         useExternalPagination: true,
         useExternalSorting: true,
+        rowHeight: 35,
         columnDefs: [
             {name: 'id', 'displayName': 'ID', width: 60},
             {name: 'org_name', 'displayName': 'Name'},
@@ -62,48 +71,83 @@ app.controller("OrganizationCtrl", ['$scope', '$rootScope', '$http', 'uiGridCons
             {name: 'org_email', 'displayName': 'Email', width: 200},
             {name: 'org_special', 'displayName': 'Special', width: 100,
                 cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope fa" ng-class="{true:\'fa-check text-success\', false:\'fa-close text-danger\'}[row.entity.org_special==true]"></div>'
-            }
+            },
+            {name: 'action', 'displayName': 'Action', width: 80, enableColumnMenu: false, enableSorting: false,
+                // cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="#/organization/{{row.entity.id}}/edit" class="btn btn-default btn-sm btn-primary" title="Edit"><span class="fa fa-pencil"></span></a><a ng-click="showDeleteConfirm(row.entity.id)" class="btn btn-default btn-sm btn-danger" title="Delete"><span class="fa fa-trash"></span></a></div>'
+                cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="{{grid.appScope.$state.href(\'organization-edit\', {id: row.entity.id})}}" class="text-primary" title="Edit"><span class="fa fa-pencil action-icon"></span></a> | <a ng-click="grid.appScope.showDeleteConfirm(row.entity.id)" class="text-danger" title="Delete"><span class="fa fa-trash action-icon"></span></a></div>'
+            },
         ],
-        onRegisterApi: function(gridApi) {
-            $scope.gridApi = gridApi;
-            gridApi.core.on.sortChanged($scope, function(grid, sortColumns) {
-                if (sortColumns.length == 0) {
-                    $scope.sortingOptions = null;
-                } else {
-                    var col = sortColumns[0];
-                    $scope.sortingOptions = (col.sort.direction==uiGridConstants.DESC?"-":"") + col.field;
-                }
-                $scope.getPage();
-            });
-            gridApi.pagination.on.paginationChanged($scope, function (newPage, pageSize) {
-                $scope.paginationOptions.page = newPage;
-                // $scope.paginationOptions.pageSize = pageSize;
-                $scope.getPage();
-            });
-        }
+        onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
     };
-    $scope.getPage = function() {
-        var url = "/api/v1/organization/?page="+$scope.paginationOptions.page;
-        if ($scope.sortingOptions) {
-            url += ("&ordering="+$scope.sortingOptions);
-        }
-        $http.get(url).
-        then(function(response) {
-            var pg = response.data.pagination;
-            $scope.organizationGridOpt.data = response.data.results;
-            $scope.organizationGridOpt.totalItems = pg.count;
-            $scope.organizationGridOpt.paginationCurrentPage = pg.current_page;
-            $scope.organizationGridOpt.paginationPageSize = pg.page_size;
-        }, function(response) {
-            app.utils.showDefaultServerError(response);
+    $scope.getPage = GeneralUiGrid.getPage($scope, OrganizationService, $scope.gridOptions);
+
+    $scope.showDeleteConfirm = function(id) {
+        var getPage = $scope.getPage;
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/partials/confirm-modal.html',
+            controller: function($scope, $uibModalInstance, Utils) {
+                $scope.selectedId = id;
+                $scope.deleting = false;
+                $scope.removeRecord = function () {
+                    $scope.deleting = true;
+                    OrganizationService.delete({id: $scope.selectedId}, function(response) {
+                        getPage();
+                        Utils.showDefaultServerSuccess(response);
+                        $uibModalInstance.close();
+                    }, function(response) {
+                        Utils.showDefaultServerError(response);
+                    }).$promise.finally(function() {
+                        $scope.deleting = false;
+                    })
+
+                };
+                $scope.cancelRemove = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }
         });
-    }
+    };
     $scope.getPage();
-}]);
+});
 
-app.controller('PageContentController', ['$scope', function($scope) {
+app.controller("OrganizationNewCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils) {
+    $scope.selectedRecord = new OrganizationService();
+    $scope.addRecord = function() {
+        $scope.saving = true;
+        $scope.selectedRecord.$save().then(function(response) {
+            $state.go('organization-list');
+            Utils.showDefaultServerSuccess(response);
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function() {
+            $scope.saving = false;
+        });
+    };
+});
 
-    $scope.$on('$includeContentLoaded', function() {
-        Layout.fixContentHeight();
-    });
-}]);
+app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils) {
+    $scope.updateRecord = function() {
+        if (!$scope.selectedRecord) {
+            return;
+        }
+        $scope.saving = true;
+        $scope.selectedRecord.$update().then(function(response) {
+            $state.go('organization-list');
+            Utils.showDefaultServerSuccess(response);
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function() {
+            $scope.saving = false;
+        });
+    };
+    $scope.loadRecord=function() {
+        OrganizationService.get({id: $stateParams.id}, function(record) {
+            $scope.selectedRecord = record;
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+            $state.go('organization-list');
+        });
+    };
+    $scope.loadRecord();
+});
