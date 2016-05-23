@@ -34,6 +34,8 @@ class CustomPagination(pagination.PageNumberPagination):
 
 
 def custom_rest_exception_handler(exc, context):
+    ''' Custom rest api exception handler '''
+
     response = exception_handler(exc, context)
     if isinstance(exc, exceptions.NotAuthenticated):
         response.status_code = 401
