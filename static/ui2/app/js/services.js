@@ -32,7 +32,7 @@ app.service('Utils', [function() {
             msg = "Server Connection Error";
         } else if(response.status == 401) {
             msg = "Session is expired. you are redirecting to login page ...";
-            window.location = '/login';
+            window.location = '/';
         } else {
             msg = response.status + ": " + response.statusText;
             if (showReason && response.responseJSON && response.responseJSON.reason) {

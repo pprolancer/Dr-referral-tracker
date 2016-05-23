@@ -21,11 +21,7 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
         $('body').css('background-image', 'none').removeClass('hide');
         Index.initCharts();
     }, function(response) {
-        if (response.status == 403) {
-            $window.location.href = '/';
-        } else {
-            Utils.showDefaultServerError(response)
-        }
+        Utils.showDefaultServerError(response);
     });
 
     // logout function

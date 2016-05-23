@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 from .celery import app as celery_app
 from rest_framework import pagination
+from rest_framework.views import exception_handler
+from rest_framework import exceptions
+from django.http.response import REASON_PHRASES
 from rest_framework.response import Response
 
 
@@ -28,3 +31,11 @@ class CustomPagination(pagination.PageNumberPagination):
             },
             'results': data
         })
+
+
+def custom_rest_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+    if isinstance(exc, exceptions.NotAuthenticated):
+        response.status_code = 401
+        response.reason_phrase = REASON_PHRASES.get(response.status_code)
+    return response
