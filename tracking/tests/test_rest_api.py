@@ -50,7 +50,7 @@ class OrganizationTest(LoginBaseTest):
         data = {'org_name': 'org1', 'clinic': self.clinic.id}
         self.assertEqual(Organization.objects.count(), 0)
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(Organization.objects.count(), 0)
 
     def test_get(self):
@@ -69,7 +69,7 @@ class OrganizationTest(LoginBaseTest):
         org1 = Organization.objects.create(org_name='org1', clinic=self.clinic)
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update(self):
         ''' update api test '''
@@ -91,7 +91,7 @@ class OrganizationTest(LoginBaseTest):
         url = reverse('rest_api:organization-detail', args=(org1.id,))
         data = {'org_name': 'org2'}
         response = self.client.patch(url, data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list(self):
         ''' list api test '''
@@ -111,7 +111,7 @@ class OrganizationTest(LoginBaseTest):
 
         url = reverse('rest_api:organization-list')
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class ReferringReportSettingTest(LoginBaseTest):

@@ -68,7 +68,7 @@ class SessionTest(LoginBaseTest):
 
         url = reverse('rest_api:session-list')
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_logout(self):
         ''' logout api test '''
@@ -87,4 +87,4 @@ class SessionTest(LoginBaseTest):
 
         url = reverse('rest_api:session-list')
         response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
