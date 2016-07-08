@@ -44,7 +44,6 @@ class LoginView(View):
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
-            messages.success(request, 'User Succefully login.')
             return HttpResponseRedirect(request.GET.get('next') or '/home')
         else:
             if username:

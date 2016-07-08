@@ -19,10 +19,10 @@
       {% block container %}
         {% block header %}
           {% include "header.html" %}
-           <div class="messages success-msg">
+           <div class="messages">
           {% if messages %}
               {% for message in messages %}
-              <div class='pull-right alert alert-{% if message.tags %}{{ message.tags }}{% endif %}'>{{ message }}</div>
+              <div class='alert alert-{% if message.tags %}{{ message.tags }}{% endif %}'>{{ message }}</div>
 
               {% endfor %}
           {% endif %}

@@ -83,6 +83,17 @@
 	top: 0 !important;
 	position: fixed;
 }
+
+.messages {
+  display: block;
+  z-index:999999;
+  left: 30%;
+  right: 30%;
+  top: 0 !important;
+  position: fixed;
+  text-align: center;
+}
+
 .capital
 {
     text-transform:capitalize;

@@ -32,7 +32,10 @@ app.service('Utils', [function() {
             msg = "Server Connection Error";
         } else if(response.status == 401) {
             msg = "Session is expired. you are redirecting to login page ...";
-            window.location = '/';
+            var next = window.location.pathname+window.location.hash;
+            setTimeout(function() {
+                window.location = '/?next=' + next;
+            }, 2000)
         } else {
             msg = response.status + ": " + response.statusText;
             if (showReason && response.responseJSON && response.responseJSON.reason) {
@@ -72,6 +75,14 @@ app.service('Utils', [function() {
     this.noCacheUrl = function(url) {
         var r = this.random_id();
         return this.addQSParm(url, 'nc', r);
+    };
+    this.findByProperty = function(array, property, value) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i][property] == value) {
+                return i;
+            }
+        }
+        return -1;
     };
 }]);
 

@@ -76,4 +76,5 @@ app.config(['$controllerProvider', '$httpProvider', function($controllerProvider
 /* Init global settings and run the app */
 app.run(["$rootScope", "$state", function($rootScope, $state) {
     $rootScope.$state = $state; // state to be accessed from view
+    $rootScope.$global = {};
 }]);
