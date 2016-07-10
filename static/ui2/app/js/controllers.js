@@ -11,6 +11,8 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
     $rootScope.pageLoaded = false;
     $rootScope.$global.TreatingProviderListCtrl = {}
     $rootScope.$global.OrganizationListCtrl = {}
+    $rootScope.$global.ReferringEntityListCtrl = {}
+    $rootScope.$global.PatientVisitListCtrl = {}
 
     $rootScope.$global.TreatingProviderListCtrl.typeChoices = [
         {
@@ -87,7 +89,7 @@ app.controller("DashboardCtrl", function($scope, $rootScope) {
 ********************* Organization controllers *****************
 *******************************************************************/
 
-app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $stateParams, OrganizationService, Utils, GeneralUiGrid, $uibModal) {
+app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $stateParams, OrganizationService, Utils, GeneralUiGrid) {
     $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
@@ -121,10 +123,7 @@ app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $sta
                 {name: 'org_email', 'displayName': 'Email', width: 200},
                 {name: 'org_special', 'displayName': 'Special', width: 80,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope fa" ng-class="{true:\'fa-check text-success\', false:\'fa-close text-danger\'}[row.entity.org_special==true]"></div>'
-                },
-                {name: 'action', 'displayName': 'Action', width: 80, enableColumnMenu: false, enableSorting: false,
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="{{grid.appScope.$state.href(\'organization-edit\', {id: row.entity.id})}}" class="text-primary" title="Edit"><span class="fa fa-pencil action-icon"></span></a> | <a ng-click="grid.appScope.showDeleteConfirm(row.entity.id)" class="text-danger" title="Delete"><span class="fa fa-trash action-icon"></span></a></div>'
-                },
+                }
             ],
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
@@ -140,41 +139,6 @@ app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $sta
             return v.value==type
         })[0];
         return choice? choice.display_name: type;
-    };
-
-    $scope.showDeleteConfirm = function(id) {
-        var getPage = $scope.getPage;
-        var $global = $rootScope.$global.OrganizationListCtrl;
-        var data = $global.gridOptions? $global.gridOptions.data: [];
-        var idx = Utils.findByProperty(data, 'id', id),
-            gridOptions = $global.gridOptions;
-
-        var modalInstance = $uibModal.open({
-            animation: true,
-            templateUrl: 'app/partials/confirm-modal.html',
-            controller: function($scope, $uibModalInstance, Utils) {
-                $scope.selectedId = id;
-                $scope.deleting = false;
-                $scope.removeRecord = function () {
-                    $scope.deleting = true;
-                    OrganizationService.delete({id: $scope.selectedId}, function(response) {
-                        if (idx >= 0) {
-                            gridOptions.data.splice(idx, 1);
-                        }
-                        Utils.showDefaultServerSuccess(response);
-                        $uibModalInstance.close();
-                    }, function(response) {
-                        Utils.showDefaultServerError(response);
-                    }).$promise.finally(function() {
-                        $scope.deleting = false;
-                    })
-
-                };
-                $scope.cancelRemove = function () {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            }
-        });
     };
 });
 
@@ -197,8 +161,47 @@ app.controller("OrganizationNewCtrl", function($scope, $rootScope, $state,$state
     };
 });
 
-app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils) {
+app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils, $uibModal) {
     var $global = $rootScope.$global.OrganizationListCtrl;
+
+    $scope.showDeleteConfirm = function() {
+        if (!$scope.selectedRecord) {
+            return;
+        }
+        var id = $scope.selectedRecord.id;
+        var data = $global.gridOptions? $global.gridOptions.data: [];
+        var idx = Utils.findByProperty(data, 'id', id),
+            gridOptions = $global.gridOptions;
+
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/partials/confirm-modal.html',
+            controller: function($scope, $uibModalInstance, Utils) {
+                $scope.selectedId = id;
+                $scope.deleting = false;
+                $scope.removeRecord = function () {
+                    $scope.deleting = true;
+                    OrganizationService.delete({id: $scope.selectedId}, function(response) {
+                        if (idx >= 0) {
+                            gridOptions.data.splice(idx, 1);
+                        }
+                        Utils.showDefaultServerSuccess(response);
+                        $uibModalInstance.close();
+                        $state.go('organization-list');
+                    }, function(response) {
+                        Utils.showDefaultServerError(response);
+                    }).$promise.finally(function() {
+                        $scope.deleting = false;
+                    })
+
+                };
+                $scope.cancelRemove = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }
+        });
+    };
+
     $scope.updateRecord = function() {
         if (!$scope.selectedRecord) {
             return;
@@ -233,7 +236,7 @@ app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stat
 ********************* ReferringEntity controllers *****************
 *******************************************************************/
 
-app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $stateParams, ReferringEntityService, Utils, GeneralUiGrid, $uibModal) {
+app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $stateParams, ReferringEntityService, Utils, GeneralUiGrid) {
     $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
@@ -261,17 +264,13 @@ app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $
                 },
                 {name: 'entity_title', 'displayName': 'Title'},
                 {name: 'organization', 'displayName': 'Organization',
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="text text-primary" href="{{grid.appScope.$state.href(\'organization-edit\', {id: row.entity.organization})}}">{{row.entity._organization.org_name}}</a></div>'
-                    // cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity.organization.org_name}}</div>'
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity._organization.org_name}}</div>'
                 },
                 {name: 'entity_phone', 'displayName': 'Phone', width: 120},
                 {name: 'entity_email', 'displayName': 'Email', width: 200},
                 {name: 'entity_special', 'displayName': 'Special', width: 100,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope fa" ng-class="{true:\'fa-check text-success\', false:\'fa-close text-danger\'}[row.entity.entity_special==true]"></div>'
-                },
-                {name: 'action', 'displayName': 'Action', width: 80, enableColumnMenu: false, enableSorting: false,
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="{{grid.appScope.$state.href(\'referring_entity-edit\', {id: row.entity.id})}}" class="text-primary" title="Edit"><span class="fa fa-pencil action-icon"></span></a> | <a ng-click="grid.appScope.showDeleteConfirm(row.entity.id)" class="text-danger" title="Delete"><span class="fa fa-trash action-icon"></span></a></div>'
-                },
+                }
             ],
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
@@ -282,40 +281,6 @@ app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $
         $scope.getPage();
     }
 
-    $scope.showDeleteConfirm = function(id) {
-        var getPage = $scope.getPage;
-        var $global = $rootScope.$global.ReferringEntityListCtrl;
-        var data = $global.gridOptions? $global.gridOptions.data: [];
-        var idx = Utils.findByProperty(data, 'id', id),
-            gridOptions = $global.gridOptions;
-
-        var modalInstance = $uibModal.open({
-            animation: true,
-            templateUrl: 'app/partials/confirm-modal.html',
-            controller: function($scope, $uibModalInstance, Utils) {
-                $scope.selectedId = id;
-                $scope.deleting = false;
-                $scope.removeRecord = function () {
-                    $scope.deleting = true;
-                    ReferringEntityService.delete({id: $scope.selectedId}, function(response) {
-                        if (idx >= 0) {
-                            gridOptions.data.splice(idx, 1);
-                        }
-                        Utils.showDefaultServerSuccess(response);
-                        $uibModalInstance.close();
-                    }, function(response) {
-                        Utils.showDefaultServerError(response);
-                    }).$promise.finally(function() {
-                        $scope.deleting = false;
-                    })
-
-                };
-                $scope.cancelRemove = function () {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            }
-        });
-    };
 });
 
 app.controller("ReferringEntityNewCtrl", function($scope, $rootScope, $state,$stateParams, ReferringEntityService, OrganizationService, Utils) {
@@ -340,11 +305,50 @@ app.controller("ReferringEntityNewCtrl", function($scope, $rootScope, $state,$st
     };
 });
 
-app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$stateParams, ReferringEntityService, OrganizationService, Utils) {
+app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$stateParams, ReferringEntityService, OrganizationService, Utils, $uibModal) {
     var $global = $rootScope.$global.ReferringEntityListCtrl;
     OrganizationService.query({page_size: 0}, function(response) {
         $scope.organizations = response.results;
     });
+
+    $scope.showDeleteConfirm = function() {
+        if (!$scope.selectedRecord) {
+            return;
+        }
+        var id = $scope.selectedRecord.id;
+        var data = $global.gridOptions? $global.gridOptions.data: [];
+        var idx = Utils.findByProperty(data, 'id', id),
+            gridOptions = $global.gridOptions;
+
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/partials/confirm-modal.html',
+            controller: function($scope, $uibModalInstance, Utils) {
+                $scope.selectedId = id;
+                $scope.deleting = false;
+                $scope.removeRecord = function () {
+                    $scope.deleting = true;
+                    ReferringEntityService.delete({id: $scope.selectedId}, function(response) {
+                        if (idx >= 0) {
+                            gridOptions.data.splice(idx, 1);
+                        }
+                        Utils.showDefaultServerSuccess(response);
+                        $uibModalInstance.close();
+                        $state.go('referring_entity-list');
+                    }, function(response) {
+                        Utils.showDefaultServerError(response);
+                    }).$promise.finally(function() {
+                        $scope.deleting = false;
+                    })
+
+                };
+                $scope.cancelRemove = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }
+        });
+    };
+
     $scope.updateRecord = function() {
         if (!$scope.selectedRecord) {
             return;
@@ -379,13 +383,20 @@ app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$s
 ********************* TreatingProvider controllers *****************
 *******************************************************************/
 
-app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, $stateParams, TreatingProviderService, Utils, GeneralUiGrid, $uibModal) {
+app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, $stateParams, TreatingProviderService, Utils, GeneralUiGrid) {
     $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
     $scope.paginationOptions = {
         page: 1,
     };
+    $scope.getDisplayType = function(type) {
+        var choice = $global.typeChoices.filter(function(v) {
+            return v.value==type
+        })[0];
+        return choice? choice.display_name: type;
+    };
+
     if (!$rootScope.$global.TreatingProviderListCtrl) {
         $rootScope.$global.TreatingProviderListCtrl = {}
     }
@@ -408,10 +419,7 @@ app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, 
                 {name: 'provider_title', 'displayName': 'Title'},
                 {name: 'provider_type', 'displayName': 'Type',
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{grid.appScope.getDisplayType(row.entity.provider_type)}}</div>'
-                },
-                {name: 'action', 'displayName': 'Action', width: 80, enableColumnMenu: false, enableSorting: false,
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="{{grid.appScope.$state.href(\'treating_provider-edit\', {id: row.entity.id})}}" class="text-primary" title="Edit"><span class="fa fa-pencil action-icon"></span></a> | <a ng-click="grid.appScope.showDeleteConfirm(row.entity.id)" class="text-danger" title="Delete"><span class="fa fa-trash action-icon"></span></a></div>'
-                },
+                }
             ],
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
@@ -422,47 +430,6 @@ app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, 
         $scope.getPage();
     }
 
-    $scope.getDisplayType = function(type) {
-        var choice = $global.typeChoices.filter(function(v) {
-            return v.value==type
-        })[0];
-        return choice? choice.display_name: type;
-    };
-
-    $scope.showDeleteConfirm = function(id) {
-        var getPage = $scope.getPage;
-        var $global = $rootScope.$global.TreatingProviderListCtrl;
-        var data = $global.gridOptions? $global.gridOptions.data: [];
-        var idx = Utils.findByProperty(data, 'id', id),
-            gridOptions = $global.gridOptions;
-
-        var modalInstance = $uibModal.open({
-            animation: true,
-            templateUrl: 'app/partials/confirm-modal.html',
-            controller: function($scope, $uibModalInstance, Utils) {
-                $scope.selectedId = id;
-                $scope.deleting = false;
-                $scope.removeRecord = function () {
-                    $scope.deleting = true;
-                    TreatingProviderService.delete({id: $scope.selectedId}, function(response) {
-                        if (idx >= 0) {
-                            gridOptions.data.splice(idx, 1);
-                        }
-                        Utils.showDefaultServerSuccess(response);
-                        $uibModalInstance.close();
-                    }, function(response) {
-                        Utils.showDefaultServerError(response);
-                    }).$promise.finally(function() {
-                        $scope.deleting = false;
-                    })
-
-                };
-                $scope.cancelRemove = function () {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            }
-        });
-    };
 });
 
 app.controller("TreatingProviderNewCtrl", function($scope, $rootScope, $state,$stateParams, TreatingProviderService, Utils) {
@@ -484,8 +451,48 @@ app.controller("TreatingProviderNewCtrl", function($scope, $rootScope, $state,$s
     };
 });
 
-app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$stateParams, TreatingProviderService, Utils) {
+app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$stateParams, TreatingProviderService, Utils, $uibModal) {
     var $global = $rootScope.$global.TreatingProviderListCtrl;
+
+    $scope.showDeleteConfirm = function() {
+        if (!$scope.selectedRecord) {
+            return;
+        }
+        var id = $scope.selectedRecord.id;
+        var $global = $rootScope.$global.TreatingProviderListCtrl;
+        var data = $global.gridOptions? $global.gridOptions.data: [];
+        var idx = Utils.findByProperty(data, 'id', id),
+            gridOptions = $global.gridOptions;
+
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/partials/confirm-modal.html',
+            controller: function($scope, $uibModalInstance, Utils) {
+                $scope.selectedId = id;
+                $scope.deleting = false;
+                $scope.removeRecord = function () {
+                    $scope.deleting = true;
+                    TreatingProviderService.delete({id: $scope.selectedId}, function(response) {
+                        if (idx >= 0) {
+                            gridOptions.data.splice(idx, 1);
+                        }
+                        Utils.showDefaultServerSuccess(response);
+                        $uibModalInstance.close();
+                        $state.go('treating_provider-list');
+                    }, function(response) {
+                        Utils.showDefaultServerError(response);
+                    }).$promise.finally(function() {
+                        $scope.deleting = false;
+                    })
+
+                };
+                $scope.cancelRemove = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }
+        });
+    };
+
     $scope.updateRecord = function() {
         if (!$scope.selectedRecord) {
             return;
@@ -520,7 +527,7 @@ app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$
 ********************* PatientVisit controllers *****************
 *******************************************************************/
 
-app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $stateParams, PatientVisitService, Utils, GeneralUiGrid, $uibModal) {
+app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $stateParams, PatientVisitService, Utils, GeneralUiGrid) {
     $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
@@ -542,27 +549,22 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
             useExternalSorting: true,
             rowHeight: 35,
             columnDefs: [
-                {name: 'id', 'displayName': 'ID', width: 60,
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="text text-primary" href="{{grid.appScope.$state.href(\'patient_visit-edit\', {id: row.entity.id})}}">{{row.entity.id}}</a></div>'
-                },
+                {name: 'id', 'displayName': 'ID', width: 60},
                 {name: 'referring_entity', 'displayName': 'Referring Entity',
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="text text-primary" href="{{grid.appScope.$state.href(\'referring_entity-edit\', {id: row.entity.referring_entity})}}">{{row.entity._referring_entity.entity_name}}</a></div>'
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="text text-primary" href="{{grid.appScope.$state.href(\'patient_visit-edit\', {id: row.entity.id})}}">{{row.entity._referring_entity.entity_name}}</a></div>'
                 },
                 {name: 'treating_provider', 'displayName': 'Treating Provider',
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="text text-primary" href="{{grid.appScope.$state.href(\'treating_provider-edit\', {id: row.entity.treating_provider})}}">{{row.entity._treating_provider.provider_name}}</a></div>'
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity._treating_provider.provider_name}}</div>'
                 },
-                {name: 'visit_date', 'displayName': 'Visit Date',
+                {name: 'visit_date', 'displayName': 'Visit Date', width: 120,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity.visit_date|date: \'MMM dd, yyyy\'}}</div>'
                 },
-                {name: 'visit_appointment_time', 'displayName': 'Appointment Time',
+                {name: 'visit_appointment_time', 'displayName': 'App. Time', width: 120,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity.visit_appointment_time|date: \'hh:mm a\'}}</div>'
                 },
-                {name: 'visit_actual_time', 'displayName': 'Actual Time',
+                {name: 'visit_actual_time', 'displayName': 'Actual Time', width: 120,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity.visit_actual_time|date: \'hh:mm a\'}}</div>'
-                },
-                {name: 'action', 'displayName': 'Action', width: 80, enableColumnMenu: false, enableSorting: false,
-                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a href="{{grid.appScope.$state.href(\'patient_visit-edit\', {id: row.entity.id})}}" class="text-primary" title="Edit"><span class="fa fa-pencil action-icon"></span></a> | <a ng-click="grid.appScope.showDeleteConfirm(row.entity.id)" class="text-danger" title="Delete"><span class="fa fa-trash action-icon"></span></a></div>'
-                },
+                }
             ],
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
@@ -572,41 +574,6 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
     if (!initialized) {
         $scope.getPage();
     }
-
-    $scope.showDeleteConfirm = function(id) {
-        var getPage = $scope.getPage;
-        var $global = $rootScope.$global.PatientVisitListCtrl;
-        var data = $global.gridOptions? $global.gridOptions.data: [];
-        var idx = Utils.findByProperty(data, 'id', id),
-            gridOptions = $global.gridOptions;
-
-        var modalInstance = $uibModal.open({
-            animation: true,
-            templateUrl: 'app/partials/confirm-modal.html',
-            controller: function($scope, $uibModalInstance, Utils) {
-                $scope.selectedId = id;
-                $scope.deleting = false;
-                $scope.removeRecord = function () {
-                    $scope.deleting = true;
-                    PatientVisitService.delete({id: $scope.selectedId}, function(response) {
-                        if (idx >= 0) {
-                            gridOptions.data.splice(idx, 1);
-                        }
-                        Utils.showDefaultServerSuccess(response);
-                        $uibModalInstance.close();
-                    }, function(response) {
-                        Utils.showDefaultServerError(response);
-                    }).$promise.finally(function() {
-                        $scope.deleting = false;
-                    })
-
-                };
-                $scope.cancelRemove = function () {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            }
-        });
-    };
 });
 
 app.controller("PatientVisitNewCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils) {
@@ -634,7 +601,7 @@ app.controller("PatientVisitNewCtrl", function($scope, $rootScope, $state,$state
     };
 });
 
-app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils) {
+app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils, $uibModal) {
     var $global = $rootScope.$global.PatientVisitListCtrl;
     ReferringEntityService.query({page_size: 0}, function(response) {
         $scope.referring_entities = response.results;
@@ -642,6 +609,45 @@ app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stat
     TreatingProviderService.query({page_size: 0}, function(response) {
         $scope.treating_providers = response.results;
     });
+
+    $scope.showDeleteConfirm = function() {
+        if (!$scope.selectedRecord) {
+            return;
+        }
+        var id = $scope.selectedRecord.id;
+        var data = $global.gridOptions? $global.gridOptions.data: [];
+        var idx = Utils.findByProperty(data, 'id', id),
+            gridOptions = $global.gridOptions;
+
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app/partials/confirm-modal.html',
+            controller: function($scope, $uibModalInstance, Utils) {
+                $scope.selectedId = id;
+                $scope.deleting = false;
+                $scope.removeRecord = function () {
+                    $scope.deleting = true;
+                    PatientVisitService.delete({id: $scope.selectedId}, function(response) {
+                        if (idx >= 0) {
+                            gridOptions.data.splice(idx, 1);
+                        }
+                        Utils.showDefaultServerSuccess(response);
+                        $uibModalInstance.close();
+                        $state.go('patient_visit-list');
+                    }, function(response) {
+                        Utils.showDefaultServerError(response);
+                    }).$promise.finally(function() {
+                        $scope.deleting = false;
+                    })
+
+                };
+                $scope.cancelRemove = function () {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }
+        });
+    };
+
     $scope.updateRecord = function() {
         if (!$scope.selectedRecord) {
             return;

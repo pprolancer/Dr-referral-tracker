@@ -17,8 +17,9 @@
                 <span ng-hide="saving">Save</span>
                 <span ng-show="saving">Saving</span>
                 </button>
-                <a href="{{ $state.href('patient_visit-list') }}" class="btn default">
+                <a href="{{ $state.href('patient_visit-list') }}" class="btn btn-default">
                 Cancel </a>
+                <button type="button" ng-click="showDeleteConfirm()" class="btn btn-danger pull-right"><apan class="fa fa-trash"></apan> Delete </button>
             </div>
 
         </form>
