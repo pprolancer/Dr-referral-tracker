@@ -1,16 +1,45 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from tracking.models import Clinic, Organization, ReferringReportSetting, \
-    ReferringEntity, ClinicReportSetting, ClinicUser
+from tracking.models import Organization, ReferringReportSetting, \
+    ReferringEntity, TreatingProvider, ClinicReportSetting, ClinicUser, \
+    PatientVisit
 from .serializers import OrganizationSerializer, \
     ReferringReportSettingSerializer, BulkReferringReportSettingSerializer, \
-    ClinicReportSettingSerializer, BulkClinicReportSettingSerializer
+    ClinicReportSettingSerializer, BulkClinicReportSettingSerializer, \
+    ReferringEntitySerializer, TreatingProviderSerializer, \
+    PatientVisitSerializer
 
 
-class OrganizationView(viewsets.ModelViewSet):
+class PaginationPageSizeMixin(object):
+    BIG_PAGE_SIZE = 10000000
+
+    @property
+    def paginator(self):
+        """
+        The paginator instance associated with the view, or `None`.
+        """
+        paginator = super().paginator
+        max_page_size = getattr(self, 'max_page_size', paginator.max_page_size)
+
+        paginator.max_page_size = max_page_size or self.BIG_PAGE_SIZE
+        return paginator
+
+
+class BaseClinicModelViewSet(viewsets.ModelViewSet):
+    '''
+    a base modelviewset class for all other viewsets
+    '''
+
+    def get_queryset(self):
+        return super(BaseClinicModelViewSet, self).get_queryset()\
+            .filter(clinic=self.request.clinic)
+
+
+class OrganizationView(PaginationPageSizeMixin, BaseClinicModelViewSet):
     '''
     rest view for Organization resource
     '''
+    max_page_size = 0  # zero mean unlimitted page_size
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
     filter_fields = ('org_name', 'org_type', 'org_contact_name', 'org_phone',
@@ -18,12 +47,44 @@ class OrganizationView(viewsets.ModelViewSet):
     ordering_fields = '__all__'
     ordering = ('id',)
 
-    def get_queryset(self):
-        return super(OrganizationView, self).get_queryset()\
-            .filter(clinic=self.request.clinic)
+
+class ReferringEntityView(BaseClinicModelViewSet):
+    '''
+    rest view for ReferringEntity resource
+    '''
+    queryset = ReferringEntity.objects.all()
+    serializer_class = ReferringEntitySerializer
+    filter_fields = ('organization', 'entity_name', 'entity_title',
+                     'entity_phone', 'entity_email', 'entity_special')
+    ordering_fields = '__all__'
+    ordering = ('id',)
 
 
-class ReferringReportSettingView(viewsets.ModelViewSet):
+class TreatingProviderView(BaseClinicModelViewSet):
+    '''
+    rest view for TreatingProvider resource
+    '''
+    queryset = TreatingProvider.objects.all()
+    serializer_class = TreatingProviderSerializer
+    filter_fields = ('provider_name', 'provider_title', 'provider_type')
+    ordering_fields = '__all__'
+    ordering = ('id',)
+
+
+class PatientVisitView(BaseClinicModelViewSet):
+    '''
+    rest view for PatientVisit resource
+    '''
+    queryset = PatientVisit.objects.all()
+    serializer_class = PatientVisitSerializer
+    filter_fields = ('referring_entity', 'treating_provider', 'visit_date',
+                     'visit_appointment_time', 'visit_actual_time',
+                     'visit_count')
+    ordering_fields = '__all__'
+    ordering = ('id',)
+
+
+class ReferringReportSettingView(BaseClinicModelViewSet):
     '''
     rest view for ReferringReportSetting resource
     '''
@@ -33,10 +94,6 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
     filter_fields = ('period', 'report_name', 'enabled',
                      'referring_entity')
     ordering_fields = '__all__'
-
-    def get_queryset(self):
-        return super(ReferringReportSettingView, self).get_queryset()\
-            .filter(referring_entity__organization__clinic=self.request.clinic)
 
     def create(self, request, *args, **kwargs):
         bulk = (request.data or {}).pop('bulk', False)
@@ -50,8 +107,7 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
         data = request.data
         referring_entities = data.pop('referring_entity', None)
 
-        ref_query = ReferringEntity.objects.filter(
-            organization__clinic=self.request.clinic)
+        ref_query = ReferringEntity.objects.filter(clinic=self.request.clinic)
         if referring_entities == '*':
             pass
         elif isinstance(referring_entities, list):
@@ -71,7 +127,7 @@ class ReferringReportSettingView(viewsets.ModelViewSet):
         return Response({'ids': ids})
 
 
-class ClinicReportSettingView(viewsets.ModelViewSet):
+class ClinicReportSettingView(BaseClinicModelViewSet):
     '''
     rest view for ClinicReportSetting resource
     '''
@@ -81,16 +137,12 @@ class ClinicReportSettingView(viewsets.ModelViewSet):
     filter_fields = ('period', 'report_name', 'enabled', 'clinic_user')
     ordering_fields = '__all__'
 
-    def get_queryset(self):
-        return super(ClinicReportSettingView, self).get_queryset()\
-            .filter(clinic_user__clinic=self.request.clinic)
-
     def create(self, request, *args, **kwargs):
         bulk = (request.data or {}).pop('bulk', False)
         if bulk:
             return self.__bulk_create(request)
         return super(ClinicReportSettingView, self).create(request, *args,
-                                                               **kwargs)
+                                                           **kwargs)
 
     def __bulk_create(self, request):
         serializer_class = BulkClinicReportSettingSerializer

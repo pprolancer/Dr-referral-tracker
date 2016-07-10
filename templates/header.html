@@ -38,6 +38,7 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav navbar-right">
+                <li><a class="new-site-link" href="{{ STATIC_URL }}ui2/index.html"><span class="fa fa-star"></span> New site <span class="label label-sm label-warning beta">Beta</span></a></li>
 				{% if user.is_authenticated %}
 					<li><a href="/logout">Logout</a></li>
 				{%else%}

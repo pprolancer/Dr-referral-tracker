@@ -1,14 +1,32 @@
 from __future__ import absolute_import
 from .celery import app as celery_app
-from rest_framework import pagination
+from rest_framework.pagination import PageNumberPagination, _positive_int
 from rest_framework.views import exception_handler
 from rest_framework import exceptions
 from django.http.response import REASON_PHRASES
 from rest_framework.response import Response
 
 
-class CustomPagination(pagination.PageNumberPagination):
+class CustomPagination(PageNumberPagination):
     ''' Custom Pagination to be used in rest api'''
+
+    page_size_query_param = 'page_size'
+    max_page_size = 20
+
+    def get_page_size(self, request):
+        page_size = self.page_size
+        if self.page_size_query_param:
+            try:
+                page_size = _positive_int(
+                    request.query_params[self.page_size_query_param],
+                    strict=False,
+                    cutoff=self.max_page_size
+                )
+            except (KeyError, ValueError):
+                pass
+        if page_size == 0:
+            page_size = self.max_page_size
+        return page_size
 
     def get_paginated_response(self, data):
         ''' override pagination structure in list rest api '''
@@ -26,7 +44,7 @@ class CustomPagination(pagination.PageNumberPagination):
                 'previous_page': previous_page,
                 'first_page': 1,
                 'last_page': self.page.paginator.num_pages,
-                'page_size': self.page_size,
+                'page_size': self.get_page_size(self.request),
                 'count': self.page.paginator.count,
             },
             'results': data
@@ -35,9 +53,13 @@ class CustomPagination(pagination.PageNumberPagination):
 
 def custom_rest_exception_handler(exc, context):
     ''' Custom rest api exception handler '''
-
     response = exception_handler(exc, context)
     if isinstance(exc, exceptions.NotAuthenticated):
         response.status_code = 401
         response.reason_phrase = REASON_PHRASES.get(response.status_code)
+    if isinstance(exc, exceptions.ValidationError) and \
+            'already exists' in str(exc):
+        response.status_code = 409
+        response.reason_phrase = REASON_PHRASES.get(response.status_code)
+
     return response

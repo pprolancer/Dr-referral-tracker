@@ -1,7 +1,8 @@
 import inspect
 import sys
 from tracking.models import Organization, ReferringReportSetting, \
-    ClinicReportSetting, TrackedModel, ClinicBaseModel
+    ClinicReportSetting, TrackedModel, ClinicBaseModel, ReferringEntity, \
+    TreatingProvider, PatientVisit
 from rest_framework import serializers
 
 
@@ -11,6 +12,65 @@ class OrganizationSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = Organization
+
+
+class RelOrganizationSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for Organization resource
+    '''
+    class Meta:
+        model = Organization
+        fields = ('id', 'org_name')
+
+
+class ReferringEntitySerializer(serializers.ModelSerializer):
+    '''
+    a serializer for ReferringEntity resource
+    '''
+    _organization = RelOrganizationSerializer(read_only=True,
+                                              source='organization')
+
+    class Meta:
+        model = ReferringEntity
+
+
+class RelReferringEntitySerializer(serializers.ModelSerializer):
+    '''
+    a serializer for ReferringEntity resource
+    '''
+    class Meta:
+        model = ReferringEntity
+        fields = ('id', 'entity_name')
+
+
+class TreatingProviderSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for TreatingProvider resource
+    '''
+    class Meta:
+        model = TreatingProvider
+
+
+class RelTreatingProviderSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for TreatingProvider resource
+    '''
+    class Meta:
+        model = TreatingProvider
+        fields = ('id', 'provider_name')
+
+
+class PatientVisitSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for PatientVisit resource
+    '''
+    _referring_entity = RelReferringEntitySerializer(read_only=True,
+                                                     source='referring_entity')
+    _treating_provider = RelTreatingProviderSerializer(
+        read_only=True, source='treating_provider')
+
+    class Meta:
+        model = PatientVisit
 
 
 class ReferringReportSettingSerializer(serializers.ModelSerializer):
@@ -67,6 +127,7 @@ for class_name, klass in classes:
         if issubclass(model, TrackedModel):
             rof = tuple(getattr(klass.Meta, 'read_only_fields', None) or ())
             klass.Meta.read_only_fields = rof + read_only_fields
-        if issubclass(model, ClinicBaseModel):
+        if issubclass(model, ClinicBaseModel) and \
+                not hasattr(klass.Meta, 'fields'):
             exclude = tuple(getattr(klass.Meta, 'exclude', None) or ())
             klass.Meta.exclude = exclude + ('clinic',)

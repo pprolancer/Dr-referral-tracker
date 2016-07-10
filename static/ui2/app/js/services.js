@@ -28,25 +28,29 @@ app.service('Utils', [function() {
     this.showDefaultServerError = function(response, showReason, delay, extra_message) {
         var msg;
         delay = delay != undefined? delay: 5000;
+        showReason = showReason != undefined? showReason: true;
         if (response.status <= 0) {
-            msg = "Server Connection Error";
+            msg = "<strong>Server Connection Error</strong>";
         } else if(response.status == 401) {
-            msg = "Session is expired. you are redirecting to login page ...";
+            msg = "<strong>Session is expired.</strong> <br>You are redirecting to login page ...";
             var next = window.location.pathname+window.location.hash;
             setTimeout(function() {
                 window.location = '/?next=' + next;
             }, 2000)
         } else {
-            msg = response.status + ": " + response.statusText;
-            if (showReason && response.responseJSON && response.responseJSON.reason) {
-                msg += ' ('+ JSON.stringify(response.responseJSON.reason) + ')';
+            msg = "<strong>"+response.status + ": " + response.statusText + "</strong>";
+            if (showReason && response.data) {
+                msg += '<p>'+ this.prettyfiy_error(response.data) + '</p>';
             }
             if (extra_message) {
-                msg += extra_message;
+                msg += '<p>'+extra_message+'</p>';
             }
         }
         this.showError(msg, delay);
     };
+    this.prettyfiy_error = function(data) {
+        return JSON.stringify(data).replace(",", "<br>").replace(/\[|\]|\}|\{/g, "");
+    }
     this.random_id = function(n) {
         n = n || 10;
         return Math.floor((Math.random() * Math.pow(10, n)) + 1);
@@ -145,7 +149,6 @@ app.factory('SessionService', ['$resource', function($resource) {
     });
 }]);
 
-
 app.factory('OrganizationService', ['$resource', function($resource) {
     return $resource('/api/v1/organization/:id', {id: '@id'}, {
         update: {
@@ -154,5 +157,86 @@ app.factory('OrganizationService', ['$resource', function($resource) {
         'query': {
             method:'GET', isArray: false
         }
+    });
+}]);
+
+app.factory('ReferringEntityService', ['$resource', function($resource) {
+    return $resource('/api/v1/referring_entity/:id', {id: '@id'}, {
+        update: {
+            method: 'PUT'
+        },
+        'query': {
+            method:'GET', isArray: false
+        }
+    });
+}]);
+
+app.factory('TreatingProviderService', ['$resource', function($resource) {
+    return $resource('/api/v1/treating_provider/:id', {id: '@id'}, {
+        update: {
+            method: 'PUT'
+        },
+        'query': {
+            method:'GET', isArray: false
+        }
+    });
+}]);
+
+app.factory('PatientVisitService', ['$resource', function($resource) {
+    var _transferDateRequest = function(d) {
+        return d && moment(d).format("YYYY-MM-DD");
+    };
+    var _transferTimeRequest = function(t) {
+        return t && moment(t).format("HH:mm:ss");
+    };
+    var _transferDateResponse = function(d) {
+        return d && moment(d+"T00:00:00Z").toDate();
+    };
+    var _transferTimeResponse = function(t) {
+        return t && moment(moment().format("YYYY-MM-DD")+"T"+t).toDate();
+    };
+    var generalTransformRequest = function(data) {
+        data.visit_date = _transferDateRequest(data.visit_date);
+        data.visit_appointment_time = _transferTimeRequest(data.visit_appointment_time);
+        data.visit_actual_time = _transferTimeRequest(data.visit_actual_time);
+        return angular.toJson(data);
+
+    };
+    var generalTransformResponse = function (data) {
+        var jdata = angular.fromJson(data)
+        jdata.visit_date = _transferDateResponse(jdata.visit_date);
+        jdata.visit_appointment_time = _transferTimeResponse(jdata.visit_appointment_time);
+        jdata.visit_actual_time = _transferTimeResponse(jdata.visit_actual_time);
+        return jdata;
+    };
+
+    return $resource('/api/v1/patient_visit/:id', {id: '@id'}, {
+        update: {
+            method: 'PUT',
+            transformRequest: generalTransformRequest,
+            transformResponse: generalTransformResponse
+        },
+        save: {
+            method: 'POST',
+            transformRequest: generalTransformRequest,
+            transformResponse: generalTransformResponse
+        },
+        'query': {
+            method:'GET', isArray: false,
+            transformResponse: function(data) {
+                var jdata = angular.fromJson(data)
+                jdata.results.forEach(function(o) {
+                    o.visit_date = _transferDateResponse(o.visit_date);
+                    o.visit_appointment_time = _transferTimeResponse(o.visit_appointment_time);
+                    o.visit_actual_time = _transferTimeResponse(o.visit_actual_time);
+                });
+                return jdata;
+            }
+        },
+        get: {
+            method: 'GET',
+            params: {id: '@id'},
+            transformResponse: generalTransformResponse
+        },
     });
 }]);

@@ -3,7 +3,8 @@ from rest_framework import routers
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tracking.rest_api.views import OrganizationView, \
-    ReferringReportSettingView, ClinicReportSettingView
+    ReferringReportSettingView, ClinicReportSettingView, ReferringEntityView, \
+    TreatingProviderView, PatientVisitView
 from users.rest_api.views import SessionView
 
 # register all rest views here
@@ -11,6 +12,9 @@ rest_router = routers.DefaultRouter()
 rest_router.trailing_slash = "/?"  # added to support both / and slashless
 rest_router.register(r'session', SessionView, base_name='session')
 rest_router.register(r'organization', OrganizationView)
+rest_router.register(r'referring_entity', ReferringEntityView)
+rest_router.register(r'treating_provider', TreatingProviderView)
+rest_router.register(r'patient_visit', PatientVisitView)
 rest_router.register(r'report_setting/referring', ReferringReportSettingView)
 rest_router.register(r'report_setting/clinic',
                      ClinicReportSettingView)

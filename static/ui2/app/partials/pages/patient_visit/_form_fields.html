@@ -1,0 +1,40 @@
+            <div class="form-group">
+                <label class="control-label">Referring Entity(*)</label>
+                <ui-select data-ng-model="selectedRecord.referring_entity" theme="bootstrap">
+                    <ui-select-match placeholder="Referring Entity or Visit">
+                        {{$select.selected.entity_name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="item.id as item in referring_entities | filter: $select.search" value="{{$select.selected.id}}">
+                        <span ng-bind-html="item.entity_name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Treating Provider(*)</label>
+                <ui-select data-ng-model="selectedRecord.treating_provider" theme="bootstrap">
+                    <ui-select-match placeholder="Treating Provider or Visit">
+                        {{$select.selected.provider_name}}
+                    </ui-select-match>
+                    <ui-select-choices repeat="item.id as item in treating_providers | filter: $select.search" value="{{$select.selected.id}}">
+                        <span ng-bind-html="item.provider_name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Visit Date(*)</label>
+                <p class="input-group">
+                  <input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" data-ng-model="selectedRecord.visit_date" is-open="popup1.opened" ng-required="true" close-text="Close" alt-input-formats="altInputFormats" />
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="popup1.opened=true"><i class="glyphicon glyphicon-calendar"></i></button>
+                  </span>
+                </p>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Appoinment Time</label>
+                <uib-timepicker data-ng-model="selectedRecord.visit_appointment_time"></uib-timepicker>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Actual Time</label>
+                <uib-timepicker data-ng-model="selectedRecord.visit_actual_time"></uib-timepicker>
+            </div>

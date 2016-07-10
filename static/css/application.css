@@ -144,3 +144,11 @@
 .pad-left-15 {
     padding-left: 15px !important;
 }
+
+.new-site-link {
+  color: deeppink !important;
+}
+
+.beta {
+  font-weight: lighter !important;
+}

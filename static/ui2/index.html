@@ -39,6 +39,7 @@ body {
 <link href="./assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
 <link href="./assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css"/>
 <link href="./assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+<link href="./assets/global/plugins/angular-ui-select/select.min.css" rel="stylesheet" type="text/css"/>
 <link href="./assets/global/plugins/ui-grid/ui-grid.min.css" rel="stylesheet" type="text/css"/>
 
 <!-- <link href="./assets/global/plugins/uniform/css/uniform.default.css" rel="stylesheet" type="text/css"/> -->
@@ -96,6 +97,12 @@ body {
         <div class="page-top">
             <!-- BEGIN TOP NAVIGATION MENU -->
             <div class="top-menu">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown dropdown-user" class="dropdown-toggle" >
+                        <a href="/home/" class="dropdown-toggle" >
+                        <i class="fa fa-reply"></i> Old site </a>
+                    </li>
+                </ul>
                 <ul class="nav navbar-nav pull-right">
                     <!-- END TODO DROPDOWN -->
                     <!-- BEGIN USER LOGIN DROPDOWN -->
@@ -152,13 +159,35 @@ body {
                     <span class="selected"></span>
                     </a>
                 </li>
-                <li class="start" data-ng-class="menuActiveIf('organization-list')">
+                <li class="start" data-ng-class="menuActiveIf('organization-list', 'organization-new', 'organization-edit')">
                     <a href="{{ $state.href('organization-list') }}">
                     <i class="fa fa-institution"></i>
                     <span class="title">{{ $state.get('organization-list').data.pageInfo.title }}</span>
                     <span class="selected"></span>
                     </a>
                 </li>
+                <li class="start" data-ng-class="menuActiveIf('referring_entity-list', 'referring_entity-new', 'referring_entity-edit')">
+                    <a href="{{ $state.href('referring_entity-list') }}">
+                    <i class="fa fa-users"></i>
+                    <span class="title">{{ $state.get('referring_entity-list').data.pageInfo.title }}</span>
+                    <span class="selected"></span>
+                    </a>
+                </li>
+                <li class="start" data-ng-class="menuActiveIf('treating_provider-list', 'treating_provider-new', 'treating_provider-edit')">
+                    <a href="{{ $state.href('treating_provider-list') }}">
+                    <i class="fa fa-user-md"></i>
+                    <span class="title">{{ $state.get('treating_provider-list').data.pageInfo.title }}</span>
+                    <span class="selected"></span>
+                    </a>
+                </li>
+                <li class="start" data-ng-class="menuActiveIf('patient_visit-list', 'patient_visit-new', 'patient_visit-edit')">
+                    <a href="{{ $state.href('patient_visit-list') }}">
+                    <i class="fa fa-medkit"></i>
+                    <span class="title">{{ $state.get('patient_visit-list').data.pageInfo.title }}</span>
+                    <span class="selected"></span>
+                    </a>
+                </li>
+
             </ul>
             <!-- END SIDEBAR MENU -->
         </div>
@@ -235,8 +264,11 @@ body {
 <script src="./assets/global/plugins/angularjs/angular-ui-router.min.js" type="text/javascript"></script>
 <script src="./assets/global/plugins/angularjs/angular-animate.min.js" type="text/javascript"></script>
 <script src="./assets/global/plugins/angularjs/angular-resource.min.js" type="text/javascript"></script>
+<script src="./assets/global/plugins/angularjs/angular-sanitize.min.js" type="text/javascript"></script>
+<script src="./assets/global/plugins/angular-ui-select/select.min.js" type="text/javascript"></script>
 <script src="./assets/global/plugins/ui-grid/ui-grid.min.js" type="text/javascript"></script>
 <script src="./assets/global/plugins/angular-ui-bootstrap/ui-bootstrap-tpls.min.js" type="text/javascript"></script>
+<script src="./assets/global/plugins/moment.min.js" type="text/javascript"></script>
 
 <!--
 include project files here
