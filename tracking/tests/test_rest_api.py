@@ -170,10 +170,12 @@ class ReferringReportSettingTest(LoginBaseTest):
             org_name='org1',
             clinic_id=self.clinic.id)
         ref1 = ReferringEntity.objects.create(
-            entity_name='phys1', organization_id=organization.id)
+            entity_name='phys1', organization_id=organization.id,
+            clinic_id=self.clinic.id)
 
         ref2 = ReferringEntity.objects.create(
-            entity_name='phys2', organization_id=organization.id)
+            entity_name='phys2', organization_id=organization.id,
+            clinic_id=self.clinic.id)
 
         data = {'enabled': True,
                 'period': ReferringReportSetting.PERIOD_DAILY,
