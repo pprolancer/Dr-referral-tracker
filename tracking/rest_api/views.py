@@ -48,10 +48,11 @@ class OrganizationView(PaginationPageSizeMixin, BaseClinicModelViewSet):
     ordering = ('id',)
 
 
-class ReferringEntityView(BaseClinicModelViewSet):
+class ReferringEntityView(PaginationPageSizeMixin, BaseClinicModelViewSet):
     '''
     rest view for ReferringEntity resource
     '''
+    max_page_size = 0  # zero mean unlimitted page_size
     queryset = ReferringEntity.objects.all()
     serializer_class = ReferringEntitySerializer
     filter_fields = ('organization', 'entity_name', 'entity_title',
@@ -60,10 +61,11 @@ class ReferringEntityView(BaseClinicModelViewSet):
     ordering = ('id',)
 
 
-class TreatingProviderView(BaseClinicModelViewSet):
+class TreatingProviderView(PaginationPageSizeMixin, BaseClinicModelViewSet):
     '''
     rest view for TreatingProvider resource
     '''
+    max_page_size = 0  # zero mean unlimitted page_size
     queryset = TreatingProvider.objects.all()
     serializer_class = TreatingProviderSerializer
     filter_fields = ('provider_name', 'provider_title', 'provider_type')
