@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
+
+from Practice_Referral import PaginationPageSizeMixin
 from tracking.models import Organization, ReferringReportSetting, \
     ReferringEntity, TreatingProvider, ClinicReportSetting, ClinicUser, \
     PatientVisit
@@ -8,21 +10,6 @@ from .serializers import OrganizationSerializer, \
     ClinicReportSettingSerializer, BulkClinicReportSettingSerializer, \
     ReferringEntitySerializer, TreatingProviderSerializer, \
     PatientVisitSerializer
-
-
-class PaginationPageSizeMixin(object):
-    BIG_PAGE_SIZE = 10000000
-
-    @property
-    def paginator(self):
-        """
-        The paginator instance associated with the view, or `None`.
-        """
-        paginator = super().paginator
-        max_page_size = getattr(self, 'max_page_size', paginator.max_page_size)
-
-        paginator.max_page_size = max_page_size or self.BIG_PAGE_SIZE
-        return paginator
 
 
 class BaseClinicModelViewSet(viewsets.ModelViewSet):

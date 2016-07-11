@@ -4,9 +4,11 @@ from tracking.models import Organization, ReferringReportSetting, \
     ClinicReportSetting, TrackedModel, ClinicBaseModel, ReferringEntity, \
     TreatingProvider, PatientVisit
 from rest_framework import serializers
+from Practice_Referral import DynamicFieldsSerializerMixin
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(DynamicFieldsSerializerMixin,
+                             serializers.ModelSerializer):
     '''
     a serializer for Organization resource
     '''
@@ -23,7 +25,8 @@ class RelOrganizationSerializer(serializers.ModelSerializer):
         fields = ('id', 'org_name')
 
 
-class ReferringEntitySerializer(serializers.ModelSerializer):
+class ReferringEntitySerializer(DynamicFieldsSerializerMixin,
+                                serializers.ModelSerializer):
     '''
     a serializer for ReferringEntity resource
     '''
@@ -43,7 +46,8 @@ class RelReferringEntitySerializer(serializers.ModelSerializer):
         fields = ('id', 'entity_name')
 
 
-class TreatingProviderSerializer(serializers.ModelSerializer):
+class TreatingProviderSerializer(DynamicFieldsSerializerMixin,
+                                 serializers.ModelSerializer):
     '''
     a serializer for TreatingProvider resource
     '''
@@ -60,7 +64,8 @@ class RelTreatingProviderSerializer(serializers.ModelSerializer):
         fields = ('id', 'provider_name')
 
 
-class PatientVisitSerializer(serializers.ModelSerializer):
+class PatientVisitSerializer(DynamicFieldsSerializerMixin,
+                             serializers.ModelSerializer):
     '''
     a serializer for PatientVisit resource
     '''
@@ -73,7 +78,8 @@ class PatientVisitSerializer(serializers.ModelSerializer):
         model = PatientVisit
 
 
-class ReferringReportSettingSerializer(serializers.ModelSerializer):
+class ReferringReportSettingSerializer(DynamicFieldsSerializerMixin,
+                                       serializers.ModelSerializer):
     '''
     a serializer for ReferringReportSetting resource
     '''
@@ -90,7 +96,8 @@ class BulkReferringReportSettingSerializer(serializers.ModelSerializer):
         exclude = ('id', 'referring_entity',)
 
 
-class ClinicReportSettingSerializer(serializers.ModelSerializer):
+class ClinicReportSettingSerializer(DynamicFieldsSerializerMixin,
+                                    serializers.ModelSerializer):
     '''
     a serializer for ClinicReportSetting resource
     '''

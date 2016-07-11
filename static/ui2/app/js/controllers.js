@@ -5,16 +5,16 @@ app.controller('PageContentController', function($scope) {
     });
 });
 
-app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
+app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, ReferringEntityService, TreatingProviderService, OrganizationService) {
     // load current user
     $rootScope.currentUser = {};
     $rootScope.pageLoaded = false;
-    $rootScope.$global.TreatingProviderListCtrl = {}
-    $rootScope.$global.OrganizationListCtrl = {}
-    $rootScope.$global.ReferringEntityListCtrl = {}
-    $rootScope.$global.PatientVisitListCtrl = {}
+    $rootScope.$global.TreatingProvider = {}
+    $rootScope.$global.Organization = {}
+    $rootScope.$global.ReferringEntity = {}
+    $rootScope.$global.PatientVisit = {}
 
-    $rootScope.$global.TreatingProviderListCtrl.typeChoices = [
+    $rootScope.$global.TreatingProvider.typeChoices = [
         {
             "value": "PA",
             "display_name": "Physician Assistant"
@@ -29,7 +29,7 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
             "display_name": "Nurse Practitioner"
         }
     ];
-    $rootScope.$global.OrganizationListCtrl.typeChoices = [
+    $rootScope.$global.Organization.typeChoices = [
         {
             "display_name": "Marketing",
             "value": "MAR"
@@ -72,11 +72,36 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils) {
         }, function(response) {
             Utils.showDefaultServerError(response)
         });
-    }
+    };
 
     $scope.menuActiveIf = function(pageName) {
         return Array.from(arguments).indexOf($rootScope.$state.current.name)>=0? 'active': '';
-    }
+    };
+
+    $rootScope.loadReferringEntityCombo = function() {
+        if (!$rootScope.$global.ReferringEntity.comboData) {
+            ReferringEntityService.query({page_size: 0, ordering: 'entity_name', fields: 'id,entity_name'}, function(response) {
+                $rootScope.$global.ReferringEntity.comboData = response.results;
+            });
+        }
+    };
+
+    $rootScope.loadTreatingProviderCombo = function() {
+        if (!$rootScope.$global.TreatingProvider.comboData) {
+            TreatingProviderService.query({page_size: 0, ordering: 'provider_name', fields: 'id,provider_name'}, function(response) {
+                $rootScope.$global.TreatingProvider.comboData = response.results;
+            });
+        }
+    };
+
+    $rootScope.loadOrganizationCombo = function() {
+        if (!$rootScope.$global.Organization.comboData) {
+            OrganizationService.query({page_size: 0, ordering: 'org_name', fields: 'id,org_name'}, function(response) {
+                $rootScope.$global.Organization.comboData = response.results;
+            });
+        }
+    };
+
 
 });
 
@@ -96,12 +121,12 @@ app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $sta
     $scope.paginationOptions = {
         page: 1,
     };
-    if (!$rootScope.$global.OrganizationListCtrl) {
-        $rootScope.$global.OrganizationListCtrl = {}
+    if (!$rootScope.$global.Organization) {
+        $rootScope.$global.Organization = {}
     }
 
     var initialized = true,
-        $global = $rootScope.$global.OrganizationListCtrl;
+        $global = $rootScope.$global.Organization;
     if (!$global.gridOptions) {
         initialized = false;
         $global.gridOptions = {
@@ -143,7 +168,7 @@ app.controller("OrganizationListCtrl", function($scope, $rootScope, $state, $sta
 });
 
 app.controller("OrganizationNewCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils) {
-    var $global = $rootScope.$global.OrganizationListCtrl;
+    var $global = $rootScope.$global.Organization;
     $scope.selectedRecord = new OrganizationService();
     $scope.addRecord = function() {
         $scope.saving = true;
@@ -151,6 +176,7 @@ app.controller("OrganizationNewCtrl", function($scope, $rootScope, $state,$state
             if ($global && $global.gridOptions) {
                 $global.gridOptions.data.splice(0, 0, response);
             }
+            $rootScope.$global.Organization.comboData = undefined;
             $state.go('organization-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -162,7 +188,7 @@ app.controller("OrganizationNewCtrl", function($scope, $rootScope, $state,$state
 });
 
 app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stateParams, OrganizationService, Utils, $uibModal) {
-    var $global = $rootScope.$global.OrganizationListCtrl;
+    var $global = $rootScope.$global.Organization;
 
     $scope.showDeleteConfirm = function() {
         if (!$scope.selectedRecord) {
@@ -185,6 +211,7 @@ app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stat
                         if (idx >= 0) {
                             gridOptions.data.splice(idx, 1);
                         }
+                        $rootScope.$global.Organization.comboData = undefined;
                         Utils.showDefaultServerSuccess(response);
                         $uibModalInstance.close();
                         $state.go('organization-list');
@@ -213,6 +240,7 @@ app.controller("OrganizationEditCtrl", function($scope, $rootScope, $state,$stat
             if (idx >= 0) {
                 $global.gridOptions.data[idx] = response;
             }
+            $rootScope.$global.Organization.comboData = undefined;
             $state.go('organization-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -243,12 +271,12 @@ app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $
     $scope.paginationOptions = {
         page: 1,
     };
-    if (!$rootScope.$global.ReferringEntityListCtrl) {
-        $rootScope.$global.ReferringEntityListCtrl = {}
+    if (!$rootScope.$global.ReferringEntity) {
+        $rootScope.$global.ReferringEntity = {}
     }
 
     var initialized = true,
-        $global = $rootScope.$global.ReferringEntityListCtrl;
+        $global = $rootScope.$global.ReferringEntity;
     if (!$global.gridOptions) {
         initialized = false;
         $global.gridOptions = {
@@ -284,17 +312,16 @@ app.controller("ReferringEntityListCtrl", function($scope, $rootScope, $state, $
 });
 
 app.controller("ReferringEntityNewCtrl", function($scope, $rootScope, $state,$stateParams, ReferringEntityService, OrganizationService, Utils) {
-    var $global = $rootScope.$global.ReferringEntityListCtrl;
+    var $global = $rootScope.$global.ReferringEntity;
     $scope.selectedRecord = new ReferringEntityService();
-    OrganizationService.query({page_size: 0}, function(response) {
-        $scope.organizations = response.results;
-    });
+    $rootScope.loadOrganizationCombo();
     $scope.addRecord = function() {
         $scope.saving = true;
         $scope.selectedRecord.$save().then(function(response) {
             if ($global && $global.gridOptions) {
                 $global.gridOptions.data.splice(0, 0, response);
             }
+            $rootScope.$global.ReferringEntity.comboData = undefined;
             $state.go('referring_entity-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -306,10 +333,8 @@ app.controller("ReferringEntityNewCtrl", function($scope, $rootScope, $state,$st
 });
 
 app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$stateParams, ReferringEntityService, OrganizationService, Utils, $uibModal) {
-    var $global = $rootScope.$global.ReferringEntityListCtrl;
-    OrganizationService.query({page_size: 0}, function(response) {
-        $scope.organizations = response.results;
-    });
+    var $global = $rootScope.$global.ReferringEntity;
+    $rootScope.loadOrganizationCombo();
 
     $scope.showDeleteConfirm = function() {
         if (!$scope.selectedRecord) {
@@ -332,6 +357,7 @@ app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$s
                         if (idx >= 0) {
                             gridOptions.data.splice(idx, 1);
                         }
+                        $rootScope.$global.ReferringEntity.comboData = undefined;
                         Utils.showDefaultServerSuccess(response);
                         $uibModalInstance.close();
                         $state.go('referring_entity-list');
@@ -360,6 +386,7 @@ app.controller("ReferringEntityEditCtrl", function($scope, $rootScope, $state,$s
             if (idx >= 0) {
                 $global.gridOptions.data[idx] = response;
             }
+            $rootScope.$global.ReferringEntity.comboData = undefined;
             $state.go('referring_entity-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -397,12 +424,12 @@ app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, 
         return choice? choice.display_name: type;
     };
 
-    if (!$rootScope.$global.TreatingProviderListCtrl) {
-        $rootScope.$global.TreatingProviderListCtrl = {}
+    if (!$rootScope.$global.TreatingProvider) {
+        $rootScope.$global.TreatingProvider = {}
     }
 
     var initialized = true,
-        $global = $rootScope.$global.TreatingProviderListCtrl;
+        $global = $rootScope.$global.TreatingProvider;
     if (!$global.gridOptions) {
         initialized = false;
         $global.gridOptions = {
@@ -433,7 +460,7 @@ app.controller("TreatingProviderListCtrl", function($scope, $rootScope, $state, 
 });
 
 app.controller("TreatingProviderNewCtrl", function($scope, $rootScope, $state,$stateParams, TreatingProviderService, Utils) {
-    var $global = $rootScope.$global.TreatingProviderListCtrl;
+    var $global = $rootScope.$global.TreatingProvider;
     $scope.selectedRecord = new TreatingProviderService();
     $scope.addRecord = function() {
         $scope.saving = true;
@@ -441,6 +468,7 @@ app.controller("TreatingProviderNewCtrl", function($scope, $rootScope, $state,$s
             if ($global && $global.gridOptions) {
                 $global.gridOptions.data.splice(0, 0, response);
             }
+            $rootScope.$global.TreatingProvider.comboData = undefined;
             $state.go('treating_provider-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -452,14 +480,14 @@ app.controller("TreatingProviderNewCtrl", function($scope, $rootScope, $state,$s
 });
 
 app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$stateParams, TreatingProviderService, Utils, $uibModal) {
-    var $global = $rootScope.$global.TreatingProviderListCtrl;
+    var $global = $rootScope.$global.TreatingProvider;
 
     $scope.showDeleteConfirm = function() {
         if (!$scope.selectedRecord) {
             return;
         }
         var id = $scope.selectedRecord.id;
-        var $global = $rootScope.$global.TreatingProviderListCtrl;
+        var $global = $rootScope.$global.TreatingProvider;
         var data = $global.gridOptions? $global.gridOptions.data: [];
         var idx = Utils.findByProperty(data, 'id', id),
             gridOptions = $global.gridOptions;
@@ -476,6 +504,7 @@ app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$
                         if (idx >= 0) {
                             gridOptions.data.splice(idx, 1);
                         }
+                        $rootScope.$global.TreatingProvider.comboData = undefined;
                         Utils.showDefaultServerSuccess(response);
                         $uibModalInstance.close();
                         $state.go('treating_provider-list');
@@ -504,6 +533,7 @@ app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$
             if (idx >= 0) {
                 $global.gridOptions.data[idx] = response;
             }
+            $rootScope.$global.TreatingProvider.comboData = undefined;
             $state.go('treating_provider-list');
             Utils.showDefaultServerSuccess(response);
         }, function(response) {
@@ -534,12 +564,12 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
     $scope.paginationOptions = {
         page: 1,
     };
-    if (!$rootScope.$global.PatientVisitListCtrl) {
-        $rootScope.$global.PatientVisitListCtrl = {}
+    if (!$rootScope.$global.PatientVisit) {
+        $rootScope.$global.PatientVisit = {}
     }
 
     var initialized = true,
-        $global = $rootScope.$global.PatientVisitListCtrl;
+        $global = $rootScope.$global.PatientVisit;
     if (!$global.gridOptions) {
         initialized = false;
         $global.gridOptions = {
@@ -577,14 +607,10 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
 });
 
 app.controller("PatientVisitNewCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils) {
-    var $global = $rootScope.$global.PatientVisitListCtrl;
+    var $global = $rootScope.$global.PatientVisit;
     $scope.selectedRecord = new PatientVisitService();
-    ReferringEntityService.query({page_size: 0}, function(response) {
-        $scope.referring_entities = response.results;
-    });
-    TreatingProviderService.query({page_size: 0}, function(response) {
-        $scope.treating_providers = response.results;
-    });
+    $rootScope.loadReferringEntityCombo();
+    $rootScope.loadTreatingProviderCombo();
     $scope.addRecord = function() {
         $scope.saving = true;
         $scope.selectedRecord.$save().then(function(response) {
@@ -602,13 +628,9 @@ app.controller("PatientVisitNewCtrl", function($scope, $rootScope, $state,$state
 });
 
 app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils, $uibModal) {
-    var $global = $rootScope.$global.PatientVisitListCtrl;
-    ReferringEntityService.query({page_size: 0}, function(response) {
-        $scope.referring_entities = response.results;
-    });
-    TreatingProviderService.query({page_size: 0}, function(response) {
-        $scope.treating_providers = response.results;
-    });
+    var $global = $rootScope.$global.PatientVisit;
+    $rootScope.loadReferringEntityCombo();
+    $rootScope.loadTreatingProviderCombo();
 
     $scope.showDeleteConfirm = function() {
         if (!$scope.selectedRecord) {

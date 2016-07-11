@@ -4,7 +4,7 @@
                     <ui-select-match placeholder="Referring Entity or Visit">
                         {{$select.selected.entity_name}}
                     </ui-select-match>
-                    <ui-select-choices repeat="item.id as item in referring_entities | filter: $select.search" value="{{$select.selected.id}}">
+                    <ui-select-choices repeat="item.id as item in $global.ReferringEntity.comboData | filter: $select.search" value="{{$select.selected.id}}">
                         <span ng-bind-html="item.entity_name | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
@@ -15,7 +15,7 @@
                     <ui-select-match placeholder="Treating Provider or Visit">
                         {{$select.selected.provider_name}}
                     </ui-select-match>
-                    <ui-select-choices repeat="item.id as item in treating_providers | filter: $select.search" value="{{$select.selected.id}}">
+                    <ui-select-choices repeat="item.id as item in $global.TreatingProviderListCtrl.comboData | filter: $select.search" value="{{$select.selected.id}}">
                         <span ng-bind-html="item.provider_name | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>

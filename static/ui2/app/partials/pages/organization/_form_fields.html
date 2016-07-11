@@ -8,7 +8,7 @@
                     <ui-select-match placeholder="Type of Organization">
                         {{$select.selected.display_name}}
                     </ui-select-match>
-                    <ui-select-choices repeat="choice.value as choice in $global.OrganizationListCtrl.typeChoices | filter: $select.search" value="{{$select.selected.id}}">
+                    <ui-select-choices repeat="choice.value as choice in $global.Organization.typeChoices | filter: $select.search" value="{{$select.selected.id}}">
                         <span ng-bind-html="choice.display_name | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>

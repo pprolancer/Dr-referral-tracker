@@ -63,3 +63,49 @@ def custom_rest_exception_handler(exc, context):
         response.reason_phrase = REASON_PHRASES.get(response.status_code)
 
     return response
+
+
+class PaginationPageSizeMixin(object):
+    BIG_PAGE_SIZE = 10000000
+
+    @property
+    def paginator(self):
+        """
+        The paginator instance associated with the view, or `None`.
+        """
+        paginator = super().paginator
+        max_page_size = getattr(self, 'max_page_size', paginator.max_page_size)
+
+        paginator.max_page_size = max_page_size or self.BIG_PAGE_SIZE
+        return paginator
+
+
+class DynamicFieldsSerializerMixin(object):
+    '''
+    This class allow you to have dynamic fields in get rest api.
+    user can pass "fields" and "xfields" as a get query parameter.
+    "fields" specify list of fields you want to be shown as a result.
+    "xfields" specify list of fields you want to be excluded in result.
+    i.e:
+    fields=id,name
+    or
+    xfields=name1,name2
+    '''
+    def __init__(self, *args, **kwargs):
+        super(DynamicFieldsSerializerMixin, self).__init__(*args, **kwargs)
+        if not self.context:
+            return
+
+        params = self.context['request'].query_params
+        fields = params.get('fields', None)
+        xfields = params.get('xfields', None)
+        if fields:
+            fields = fields.split(',')
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+        elif xfields:
+            xfields = xfields.split(',')
+            for field_name in xfields:
+                self.fields.pop(field_name, None)

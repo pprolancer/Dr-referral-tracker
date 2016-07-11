@@ -12,7 +12,7 @@
                     <ui-select-match placeholder="Organization of Entity">
                         {{$select.selected.org_name}}
                     </ui-select-match>
-                    <ui-select-choices repeat="item.id as item in organizations | filter: $select.search" value="{{$select.selected.id}}">
+                    <ui-select-choices repeat="item.id as item in $global.Organization.comboData | filter: $select.search" value="{{$select.selected.id}}">
                         <span ng-bind-html="item.org_name | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
