@@ -15,7 +15,7 @@
                     <ui-select-match placeholder="Treating Provider or Visit">
                         {{$select.selected.provider_name}}
                     </ui-select-match>
-                    <ui-select-choices repeat="item.id as item in $global.TreatingProviderListCtrl.comboData | filter: $select.search" value="{{$select.selected.id}}">
+                    <ui-select-choices repeat="item.id as item in $global.TreatingProvider.comboData | filter: $select.search" value="{{$select.selected.id}}">
                         <span ng-bind-html="item.provider_name | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
