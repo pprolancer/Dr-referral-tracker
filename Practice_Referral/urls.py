@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tracking.rest_api.views import OrganizationView, \
     ReferringReportSettingView, ClinicReportSettingView, ReferringEntityView, \
-    TreatingProviderView, PatientVisitView
+    TreatingProviderView, PatientVisitView, PatientVisitReportView
 from users.rest_api.views import SessionView
 
 # register all rest views here
@@ -15,6 +15,8 @@ rest_router.register(r'organization', OrganizationView)
 rest_router.register(r'referring_entity', ReferringEntityView)
 rest_router.register(r'treating_provider', TreatingProviderView)
 rest_router.register(r'patient_visit', PatientVisitView)
+rest_router.register(r'report/patient_visits', PatientVisitReportView,
+                     base_name='report')
 rest_router.register(r'report_setting/referring', ReferringReportSettingView)
 rest_router.register(r'report_setting/clinic',
                      ClinicReportSettingView)

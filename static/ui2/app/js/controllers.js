@@ -13,6 +13,7 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, R
     $rootScope.$global.Organization = {}
     $rootScope.$global.ReferringEntity = {}
     $rootScope.$global.PatientVisit = {}
+    $rootScope.$global.PatientVisitsReport = {}
 
     $rootScope.$global.TreatingProvider.typeChoices = [
         {
@@ -699,4 +700,43 @@ app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stat
         });
     };
     $scope.loadRecord();
+});
+
+
+/******************************************************************
+********************* PatientVisit controllers *****************
+*******************************************************************/
+
+app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, Utils) {
+    updateTotal = function() {
+        $scope.total = {};
+        angular.forEach($scope.tableData, function(org) {
+            angular.forEach(org.counts, function(c, k) {
+                if ($scope.total[k] == undefined) {
+                    $scope.total[k] = 0;
+                }
+                $scope.total[k] += c;
+            });
+        });
+    };
+    $scope.refreshData = function() {
+        var lastYear = moment().year() - 1;
+        $scope.mtdRange = [moment().date(1).toDate(), moment().toDate()];
+        $scope.mtdLastRange = [moment().date(1).year(lastYear).toDate(), moment().year(lastYear).toDate()];
+        $scope.ytdRange = [moment().date(1).month(0).toDate(), moment().toDate()];
+        $scope.ytdLastRange = [moment().date(1).month(0).year(lastYear).toDate(), moment().year(lastYear).toDate()];
+
+        $scope.refreshing = true;
+        $http.get("/api/v1/report/patient_visits").
+        then(function(response) {
+            $scope.tableData = response.data;
+            updateTotal();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function () {
+            $scope.refreshing = false;
+        });
+    };
+    $scope.refreshData();
+
 });

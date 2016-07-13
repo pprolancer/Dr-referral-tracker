@@ -132,7 +132,7 @@ def get_organization_counts_year_lastyear(organization):
         all_phys = organization.get_referring_entity()
         count = 0
         for phy in all_phys:
-            count = count + get_referring_entity_counts_month_lastyear(phy)
+            count = count + get_referring_entity_counts_year_lastyear(phy)
 
         return count
     except Exception:

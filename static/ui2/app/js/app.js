@@ -141,6 +141,16 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         },
         controller  : 'PatientVisitEditCtrl'
+    }).state('patient_visits_report', {
+        url: "/reports/patient_visit/",
+        templateUrl : 'app/partials/pages/reports/patient_visits.html',
+        data: {
+            pageInfo: {
+                title: 'Patient Visits Report',
+                titleDesc: 'report of patient visits summary'
+            }
+        },
+        controller  : 'PatientVisitsReportCtrl'
     });
 });
 

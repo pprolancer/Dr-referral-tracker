@@ -79,3 +79,11 @@ Rounded Portlets
   padding-bottom: 0px;
   padding-top: 0px;
 }
+
+.vcenter {
+    vertical-align: middle !important;
+}
+
+#patient-visit-report-table > tbody > tr:nth-of-type(even) {
+  background-color: #f9f9f9;
+}

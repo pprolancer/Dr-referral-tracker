@@ -116,7 +116,6 @@ var Layout = function() {
     // Handle sidebar menu
     var handleSidebarMenu = function() {
         $('.page-sidebar').on('click', 'li > a', function(e) {
-
             if (Metronic.getViewPort().width >= resBreakpointMd && $(this).parents('.page-sidebar-menu-hover-submenu').size() === 1) { // exit of hover sidebar menu
                 return;
             }
@@ -166,7 +165,7 @@ var Layout = function() {
                 });
             } else {
                 $('.arrow', $(this)).addClass("open");
-                $(this).parent().addClass("open");
+                // $(this).parent().addClass("open");
                 sub.slideDown(slideSpeed, function() {
                     if (autoScroll === true && $('body').hasClass('page-sidebar-closed') === false) {
                         if ($('body').hasClass('page-sidebar-fixed')) {

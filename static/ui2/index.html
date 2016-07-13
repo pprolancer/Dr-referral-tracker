@@ -151,7 +151,7 @@ body {
             <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing -->
             <!-- DOC: Set data-keep-expand="true" to keep the submenues expanded -->
             <!-- DOC: Set data-auto-speed="200" to adjust the sub menu slide up/down speed -->
-            <ul class="page-sidebar-menu page-sidebar-menu-hover-submenu" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
+            <ul class="page-sidebar-menu page-sidebar-menu-accordion-submenu" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="100">
                 <li class="start" data-ng-class="menuActiveIf('dashboard')">
                     <a href="{{ $state.href('dashboard') }}">
                     <i class="fa fa-home"></i>
@@ -187,7 +187,20 @@ body {
                     <span class="selected"></span>
                     </a>
                 </li>
-
+                <li class="start" data-ng-class="menuActiveIf('patient_visits_report')">
+                    <a href="javascript:;">
+                        <i class="fa fa-bar-chart"></i>
+                        <span class="title">Reports</span>
+                        <span class="arrow"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li data-ng-class="menuActiveIf('patient_visits_report')">
+                            <a href="{{ $state.href('patient_visits_report') }}">
+                                <i class="fa fa-table"></i> {{ $state.get('patient_visits_report').data.pageInfo.title }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
             <!-- END SIDEBAR MENU -->
         </div>
