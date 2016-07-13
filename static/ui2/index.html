@@ -187,16 +187,16 @@ body {
                     <span class="selected"></span>
                     </a>
                 </li>
-                <li class="start" data-ng-class="menuActiveIf('patient_visits_report')">
+                <li class="start" data-ng-class="menuActiveIf('report-patient_visits')">
                     <a href="javascript:;">
                         <i class="fa fa-bar-chart"></i>
                         <span class="title">Reports</span>
                         <span class="arrow"></span>
                     </a>
                     <ul class="sub-menu">
-                        <li data-ng-class="menuActiveIf('patient_visits_report')">
-                            <a href="{{ $state.href('patient_visits_report') }}">
-                                <i class="fa fa-table"></i> {{ $state.get('patient_visits_report').data.pageInfo.title }}
+                        <li data-ng-class="menuActiveIf('report-patient_visits')">
+                            <a href="{{ $state.href('report-patient_visits') }}">
+                                <i class="fa fa-table"></i> {{ $state.get('report-patient_visits').data.pageInfo.title }}
                             </a>
                         </li>
                     </ul>

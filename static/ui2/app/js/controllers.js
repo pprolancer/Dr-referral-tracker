@@ -708,35 +708,38 @@ app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stat
 *******************************************************************/
 
 app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, Utils) {
+    var $global = $rootScope.$global.PatientVisitsReport
     updateTotal = function() {
-        $scope.total = {};
-        angular.forEach($scope.tableData, function(org) {
+        $global.total = {};
+        angular.forEach($global.tableData, function(org) {
             angular.forEach(org.counts, function(c, k) {
-                if ($scope.total[k] == undefined) {
-                    $scope.total[k] = 0;
+                if ($global.total[k] == undefined) {
+                    $global.total[k] = 0;
                 }
-                $scope.total[k] += c;
+                $global.total[k] += c;
             });
         });
     };
     $scope.refreshData = function() {
         var lastYear = moment().year() - 1;
-        $scope.mtdRange = [moment().date(1).toDate(), moment().toDate()];
-        $scope.mtdLastRange = [moment().date(1).year(lastYear).toDate(), moment().year(lastYear).toDate()];
-        $scope.ytdRange = [moment().date(1).month(0).toDate(), moment().toDate()];
-        $scope.ytdLastRange = [moment().date(1).month(0).year(lastYear).toDate(), moment().year(lastYear).toDate()];
+        $global.mtdRange = [moment().date(1).toDate(), moment().toDate()];
+        $global.mtdLastRange = [moment().date(1).year(lastYear).toDate(), moment().year(lastYear).toDate()];
+        $global.ytdRange = [moment().date(1).month(0).toDate(), moment().toDate()];
+        $global.ytdLastRange = [moment().date(1).month(0).year(lastYear).toDate(), moment().year(lastYear).toDate()];
 
-        $scope.refreshing = true;
+        $global.refreshing = true;
         $http.get("/api/v1/report/patient_visits").
         then(function(response) {
-            $scope.tableData = response.data;
+            $global.tableData = response.data;
             updateTotal();
         }, function(response) {
             Utils.showDefaultServerError(response);
         }).finally(function () {
-            $scope.refreshing = false;
+            $global.refreshing = false;
         });
     };
-    $scope.refreshData();
+    if ($global.tableData == undefined) {
+        $scope.refreshData();
+    }
 
 });

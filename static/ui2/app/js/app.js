@@ -141,13 +141,23 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         },
         controller  : 'PatientVisitEditCtrl'
-    }).state('patient_visits_report', {
+    }).state('reports', {
+        url: "/reports",
+        redirectTo: 'report-patient_visits',
+        data: {
+            pageInfo: {
+                title: 'Reports'
+            }
+        },
+        controller  : 'PatientVisitEditCtrl'
+    }).state('report-patient_visits', {
         url: "/reports/patient_visit/",
         templateUrl : 'app/partials/pages/reports/patient_visits.html',
         data: {
             pageInfo: {
                 title: 'Patient Visits Report',
-                titleDesc: 'report of patient visits summary'
+                titleDesc: 'report of patient visits summary',
+                back: 'reports'
             }
         },
         controller  : 'PatientVisitsReportCtrl'
@@ -183,4 +193,10 @@ app.config(['$controllerProvider', '$httpProvider', function($controllerProvider
 app.run(["$rootScope", "$state", function($rootScope, $state) {
     $rootScope.$state = $state; // state to be accessed from view
     $rootScope.$global = {};
+    $rootScope.$on('$stateChangeStart', function(evt, to, params) {
+        if (to.redirectTo) {
+            evt.preventDefault();
+            $state.go(to.redirectTo, params, {location: 'replace'})
+        }
+    });
 }]);

@@ -1,10 +1,10 @@
 <!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
 <!-- BEGIN PAGE HEADER-->
 <ng-include src="'app/partials/pagebar.html'"></ng-include>
-<button ng-click="refreshData()" ng-disabled="refreshing" class="btn green-haze pull-right">
-    <i ng-class="refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
-    <span ng-hide="refreshing">Refresh</span>
-    <span ng-show="refreshing">Refreshing</span>
+<button ng-click="refreshData()" ng-disabled="$global.PatientVisitsReport.refreshing" class="btn green-haze pull-right">
+    <i ng-class="$global.PatientVisitsReport.refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
+    <span ng-hide="$global.PatientVisitsReport.refreshing">Refresh</span>
+    <span ng-show="$global.PatientVisitsReport.refreshing">Refreshing</span>
 </button>
 <h3 class="page-title">
 {{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
@@ -18,21 +18,21 @@
             <thead>
                 <tr class="">
                     <th class="vcenter"><strong>Organization</strong> <span class="pull-right"><em>Referring Entity</em></span></th>
-                    <th>MTD ({{mtdRange[0]|date:'yyyy'}})<br>{{mtdRange[0]|date:'MMM dd'}} - {{mtdRange[1]|date:'MMM dd'}}</th>
-                    <th>MTD ({{mtdLastRange[0]|date:'yyyy'}})<br>{{mtdLastRange[0]|date:'MMM dd'}} - {{mtdLastRange[1]|date:'MMM dd'}}</th>
-                    <th>YTD ({{ytdRange[0]|date:'yyyy'}})<br>{{ytdRange[0]|date:'MMM dd'}} - {{ytdRange[1]|date:'MMM dd'}}</th>
-                    <th>YTD ({{ytdLastRange[0]|date:'yyyy'}})<br>{{ytdLastRange[0]|date:'MMM dd'}} - {{ytdLastRange[1]|date:'MMM dd'}}</th>
+                    <th>MTD ({{$global.PatientVisitsReport.mtdRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.mtdRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.mtdRange[1]|date:'MMM dd'}}</th>
+                    <th>MTD ({{$global.PatientVisitsReport.mtdLastRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.mtdLastRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.mtdLastRange[1]|date:'MMM dd'}}</th>
+                    <th>YTD ({{$global.PatientVisitsReport.ytdRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.ytdRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.ytdRange[1]|date:'MMM dd'}}</th>
+                    <th>YTD ({{$global.PatientVisitsReport.ytdLastRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.ytdLastRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.ytdLastRange[1]|date:'MMM dd'}}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="warning">
                     <td><strong>Total</strong></td>
-                    <td><strong>{{total.mtd}}</strong></td>
-                    <td><strong>{{total.mtd_last}}</strong></td>
-                    <td><strong>{{total.ytd}}</strong></td>
-                    <td><strong>{{total.ytd_last}}</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.mtd}}</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.mtd_last}}</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.ytd}}</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.ytd_last}}</strong></td>
                 </tr>
-                <tr ng-repeat-start="(orgId, orgData) in tableData | orderObjectBy : 'org_name'">
+                <tr ng-repeat-start="(orgId, orgData) in $global.PatientVisitsReport.tableData | orderObjectBy : 'org_name'">
                     <td><strong>{{orgData.org_name}}</strong></td>
                     <td ng-class="orgData.counts.mtd<orgData.counts.mtd_last? 'danger': 'success'"><strong>{{orgData.counts.mtd}}</strong></td>
                     <td><strong>{{orgData.counts.mtd_last}}</strong></td>
