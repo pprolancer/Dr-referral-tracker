@@ -87,3 +87,8 @@ Rounded Portlets
 #patient-visit-report-table > tbody > tr:nth-of-type(even) {
   background-color: #f9f9f9;
 }
+
+#patient-visit-report-table th {
+  border-color: whitesmoke;
+  border-left: 0px;
+}

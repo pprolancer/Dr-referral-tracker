@@ -595,7 +595,8 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
                 },
                 {name: 'visit_actual_time', 'displayName': 'Actual Time', width: 120,
                     cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{row.entity.visit_actual_time|date: \'hh:mm a\'}}</div>'
-                }
+                },
+                {name: 'visit_count', 'displayName': 'Visit Count', width: 120}
             ],
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
@@ -704,7 +705,7 @@ app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stat
 
 
 /******************************************************************
-********************* PatientVisit controllers *****************
+********************* PatientVisitsReport controllers *****************
 *******************************************************************/
 
 app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, Utils) {
@@ -722,6 +723,8 @@ app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $s
     };
     $scope.refreshData = function() {
         var lastYear = moment().year() - 1;
+        $global.today = moment().toDate();
+        $global.yesterday = moment().add(-1, 'days').toDate();
         $global.mtdRange = [moment().date(1).toDate(), moment().toDate()];
         $global.mtdLastRange = [moment().date(1).year(lastYear).toDate(), moment().year(lastYear).toDate()];
         $global.ytdRange = [moment().date(1).month(0).toDate(), moment().toDate()];

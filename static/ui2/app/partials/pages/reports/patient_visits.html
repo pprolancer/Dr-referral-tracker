@@ -18,6 +18,8 @@
             <thead>
                 <tr class="">
                     <th class="vcenter"><strong>Organization</strong> <span class="pull-right"><em>Referring Entity</em></span></th>
+                    <th>TODAY<br>{{$global.PatientVisitsReport.today|date:'MMM dd, yyyy'}}</th>
+                    <th>YESTERDAY<br>{{$global.PatientVisitsReport.yesterday|date:'MMM dd, yyyy'}}</th>
                     <th>MTD ({{$global.PatientVisitsReport.mtdRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.mtdRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.mtdRange[1]|date:'MMM dd'}}</th>
                     <th>MTD ({{$global.PatientVisitsReport.mtdLastRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.mtdLastRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.mtdLastRange[1]|date:'MMM dd'}}</th>
                     <th>YTD ({{$global.PatientVisitsReport.ytdRange[0]|date:'yyyy'}})<br>{{$global.PatientVisitsReport.ytdRange[0]|date:'MMM dd'}} - {{$global.PatientVisitsReport.ytdRange[1]|date:'MMM dd'}}</th>
@@ -27,6 +29,8 @@
             <tbody>
                 <tr class="warning">
                     <td><strong>Total</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.today}}</strong></td>
+                    <td><strong>{{$global.PatientVisitsReport.total.yesterday}}</strong></td>
                     <td><strong>{{$global.PatientVisitsReport.total.mtd}}</strong></td>
                     <td><strong>{{$global.PatientVisitsReport.total.mtd_last}}</strong></td>
                     <td><strong>{{$global.PatientVisitsReport.total.ytd}}</strong></td>
@@ -34,6 +38,8 @@
                 </tr>
                 <tr ng-repeat-start="(orgId, orgData) in $global.PatientVisitsReport.tableData | orderObjectBy : 'org_name'">
                     <td><strong>{{orgData.org_name}}</strong></td>
+                    <td ng-class="orgData.counts.today<orgData.counts.yesterday? 'danger': 'success'"><strong>{{orgData.counts.today}}</strong></td>
+                    <td><strong>{{orgData.counts.yesterday}}</strong></td>
                     <td ng-class="orgData.counts.mtd<orgData.counts.mtd_last? 'danger': 'success'"><strong>{{orgData.counts.mtd}}</strong></td>
                     <td><strong>{{orgData.counts.mtd_last}}</strong></td>
                     <td ng-class="orgData.counts.ytd<orgData.counts.ytd_last? 'danger': 'success'"><strong>{{orgData.counts.ytd}}</strong></td>
@@ -41,6 +47,8 @@
                 </tr>
                 <tr ng-repeat-start="(eId, eData) in orgData.entities | orderObjectBy : 'entity_name'">
                     <td class="text-right"><em>{{eData.entity_name}}</em></td>
+                    <td ng-class="eData.counts.today<eData.counts.yesterday? 'danger': 'success'"><em>{{eData.counts.today}}</em></td>
+                    <td><em>{{eData.counts.yesterday}}</em></td>
                     <td ng-class="eData.counts.mtd<eData.counts.mtd_last? 'danger': 'success'"><em>{{eData.counts.mtd}}</em></td>
                     <td><em>{{eData.counts.mtd_last}}</em></td>
                     <td ng-class="eData.counts.ytd<eData.counts.ytd_last? 'danger': 'success'"><em>{{eData.counts.ytd}}</em></td>

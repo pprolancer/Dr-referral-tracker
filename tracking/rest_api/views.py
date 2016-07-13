@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import Sum
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -88,7 +88,8 @@ class PatientVisitReportView(ClinicViewSetMixin, viewsets.GenericViewSet):
     queryset = PatientVisit.objects.all()
 
     def __count_struct(self):
-        return {'mtd': 0, 'mtd_last': 0, 'ytd': 0, 'ytd_last': 0}
+        return {'mtd': 0, 'mtd_last': 0, 'ytd': 0, 'ytd_last': 0,
+                'today': 0, 'yesterday': 0}
 
     def list(self, request, *args, **kwargs):
         orgs = self.clinic_filter(Organization.objects)
@@ -110,6 +111,7 @@ class PatientVisitReportView(ClinicViewSetMixin, viewsets.GenericViewSet):
         ).annotate(visit_counts=Sum('visit_count'))
 
         today = datetime.today()
+        yesterday = today - timedelta(days=1)
         last_year = today.year - 1
         date_ranges = {
             'mtd': (today.replace(day=1), today),
@@ -118,6 +120,8 @@ class PatientVisitReportView(ClinicViewSetMixin, viewsets.GenericViewSet):
             'ytd': (today.replace(day=1, month=1), today),
             'ytd_last': (today.replace(day=1, month=1, year=last_year),
                          today.replace(year=last_year)),
+            'today': (today, today),
+            'yesterday': (yesterday, yesterday)
         }
         for k, date_range in date_ranges.items():
             for r in qs.filter(visit_date__range=date_range):
