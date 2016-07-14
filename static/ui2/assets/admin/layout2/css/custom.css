@@ -89,8 +89,8 @@ Rounded Portlets
 }
 
 #patient-visit-report-table th {
+  /*border-left-color: whitesmoke;*/
   border-color: whitesmoke;
-  border-left: 0px;
 }
 
 #weekly-provider-visit-report-table tr {

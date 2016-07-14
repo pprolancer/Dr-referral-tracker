@@ -15,6 +15,7 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, R
     $rootScope.$global.PatientVisit = {}
     $rootScope.$global.PatientVisitsReport = {}
     $rootScope.$global.WeeklyProvidersVisitsReport = {}
+    $rootScope.$global.MonthlyProvidersVisitsReport = {}
 
     $rootScope.$global.TreatingProvider.typeChoices = [
         {
@@ -755,7 +756,7 @@ app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $s
 app.controller("WeeklyProvidersVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, $filter, Utils) {
     var $global = $rootScope.$global.WeeklyProvidersVisitsReport
     updateTotal = function() {
-        $global.total = [0, 1, 2, 3, 4, 5, 6].map(function() {
+        $global.total = Array.apply(null, Array($global.weekDays.length+2)).map(function() {
             return {'current': 0, 'new': 0};
         });
         angular.forEach($global.tableData, function(pvd) {
@@ -778,6 +779,57 @@ app.controller("WeeklyProvidersVisitsReportCtrl", function($scope, $rootScope, $
 
         $global.refreshing = true;
         $http.get("/api/v1/report/weekly_providers_visits").
+        then(function(response) {
+            $global.tableData = response.data;
+            updateTotal();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function () {
+            $global.refreshing = false;
+        });
+    };
+    if ($global.tableData == undefined) {
+        $scope.refreshData();
+    }
+
+});
+
+
+/******************************************************************
+********************* MonthlyProvidersVisitsReport controllers *****************
+*******************************************************************/
+
+app.controller("MonthlyProvidersVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, $filter, Utils) {
+    var $global = $rootScope.$global.MonthlyProvidersVisitsReport
+    updateTotal = function() {
+        monthsCount = $global.yearMonths.length;
+        $global.total = Array.apply(null, Array(monthsCount + 2)).map(function() {
+            return {'current': 0, 'new': 0};
+        });
+        angular.forEach($global.tableData, function(pvd) {
+            angular.forEach(pvd.months, function(c, i) {
+                $global.total[i]['current'] += c['current'];
+                $global.total[i]['new'] += c['new'];
+                $global.total[monthsCount]['new'] += c['new'];
+                $global.total[monthsCount]['current'] += c['current'];
+            });
+            $global.total[monthsCount+1]['new'] += pvd.prev_year['new'];
+            $global.total[monthsCount+1]['current'] += pvd.prev_year['current'];
+        });
+    };
+
+    $scope.refreshData = function() {
+        $global.today = moment().toDate();
+        $global.prevYear = $global.today.getFullYear() - 1
+        var thisMonth = $global.today.getMonth(),
+            thisYear = $global.today.getFullYear();
+
+        $global.yearMonths = Array.apply(null, Array(thisMonth + 1)).map(function(d, i) {
+            return moment({year: thisYear, month: i}).toDate();
+        });
+
+        $global.refreshing = true;
+        $http.get("/api/v1/report/monthly_providers_visits").
         then(function(response) {
             $global.tableData = response.data;
             updateTotal();

@@ -5,7 +5,7 @@ from django.contrib import admin
 from tracking.rest_api.views import OrganizationView, \
     ReferringReportSettingView, ClinicReportSettingView, ReferringEntityView, \
     TreatingProviderView, PatientVisitView, PatientVisitReportView, \
-    WeeklyProvidersVisitReportView
+    WeeklyProvidersVisitReportView, MonthlyProvidersVisitReportView
 from users.rest_api.views import SessionView
 
 # register all rest views here
@@ -20,6 +20,8 @@ rest_router.register(r'report/patient_visits', PatientVisitReportView,
                      base_name='report')
 rest_router.register(r'report/weekly_providers_visits',
                      WeeklyProvidersVisitReportView, base_name='report')
+rest_router.register(r'report/monthly_providers_visits',
+                     MonthlyProvidersVisitReportView, base_name='report')
 rest_router.register(r'report_setting/referring', ReferringReportSettingView)
 rest_router.register(r'report_setting/clinic',
                      ClinicReportSettingView)

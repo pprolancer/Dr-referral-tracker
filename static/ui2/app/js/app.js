@@ -172,6 +172,17 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         },
         controller  : 'WeeklyProvidersVisitsReportCtrl'
+    }).state('report-monthly_providers_visits', {
+        url: "/reports/monthly_providers_visits/",
+        templateUrl : 'app/partials/pages/reports/monthly_providers_visits.html',
+        data: {
+            pageInfo: {
+                title: 'Monthly Visits Report',
+                titleDesc: 'report of monthly providers visits summary',
+                back: 'reports'
+            }
+        },
+        controller  : 'MonthlyProvidersVisitsReportCtrl'
     });
 });
 

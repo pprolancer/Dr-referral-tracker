@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
-from django.db.models import Sum
+from django.db import connection
+from django.db.models import Sum, Q
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -78,6 +79,91 @@ class PatientVisitView(ClinicViewSetMixin, viewsets.ModelViewSet):
                      'visit_count')
     ordering_fields = '__all__'
     ordering = ('id',)
+
+
+class ReferringReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
+    '''
+    rest view for ReferringReportSetting resource
+    '''
+
+    queryset = ReferringReportSetting.objects.all()
+    serializer_class = ReferringReportSettingSerializer
+    filter_fields = ('period', 'report_name', 'enabled',
+                     'referring_entity')
+    ordering_fields = '__all__'
+
+    def create(self, request, *args, **kwargs):
+        bulk = (request.data or {}).pop('bulk', False)
+        if bulk:
+            return self.__bulk_create(request)
+        return super(ReferringReportSettingView, self).create(request, *args,
+                                                              **kwargs)
+
+    def __bulk_create(self, request):
+        serializer_class = BulkReferringReportSettingSerializer
+        data = request.data
+        referring_entities = data.pop('referring_entity', None)
+
+        ref_query = self.clinic_filter(ReferringEntity.objects)
+        if referring_entities == '*':
+            pass
+        elif isinstance(referring_entities, list):
+            ref_query = ref_query.filter(id__in=tuple(referring_entities))
+        else:
+            return Response({'referring_entity': 'Invalid data'},
+                            status=400)
+        ids = []
+        for ref in ref_query:
+            serializer = serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            report_name = serializer.data['report_name']
+            obj, created = ReferringReportSetting.objects.update_or_create(
+                report_name=report_name, referring_entity=ref,
+                defaults=serializer.data)
+            ids.append(obj.id)
+        return Response({'ids': ids})
+
+
+class ClinicReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
+    '''
+    rest view for ClinicReportSetting resource
+    '''
+
+    queryset = ClinicReportSetting.objects.all()
+    serializer_class = ClinicReportSettingSerializer
+    filter_fields = ('period', 'report_name', 'enabled', 'clinic_user')
+    ordering_fields = '__all__'
+
+    def create(self, request, *args, **kwargs):
+        bulk = (request.data or {}).pop('bulk', False)
+        if bulk:
+            return self.__bulk_create(request)
+        return super(ClinicReportSettingView, self).create(request, *args,
+                                                           **kwargs)
+
+    def __bulk_create(self, request):
+        serializer_class = BulkClinicReportSettingSerializer
+        data = request.data
+        clinic_users = data.pop('clinic_user', None)
+
+        cu_query = self.clinic_filter(ClinicUser.objects)
+        if clinic_users == '*':
+            pass
+        elif isinstance(clinic_users, list):
+            cu_query = cu_query.filter(id__in=tuple(clinic_users))
+        else:
+            return Response({'clinic_user': 'Invalid data'},
+                            status=400)
+        ids = []
+        for cu in cu_query:
+            serializer = serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            report_name = serializer.data['report_name']
+            obj, created = ClinicReportSetting.objects.update_or_create(
+                report_name=report_name, clinic_user=cu,
+                defaults=serializer.data)
+            ids.append(obj.id)
+        return Response({'ids': ids})
 
 
 class PatientVisitReportView(ClinicViewSetMixin, viewsets.GenericViewSet):
@@ -194,86 +280,65 @@ class WeeklyProvidersVisitReportView(ClinicViewSetMixin,
         return Response(data)
 
 
-class ReferringReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
+class MonthlyProvidersVisitReportView(ClinicViewSetMixin,
+                                      viewsets.GenericViewSet):
     '''
-    rest view for ReferringReportSetting resource
-    '''
-
-    queryset = ReferringReportSetting.objects.all()
-    serializer_class = ReferringReportSettingSerializer
-    filter_fields = ('period', 'report_name', 'enabled',
-                     'referring_entity')
-    ordering_fields = '__all__'
-
-    def create(self, request, *args, **kwargs):
-        bulk = (request.data or {}).pop('bulk', False)
-        if bulk:
-            return self.__bulk_create(request)
-        return super(ReferringReportSettingView, self).create(request, *args,
-                                                              **kwargs)
-
-    def __bulk_create(self, request):
-        serializer_class = BulkReferringReportSettingSerializer
-        data = request.data
-        referring_entities = data.pop('referring_entity', None)
-
-        ref_query = self.clinic_filter(ReferringEntity.objects)
-        if referring_entities == '*':
-            pass
-        elif isinstance(referring_entities, list):
-            ref_query = ref_query.filter(id__in=tuple(referring_entities))
-        else:
-            return Response({'referring_entity': 'Invalid data'},
-                            status=400)
-        ids = []
-        for ref in ref_query:
-            serializer = serializer_class(data=data)
-            serializer.is_valid(raise_exception=True)
-            report_name = serializer.data['report_name']
-            obj, created = ReferringReportSetting.objects.update_or_create(
-                report_name=report_name, referring_entity=ref,
-                defaults=serializer.data)
-            ids.append(obj.id)
-        return Response({'ids': ids})
-
-
-class ClinicReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
-    '''
-    rest view for ClinicReportSetting resource
+    rest view for MonthlyProvidersVisitReport
     '''
 
-    queryset = ClinicReportSetting.objects.all()
-    serializer_class = ClinicReportSettingSerializer
-    filter_fields = ('period', 'report_name', 'enabled', 'clinic_user')
-    ordering_fields = '__all__'
+    queryset = PatientVisit.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        bulk = (request.data or {}).pop('bulk', False)
-        if bulk:
-            return self.__bulk_create(request)
-        return super(ClinicReportSettingView, self).create(request, *args,
-                                                           **kwargs)
+    def __count_struct(self, provider_name):
+        return {'name': provider_name, 'prev_year': {'current': 0, 'new': 0},
+                'months': {}}
 
-    def __bulk_create(self, request):
-        serializer_class = BulkClinicReportSettingSerializer
-        data = request.data
-        clinic_users = data.pop('clinic_user', None)
+    def list(self, request, *args, **kwargs):
+        today = date.today()
+        end_cur_year = today.replace(day=1)
+        start_cur_year = date(end_cur_year.year, 1, 1)
+        start_prev_year = start_cur_year.replace(year=start_cur_year.year-1)
+        end_prev_year = end_cur_year.replace(year=end_cur_year.year-1)
+        year_months = [start_cur_year.replace(month=i+1) for i in
+                       range(end_cur_year.month)]
+        CUR_YEAR = start_cur_year.year
 
-        cu_query = self.clinic_filter(ClinicUser.objects)
-        if clinic_users == '*':
-            pass
-        elif isinstance(clinic_users, list):
-            cu_query = cu_query.filter(id__in=tuple(clinic_users))
-        else:
-            return Response({'clinic_user': 'Invalid data'},
-                            status=400)
-        ids = []
-        for cu in cu_query:
-            serializer = serializer_class(data=data)
-            serializer.is_valid(raise_exception=True)
-            report_name = serializer.data['report_name']
-            obj, created = ClinicReportSetting.objects.update_or_create(
-                report_name=report_name, clinic_user=cu,
-                defaults=serializer.data)
-            ids.append(obj.id)
-        return Response({'ids': ids})
+        month_partial = connection.ops.date_trunc_sql('month', 'visit_date')
+        date_range = Q(visit_date__range=(start_cur_year, end_cur_year)) | \
+            Q(visit_date__range=(start_prev_year, end_prev_year))
+        qs = self.get_queryset().filter(
+            date_range,
+            referring_entity__organization__org_type__isnull=False
+            ).extra(select={
+                'month': month_partial,
+                'is_current': "tracking_organization.org_type='INT'"}
+            ).values('month', 'treating_provider', 'is_current'
+                     ).annotate(total=Sum('visit_count')).all()
+
+        providers = self.clinic_filter(TreatingProvider.objects)
+        data = {p.id: self.__count_struct(p.provider_name) for p in providers}
+        data[None] = self.__count_struct('UNKNOWN')
+        has_unknown_provider = False
+        for r in qs:
+            provider_id = r['treating_provider']
+            month_date = r['month'].date()
+            total = r['total']
+            if not provider_id:
+                has_unknown_provider = True
+            val_idx = 'current' if r['is_current'] else 'new'
+            if month_date.year == CUR_YEAR:
+                vals = data[provider_id]['months'].setdefault(
+                    str(month_date), {'current': 0, 'new': 0})
+                vals[val_idx] += total
+            else:
+                vals = data[provider_id]['prev_year']
+                vals[val_idx] += total
+
+        if not has_unknown_provider:
+            data.pop(None)
+
+        for record in data.values():
+            md = record['months']
+            new_md = [md.get(str(d),
+                             {'current': 0, 'new': 0}) for d in year_months]
+            record['months'] = new_md
+        return Response(data)

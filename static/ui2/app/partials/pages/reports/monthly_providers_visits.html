@@ -1,0 +1,68 @@
+<!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+<!-- BEGIN PAGE HEADER-->
+<ng-include src="'app/partials/pagebar.html'"></ng-include>
+<button ng-click="refreshData()" ng-disabled="$global.PatientVisitsReport.refreshing" class="btn green-haze pull-right">
+    <i ng-class="$global.PatientVisitsReport.refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
+    <span ng-hide="$global.PatientVisitsReport.refreshing">Refresh</span>
+    <span ng-show="$global.PatientVisitsReport.refreshing">Refreshing</span>
+</button>
+<h3 class="page-title">
+{{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
+</h3>
+<!-- END PAGE HEADER-->
+<div class="clearfix">
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table id="monthly-provider-visit-report-table" class="table table-bordered table-advance">
+            <thead>
+                <tr class="">
+                    <th class="vcenter"><strong>Provider</strong></th>
+                    <th ng-repeat="month in $global.MonthlyProvidersVisitsReport.yearMonths">{{month|date:'MMM'}}</th>
+                    <th>Year ({{$global.MonthlyProvidersVisitsReport.yearMonths[0]|date:'yyyy'}})</th>
+                    <th>Year ({{$global.MonthlyProvidersVisitsReport.prevYear}})</th>
+                </tr>
+                <tr>
+                    <th colspan="{{$global.MonthlyProvidersVisitsReport.total.length+1}}" class="warning"><strong>Clinic Totals</strong></th>
+                </tr>
+                <tr class="warning">
+                    <th><em>Total patients</em></th>
+                    <th ng-repeat="count in $global.MonthlyProvidersVisitsReport.total">{{count.current + count.new}}</th>
+                </tr>
+                <tr class="warning">
+                    <th><em>Current patients</em></th>
+                    <th ng-repeat="count in $global.MonthlyProvidersVisitsReport.total">{{count.current}}</th>
+                </tr>
+                <tr class="warning">
+                    <th><em>New patients</em></th>
+                    <th ng-repeat="count in $global.MonthlyProvidersVisitsReport.total">{{count.new}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="success" ng-repeat-start="(pvdId, pvdData) in $global.MonthlyProvidersVisitsReport.tableData | orderObjectBy : 'org_name'">
+                    <td colspan="{{$global.MonthlyProvidersVisitsReport.total.length+1}}"><strong>{{pvdData.name || 'UNKNOWN'}}</strong></td>
+                </tr>
+
+                <tr class="warning">
+                    <td><em>Total patients</em></td>
+                    <td ng-repeat="count in pvdData.months">{{count.current + count.new}}</td>
+                    <td>{{(pvdData.months|sumByKey:'current') + (pvdData.months|sumByKey:'new')}}</td>
+                    <td>{{pvdData.prev_year.current + pvdData.prev_year.new}}</td>
+                </tr>
+                <tr class="">
+                    <td>Current patients</td>
+                    <td ng-repeat="count in pvdData.months">{{count.current}}</td>
+                    <td>{{pvdData.months|sumByKey:'current'}}</td>
+                    <td>{{pvdData.prev_year.current}}</td>
+                </tr>
+                <tr ng-repeat-end class="">
+                    <td>New patients</td>
+                    <td ng-repeat="count in pvdData.months">{{count.new}}</td>
+                    <td>{{pvdData.months|sumByKey:'new'}}</td>
+                    <td>{{pvdData.prev_year.new}}</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
