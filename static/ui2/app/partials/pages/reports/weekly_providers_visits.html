@@ -1,10 +1,10 @@
 <!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
 <!-- BEGIN PAGE HEADER-->
 <ng-include src="'app/partials/pagebar.html'"></ng-include>
-<button ng-click="refreshData()" ng-disabled="$global.PatientVisitsReport.refreshing" class="btn green-haze pull-right">
-    <i ng-class="$global.PatientVisitsReport.refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
-    <span ng-hide="$global.PatientVisitsReport.refreshing">Refresh</span>
-    <span ng-show="$global.PatientVisitsReport.refreshing">Refreshing</span>
+<button ng-click="refreshData()" ng-disabled="$global.WeeklyProvidersVisitsReport.refreshing" class="btn green-haze pull-right">
+    <i ng-class="$global.WeeklyProvidersVisitsReport.refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
+    <span ng-hide="$global.WeeklyProvidersVisitsReport.refreshing">Refresh</span>
+    <span ng-show="$global.WeeklyProvidersVisitsReport.refreshing">Refreshing</span>
 </button>
 <h3 class="page-title">
 {{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
