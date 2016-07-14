@@ -151,7 +151,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
         },
         controller  : 'PatientVisitEditCtrl'
     }).state('report-patient_visits', {
-        url: "/reports/patient_visit/",
+        url: "/reports/patient_visits/",
         templateUrl : 'app/partials/pages/reports/patient_visits.html',
         data: {
             pageInfo: {
@@ -161,6 +161,17 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         },
         controller  : 'PatientVisitsReportCtrl'
+    }).state('report-weekly_providers_visits', {
+        url: "/reports/weekly_providers_visits/",
+        templateUrl : 'app/partials/pages/reports/weekly_providers_visits.html',
+        data: {
+            pageInfo: {
+                title: 'Weekly Visits Report',
+                titleDesc: 'report of weekly providers visits summary',
+                back: 'reports'
+            }
+        },
+        controller  : 'WeeklyProvidersVisitsReportCtrl'
     });
 });
 

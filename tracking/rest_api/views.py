@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.db.models import Sum
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -132,6 +132,65 @@ class PatientVisitReportView(ClinicViewSetMixin, viewsets.GenericViewSet):
                 org_data['counts'][k] += count
                 org_data['entities'][entity_id]['counts'][k] = count
 
+        return Response(data)
+
+
+class WeeklyProvidersVisitReportView(ClinicViewSetMixin,
+                                     viewsets.GenericViewSet):
+    '''
+    rest view for WeeklyProviderVisitReport
+    '''
+
+    queryset = PatientVisit.objects.all()
+
+    def __count_struct(self, provider_name):
+        return {'name': provider_name, 'month': {'current': 0, 'new': 0},
+                'week_days': {}}
+
+    def list(self, request, *args, **kwargs):
+        today = date.today()
+        start_week = today - timedelta(today.weekday())
+        end_week = start_week + timedelta(4)
+        start_month = today.replace(day=1)
+        end_month = (today.replace(day=10) + timedelta(days=30)
+                     ).replace(day=1) - timedelta(days=1)
+        start_date = min(start_month, start_week)
+        end_date = max(end_month, end_week)
+        week_days = [start_week + timedelta(days=i) for i in range(5)]
+
+        providers = self.clinic_filter(TreatingProvider.objects)
+        data = {p.id: self.__count_struct(p.provider_name) for p in providers}
+        data[None] = self.__count_struct('UNKNOWN')
+        qs = self.get_queryset().filter(
+            referring_entity__organization__org_type__isnull=False,
+            visit_date__range=(start_date, end_date)
+            ).extra(select={
+                'is_current': "tracking_organization.org_type='INT'"}
+            ).values('visit_date', 'treating_provider', 'is_current'
+                     ).annotate(total=Sum('visit_count')).all()
+        has_unknown_provider = False
+        for r in qs:
+            provider_id = r['treating_provider']
+            if not provider_id:
+                has_unknown_provider = True
+            total = r['total']
+            visit_date = r['visit_date']
+            val_idx = 'current' if r['is_current'] else 'new'
+            if visit_date >= start_week and visit_date <= end_week:
+                vals = data[provider_id]['week_days'].setdefault(
+                    str(visit_date), {'current': 0, 'new': 0})
+                vals[val_idx] += total
+            if visit_date >= start_month and visit_date <= end_month:
+                vals = data[provider_id]['month']
+                vals[val_idx] += total
+        if not has_unknown_provider:
+            data.pop(None)
+
+        for record in data.values():
+            wd = record['week_days']
+            new_wd = [wd.get(str(d),
+                             {'current': 0, 'new': 0}) for d in week_days]
+            record['week_days'] = new_wd
         return Response(data)
 
 

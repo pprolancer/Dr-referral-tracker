@@ -1,0 +1,68 @@
+<!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+<!-- BEGIN PAGE HEADER-->
+<ng-include src="'app/partials/pagebar.html'"></ng-include>
+<button ng-click="refreshData()" ng-disabled="$global.PatientVisitsReport.refreshing" class="btn green-haze pull-right">
+    <i ng-class="$global.PatientVisitsReport.refreshing? 'fa fa-spin fa-refresh':'fa fa-refresh'"></i>
+    <span ng-hide="$global.PatientVisitsReport.refreshing">Refresh</span>
+    <span ng-show="$global.PatientVisitsReport.refreshing">Refreshing</span>
+</button>
+<h3 class="page-title">
+{{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
+</h3>
+<!-- END PAGE HEADER-->
+<div class="clearfix">
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table id="weekly-provider-visit-report-table" class="table  table-advance">
+            <thead>
+                <tr class="">
+                    <th class="vcenter"><strong>Provider</strong></th>
+                    <th ng-repeat="day in $global.WeeklyProvidersVisitsReport.weekDays">{{day|date:'EEE'}}<br>{{day|date:'dd MMM'}}</th>
+                    <th>This Week<br>{{$global.WeeklyProvidersVisitsReport.weekDays[0]|date:'dd MMM'}} - {{$global.WeeklyProvidersVisitsReport.weekDays[4]|date:'dd MMM'}}</th>
+                    <th>This Month<br>{{$global.WeeklyProvidersVisitsReport.today|date:'MMM yyyy'}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="8" class="warning"><strong>Clinic Totals</strong></td>
+                </tr>
+                <tr class="warning">
+                    <td><em>Total patients</em></td>
+                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current + count.new}}</td>
+                </tr>
+                <tr class="warning">
+                    <td><em>Current patients</em></td>
+                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current}}</td>
+                </tr>
+                <tr class="warning">
+                    <td><em>New patients</em></td>
+                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.new}}</td>
+                </tr>
+                <tr class="success" ng-repeat-start="(pvdId, pvdData) in $global.WeeklyProvidersVisitsReport.tableData | orderObjectBy : 'org_name'">
+                    <td colspan="8"><strong>{{pvdData.name || 'UNKNOWN'}}</strong></td>
+                </tr>
+
+                <tr class="">
+                    <td>Total patients</td>
+                    <td ng-repeat="count in pvdData.week_days">{{count.current + count.new}}</td>
+                    <td>{{(pvdData.week_days|sumByKey:'current') + (pvdData.week_days|sumByKey:'new')}}</td>
+                    <td>{{pvdData.month.current + pvdData.month.new}}</td>
+                </tr>
+                <tr class="">
+                    <td>Current patients</td>
+                    <td ng-repeat="count in pvdData.week_days">{{count.current}}</td>
+                    <td>{{pvdData.week_days|sumByKey:'current'}}</td>
+                    <td>{{pvdData.month.current}}</td>
+                </tr>
+                <tr ng-repeat-end class="">
+                    <td>New patients</td>
+                    <td ng-repeat="count in pvdData.week_days">{{count.new}}</td>
+                    <td>{{pvdData.week_days|sumByKey:'new'}}</td>
+                    <td>{{pvdData.month.new}}</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>

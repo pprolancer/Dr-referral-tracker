@@ -25,6 +25,14 @@ app.service('Utils', [function() {
             defaultMsg = 'Operation done successfully';
         this.showSuccess(response.statusText || defaultMsg, delay);
     };
+    this.safeFromJson = function(s, nullIfFail) {
+        nullIfFail = nullIfFail==undefined? true: false;
+        try {
+            return angular.fromJson(s);
+        } catch(e) {
+            return nullIfFail? null: s;
+        }
+    };
     this.showDefaultServerError = function(response, showReason, delay, extra_message) {
         var msg;
         delay = delay != undefined? delay: 5000;
@@ -39,7 +47,8 @@ app.service('Utils', [function() {
             }, 2000)
         } else {
             msg = "<strong>"+response.status + ": " + response.statusText + "</strong>";
-            if (showReason && response.data) {
+            var jData = this.safeFromJson(response.data);
+            if (showReason && jData) {
                 msg += '<p>'+ this.prettyfiy_error(response.data) + '</p>';
             }
             if (extra_message) {

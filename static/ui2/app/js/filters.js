@@ -21,3 +21,15 @@ app.filter('orderObjectBy', function() {
         return filtered;
     };
 });
+
+
+app.filter('sumByKey', function() {
+    return function(items, prop) {
+        if (typeof(items) === 'undefined' || typeof(prop) === 'undefined') {
+            return 0;
+        }
+        return items.reduce( function(a, b) {
+            return a + b[prop];
+        }, 0);
+    };
+});

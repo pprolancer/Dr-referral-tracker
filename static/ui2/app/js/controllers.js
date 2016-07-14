@@ -14,6 +14,7 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, R
     $rootScope.$global.ReferringEntity = {}
     $rootScope.$global.PatientVisit = {}
     $rootScope.$global.PatientVisitsReport = {}
+    $rootScope.$global.WeeklyProvidersVisitsReport = {}
 
     $rootScope.$global.TreatingProvider.typeChoices = [
         {
@@ -732,6 +733,51 @@ app.controller("PatientVisitsReportCtrl", function($scope, $rootScope, $http, $s
 
         $global.refreshing = true;
         $http.get("/api/v1/report/patient_visits").
+        then(function(response) {
+            $global.tableData = response.data;
+            updateTotal();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function () {
+            $global.refreshing = false;
+        });
+    };
+    if ($global.tableData == undefined) {
+        $scope.refreshData();
+    }
+
+});
+
+/******************************************************************
+********************* WeeklyProvidersVisitsReport controllers *****************
+*******************************************************************/
+
+app.controller("WeeklyProvidersVisitsReportCtrl", function($scope, $rootScope, $http, $state, $stateParams, $filter, Utils) {
+    var $global = $rootScope.$global.WeeklyProvidersVisitsReport
+    updateTotal = function() {
+        $global.total = [0, 1, 2, 3, 4, 5, 6].map(function() {
+            return {'current': 0, 'new': 0};
+        });
+        angular.forEach($global.tableData, function(pvd) {
+            angular.forEach(pvd.week_days, function(c, i) {
+                $global.total[i]['current'] += c['current'];
+                $global.total[i]['new'] += c['new'];
+                $global.total[5]['new'] += c['new'];
+                $global.total[5]['current'] += c['current'];
+            });
+            $global.total[6]['new'] += pvd.month['new'];
+            $global.total[6]['current'] += pvd.month['current'];
+        });
+    };
+
+    $scope.refreshData = function() {
+        $global.today = moment().toDate();
+        $global.weekDays = [0, 1, 2, 3, 4].map(function(d, i) {
+            return moment().utc().startOf('isoWeek').add({days: d}).toDate();
+        });
+
+        $global.refreshing = true;
+        $http.get("/api/v1/report/weekly_providers_visits").
         then(function(response) {
             $global.tableData = response.data;
             updateTotal();

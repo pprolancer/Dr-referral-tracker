@@ -4,7 +4,8 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tracking.rest_api.views import OrganizationView, \
     ReferringReportSettingView, ClinicReportSettingView, ReferringEntityView, \
-    TreatingProviderView, PatientVisitView, PatientVisitReportView
+    TreatingProviderView, PatientVisitView, PatientVisitReportView, \
+    WeeklyProvidersVisitReportView
 from users.rest_api.views import SessionView
 
 # register all rest views here
@@ -17,20 +18,21 @@ rest_router.register(r'treating_provider', TreatingProviderView)
 rest_router.register(r'patient_visit', PatientVisitView)
 rest_router.register(r'report/patient_visits', PatientVisitReportView,
                      base_name='report')
+rest_router.register(r'report/weekly_providers_visits',
+                     WeeklyProvidersVisitReportView, base_name='report')
 rest_router.register(r'report_setting/referring', ReferringReportSettingView)
 rest_router.register(r'report_setting/clinic',
                      ClinicReportSettingView)
 
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'Practice_Referral.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+urlpatterns = patterns(
+    '',
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('tracking.urls')),
     url(r'^', include('social.apps.django_app.urls', namespace='social')),
     url(r'^', include('users.urls')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api-auth/', include('rest_framework.urls',
+                               namespace='rest_framework')),
     url(r'^api/v1/', include(rest_router.urls, namespace='rest_api')),
 )
