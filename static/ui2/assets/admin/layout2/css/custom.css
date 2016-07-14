@@ -92,3 +92,7 @@ Rounded Portlets
   border-color: whitesmoke;
   border-left: 0px;
 }
+
+#weekly-provider-visit-report-table tr {
+  background-color: #f9f9f9;
+}

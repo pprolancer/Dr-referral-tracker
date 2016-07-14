@@ -14,7 +14,7 @@
 </div>
 <div class="row">
     <div class="col-md-12">
-        <table id="weekly-provider-visit-report-table" class="table  table-advance">
+        <table id="weekly-provider-visit-report-table" class="table table-bordered table-advance">
             <thead>
                 <tr class="">
                     <th class="vcenter"><strong>Provider</strong></th>
@@ -22,29 +22,29 @@
                     <th>This Week<br>{{$global.WeeklyProvidersVisitsReport.weekDays[0]|date:'dd MMM'}} - {{$global.WeeklyProvidersVisitsReport.weekDays[4]|date:'dd MMM'}}</th>
                     <th>This Month<br>{{$global.WeeklyProvidersVisitsReport.today|date:'MMM yyyy'}}</th>
                 </tr>
+                <tr>
+                    <th colspan="8" class="warning"><strong>Clinic Totals</strong></th>
+                </tr>
+                <tr class="warning">
+                    <th><em>Total patients</em></th>
+                    <th ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current + count.new}}</th>
+                </tr>
+                <tr class="warning">
+                    <th><em>Current patients</em></th>
+                    <th ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current}}</th>
+                </tr>
+                <tr class="warning">
+                    <th><em>New patients</em></th>
+                    <th ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.new}}</th>
+                </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td colspan="8" class="warning"><strong>Clinic Totals</strong></td>
-                </tr>
-                <tr class="warning">
-                    <td><em>Total patients</em></td>
-                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current + count.new}}</td>
-                </tr>
-                <tr class="warning">
-                    <td><em>Current patients</em></td>
-                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.current}}</td>
-                </tr>
-                <tr class="warning">
-                    <td><em>New patients</em></td>
-                    <td ng-repeat="count in $global.WeeklyProvidersVisitsReport.total">{{count.new}}</td>
-                </tr>
                 <tr class="success" ng-repeat-start="(pvdId, pvdData) in $global.WeeklyProvidersVisitsReport.tableData | orderObjectBy : 'org_name'">
                     <td colspan="8"><strong>{{pvdData.name || 'UNKNOWN'}}</strong></td>
                 </tr>
 
-                <tr class="">
-                    <td>Total patients</td>
+                <tr class="warning">
+                    <td><em>Total patients</em></td>
                     <td ng-repeat="count in pvdData.week_days">{{count.current + count.new}}</td>
                     <td>{{(pvdData.week_days|sumByKey:'current') + (pvdData.week_days|sumByKey:'new')}}</td>
                     <td>{{pvdData.month.current + pvdData.month.new}}</td>
