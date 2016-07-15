@@ -38,12 +38,15 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label class="control-label">Appoinment Time</label>
-                    <uib-timepicker data-ng-model="selectedRecord.visit_appointment_time"></uib-timepicker>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label class="control-label">Actual Time</label>
-                    <uib-timepicker data-ng-model="selectedRecord.visit_actual_time"></uib-timepicker>
-                </div>
+                <button type="button" class="btn btn-link nounderline" ng-click="showTimes=!(showTimes || false)"><span ng-class="showTimes? 'fa fa-minus': 'fa fa-plus'"></span> Record Times</button>
+                <fieldset ng-show="showTimes">
+                    <div class="col-md-6 form-group">
+                        <label class="control-label">Appoinment Time</label>
+                        <uib-timepicker data-ng-model="selectedRecord.visit_appointment_time"></uib-timepicker>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="control-label">Actual Time</label>
+                        <uib-timepicker data-ng-model="selectedRecord.visit_actual_time"></uib-timepicker>
+                    </div>
+                </fieldset>
             </div>

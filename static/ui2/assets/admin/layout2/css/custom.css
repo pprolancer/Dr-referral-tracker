@@ -108,3 +108,7 @@ Rounded Portlets
 #quick-add-patient-visit .portlet {
   padding: 5px 20px 5px 20px;
 }
+
+.nounderline, .nounderline:hover, .nounderline:focus {
+  text-decoration: none
+}
