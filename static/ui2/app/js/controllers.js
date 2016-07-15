@@ -561,18 +561,38 @@ app.controller("TreatingProviderEditCtrl", function($scope, $rootScope, $state,$
 *******************************************************************/
 
 app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $stateParams, PatientVisitService, Utils, GeneralUiGrid) {
+    var initialized = true,
+        $global = $rootScope.$global.PatientVisit;
+
+    $scope.resetForm = function() {
+        $scope.selectedRecord = new PatientVisitService({
+            visit_date: new Date(), visit_count: 1
+        });
+        $scope.$broadcast('PatientVisitReferringFocus');
+    };
+    $scope.addRecord = function() {
+        $scope.saving = true;
+        $scope.selectedRecord.$save().then(function(response) {
+            if ($global && $global.gridOptions) {
+                $global.gridOptions.data.splice(0, 0, response);
+                $global.gridOptions.data.pop();
+            }
+            // $state.go('patient_visit-list');
+            Utils.showDefaultServerSuccess(response);
+            $scope.resetForm();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function() {
+            $scope.saving = false;
+        });
+    };
     $scope.loadingGrid = false;
     $scope.sortingOptions = null;
     $scope.filteringOptions = [];
     $scope.paginationOptions = {
         page: 1,
     };
-    if (!$rootScope.$global.PatientVisit) {
-        $rootScope.$global.PatientVisit = {}
-    }
 
-    var initialized = true,
-        $global = $rootScope.$global.PatientVisit;
     if (!$global.gridOptions) {
         initialized = false;
         $global.gridOptions = {
@@ -603,32 +623,14 @@ app.controller("PatientVisitListCtrl", function($scope, $rootScope, $state, $sta
             // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
         };
     }
+    $rootScope.loadReferringEntityCombo();
+    $rootScope.loadTreatingProviderCombo();
+    $scope.resetForm();
     $global.gridOptions.onRegisterApi = GeneralUiGrid.onRegisterApi($scope);
     $scope.getPage = GeneralUiGrid.getPage($scope, PatientVisitService, $global.gridOptions);
     if (!initialized) {
         $scope.getPage();
     }
-});
-
-app.controller("PatientVisitNewCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils) {
-    var $global = $rootScope.$global.PatientVisit;
-    $scope.selectedRecord = new PatientVisitService();
-    $rootScope.loadReferringEntityCombo();
-    $rootScope.loadTreatingProviderCombo();
-    $scope.addRecord = function() {
-        $scope.saving = true;
-        $scope.selectedRecord.$save().then(function(response) {
-            if ($global && $global.gridOptions) {
-                $global.gridOptions.data.splice(0, 0, response);
-            }
-            $state.go('patient_visit-list');
-            Utils.showDefaultServerSuccess(response);
-        }, function(response) {
-            Utils.showDefaultServerError(response);
-        }).finally(function() {
-            $scope.saving = false;
-        });
-    };
 });
 
 app.controller("PatientVisitEditCtrl", function($scope, $rootScope, $state,$stateParams, PatientVisitService, ReferringEntityService, TreatingProviderService, Utils, $uibModal) {

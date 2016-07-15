@@ -115,21 +115,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
         data: {
             pageInfo: {
                 title: 'Patient Visit',
-                titleDesc: 'list of treating providers'
+                titleDesc: 'list of patient visits'
             }
         },
         controller  : 'PatientVisitListCtrl'
-    }).state('patient_visit-new', {
-        url: "/patient_visit/new",
-        templateUrl : 'app/partials/pages/patient_visit/new.html',
-        data: {
-            pageInfo: {
-                title: 'New Patient Visit',
-                titleDesc: 'add a new patient_visit',
-                back: 'patient_visit-list'
-            }
-        },
-        controller  : 'PatientVisitNewCtrl'
     }).state('patient_visit-edit', {
         url: "/patient_visit/:id/edit",
         templateUrl : 'app/partials/pages/patient_visit/edit.html',

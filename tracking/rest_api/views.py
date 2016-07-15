@@ -78,7 +78,7 @@ class PatientVisitView(ClinicViewSetMixin, viewsets.ModelViewSet):
                      'visit_appointment_time', 'visit_actual_time',
                      'visit_count')
     ordering_fields = '__all__'
-    ordering = ('id',)
+    ordering = ('-id',)
 
 
 class ReferringReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
@@ -294,7 +294,8 @@ class MonthlyProvidersVisitReportView(ClinicViewSetMixin,
 
     def list(self, request, *args, **kwargs):
         today = date.today()
-        end_cur_year = today.replace(day=1)
+        end_cur_year = (today.replace(day=10) + timedelta(days=30)
+                        ).replace(day=1) - timedelta(days=1)
         start_cur_year = date(end_cur_year.year, 1, 1)
         start_prev_year = start_cur_year.replace(year=start_cur_year.year-1)
         end_prev_year = end_cur_year.replace(year=end_cur_year.year-1)

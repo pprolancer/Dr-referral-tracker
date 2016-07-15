@@ -1,11 +1,30 @@
 <!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
 <!-- BEGIN PAGE HEADER-->
 <ng-include src="'app/partials/pagebar.html'"></ng-include>
-<a href="{{ $state.href('patient_visit-new') }}" class="btn btn-success pull-right"><i class="fa fa-plus"></i> New</a>
+<!-- END PAGE HEADER-->
+
+<div  id="quick-add-patient-visit" class="">
+    <div class="col-md-12 portlet light">
+        <form role="form" ng-submit="addRecord()">
+            <ng-include src="'app/partials/pages/patient_visit/_form_fields.html'"></ng-include>
+            <div class="row margiv-top-10">
+                <div class="col-md-6 form-group">
+                    <button type="submit" name="submitBtn" class="btn green-haze"  ng-disabled="saving">
+                    <i ng-class="saving? 'fa fa-spin fa-spinner':'fa fa-plus'"></i>
+                    <span ng-hide="saving">Add</span>
+                    <span ng-show="saving">Adding</span>
+                    </button>
+                    <button type="button" name="resetBtn" class="btn btn-warning" ng-click="resetForm()"><span class="fa fa-refresh"></span> Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <h3 class="page-title">
 {{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
 </h3>
-<!-- END PAGE HEADER-->
+
 <div class="clearfix">
 </div>
 <div class="row">

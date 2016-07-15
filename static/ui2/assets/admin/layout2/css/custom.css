@@ -100,3 +100,11 @@ Rounded Portlets
 #monthly-provider-visit-report-table tr {
   background-color: #f9f9f9;
 }
+
+#quick-add-patient-visit .form-group {
+  margin-bottom: 5px;
+}
+
+#quick-add-patient-visit .portlet {
+  padding: 5px 20px 5px 20px;
+}
