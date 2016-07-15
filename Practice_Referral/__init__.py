@@ -66,6 +66,13 @@ def custom_rest_exception_handler(exc, context):
 
 
 class PaginationPageSizeMixin(object):
+    '''
+    a mixin class to be used in rest viewset.
+    by extending this class you can customize page_size by setting
+    'max_page_size' property in class.
+    if max_page_size = 0, this mean this support infinite page_size.
+    then user can have a query on list rest api by page_size=0.
+    '''
     BIG_PAGE_SIZE = 10000000
 
     @property
@@ -97,8 +104,8 @@ class DynamicFieldsSerializerMixin(object):
             return
 
         params = self.context['request'].query_params
-        fields = params.get('fields', None)
-        xfields = params.get('xfields', None)
+        fields = params.get('fields')
+        xfields = params.get('xfields')
         if fields:
             fields = fields.split(',')
             allowed = set(fields)

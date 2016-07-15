@@ -262,11 +262,11 @@ class WeeklyProvidersVisitReportView(ClinicViewSetMixin,
             total = r['total']
             visit_date = r['visit_date']
             val_idx = 'current' if r['is_current'] else 'new'
-            if visit_date >= start_week and visit_date <= end_week:
+            if start_week <= visit_date <= end_week:
                 vals = data[provider_id]['week_days'].setdefault(
                     str(visit_date), {'current': 0, 'new': 0})
                 vals[val_idx] += total
-            if visit_date >= start_month and visit_date <= end_month:
+            if start_month <= visit_date <= end_month:
                 vals = data[provider_id]['month']
                 vals[val_idx] += total
         if not has_unknown_provider:
