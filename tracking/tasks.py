@@ -5,7 +5,7 @@ from celery.decorators import periodic_task
 from celery.schedules import crontab
 from Practice_Referral import settings
 from tracking.models import ReferringReportSetting, ClinicReportSetting, \
-    Clinic
+    Clinic, ReportSetting
 from tracking.reports import ReportManager, InvalidReportException
 from tracking.reports.referring_reports import REPORT_TYPE \
     as REFERRING_REPORT_TYPE
@@ -96,6 +96,18 @@ def _get_clinic_report_setting(period, clinic):
         period=period, enabled=True, clinic=clinic).all()
 
 
+def _send_all_reports(period):
+    try:
+        send_referring_reports(period=period)
+    except Exception as e:
+        logger.exception(e)
+
+    try:
+        send_clinic_reports(period=period)
+    except Exception as e:
+        logger.exception(e)
+
+
 # @periodic_task(run_every=crontab(minute='*/1'))
 @periodic_task(run_every=crontab(minute=0, hour=0))
 def daily_reports_handler():
@@ -103,15 +115,7 @@ def daily_reports_handler():
     daily reports handler
     python manage.py celeryd -B -l info
     '''
-    try:
-        send_referring_reports(period=ReferringReportSetting.PERIOD_DAILY)
-    except Exception as e:
-        logger.exception(e)
-
-    try:
-        send_clinic_reports(period=ClinicReportSetting.PERIOD_DAILY)
-    except Exception as e:
-        logger.exception(e)
+    _send_all_reports(ReportSetting.PERIOD_DAILY)
 
 
 # @periodic_task(run_every=crontab(minute='*/1'))
@@ -121,16 +125,7 @@ def weekly_reports_handler():
     weekly reports handler
     python manage.py celeryd -B -l info
     '''
-
-    try:
-        send_referring_reports(period=ReferringReportSetting.PERIOD_WEEKLY)
-    except Exception as e:
-        logger.exception(e)
-
-    try:
-        send_clinic_reports(period=ClinicReportSetting.PERIOD_WEEKLY)
-    except Exception as e:
-        logger.exception(e)
+    _send_all_reports(ReportSetting.PERIOD_WEEKLY)
 
 
 # @periodic_task(run_every=crontab(minute='*/1'))
@@ -140,16 +135,7 @@ def monthly_reports_handler():
     monthly reports handler
     python manage.py celeryd -B -l info
     '''
-
-    try:
-        send_referring_reports(period=ReferringReportSetting.PERIOD_MONTHLY)
-    except Exception as e:
-        logger.exception(e)
-
-    try:
-        send_clinic_reports(period=ClinicReportSetting.PERIOD_MONTHLY)
-    except Exception as e:
-        logger.exception(e)
+    _send_all_reports(ReportSetting.PERIOD_MONTHLY)
 
 
 @periodic_task(run_every=crontab(hour=0, minute=0, day_of_month=1,
@@ -159,16 +145,7 @@ def quarterly_reports_handler():
     quarterly reports handler
     python manage.py celeryd -B -l info
     '''
-
-    try:
-        send_referring_reports(period=ReferringReportSetting.PERIOD_QUARTERLY)
-    except Exception as e:
-        logger.exception(e)
-
-    try:
-        send_clinic_reports(period=ClinicReportSetting.PERIOD_QUARTERLY)
-    except Exception as e:
-        logger.exception(e)
+    _send_all_reports(ReportSetting.PERIOD_QUARTERLY)
 
 
 @periodic_task(run_every=crontab(hour=0, minute=0, day_of_month=1,
@@ -178,13 +155,4 @@ def yealy_reports_handler():
     yearly reports handler
     python manage.py celeryd -B -l info
     '''
-
-    try:
-        send_referring_reports(period=ReferringReportSetting.PERIOD_YEARLY)
-    except Exception as e:
-        logger.exception(e)
-
-    try:
-        send_clinic_reports(period=ClinicReportSetting.PERIOD_YEARLY)
-    except Exception as e:
-        logger.exception(e)
+    _send_all_reports(ReportSetting.PERIOD_YEARLY)
