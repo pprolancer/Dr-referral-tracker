@@ -896,6 +896,7 @@ app.controller("ClinicReportSettingCtrl", function($scope, $rootScope, $state, $
         $scope.selectedRecord = new ClinicReportSettingService(record);
         $scope.selectedRecord.clinic_user = [record.clinic_user];
         $scope.selectedRecord.bulk = true;
+        $scope.allClinicUsersSelected = false;
     };
     $scope.applyRecord = function() {
         var r = $scope.selectedRecord;
@@ -998,6 +999,7 @@ app.controller("ReferringReportSettingCtrl", function($scope, $rootScope, $state
         $scope.selectedRecord = new ReferringReportSettingService(record);
         $scope.selectedRecord.referring_entity = [record.referring_entity];
         $scope.selectedRecord.bulk = true;
+        $scope.allReferringEntitiesSelected = false;
     };
     $scope.applyRecord = function() {
         var r = $scope.selectedRecord;
