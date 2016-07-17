@@ -12,7 +12,7 @@ from .serializers import OrganizationSerializer, \
     ReferringReportSettingSerializer, BulkReferringReportSettingSerializer, \
     ClinicReportSettingSerializer, BulkClinicReportSettingSerializer, \
     ReferringEntitySerializer, TreatingProviderSerializer, \
-    PatientVisitSerializer
+    PatientVisitSerializer, ClinicUserSerializer
 
 
 class ClinicViewSetMixin(object):
@@ -81,15 +81,29 @@ class PatientVisitView(ClinicViewSetMixin, viewsets.ModelViewSet):
     ordering = ('-id',)
 
 
-class ReferringReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
+class ClinicUserView(PaginationPageSizeMixin, ClinicViewSetMixin,
+                     viewsets.ModelViewSet):
+    '''
+    rest view for ClinicUser resource
+    '''
+    max_page_size = 0  # zero mean unlimitted page_size
+    queryset = ClinicUser.objects.all()
+    serializer_class = ClinicUserSerializer
+    filter_fields = ('user', 'user__username')
+    ordering_fields = '__all__'
+    ordering = ('id',)
+
+
+class ReferringReportSettingView(PaginationPageSizeMixin,
+                                 ClinicViewSetMixin, viewsets.ModelViewSet):
     '''
     rest view for ReferringReportSetting resource
     '''
 
+    max_page_size = 0  # zero mean unlimitted page_size
     queryset = ReferringReportSetting.objects.all()
     serializer_class = ReferringReportSettingSerializer
-    filter_fields = ('period', 'report_name', 'enabled',
-                     'referring_entity')
+    filter_fields = ('period', 'report_name', 'enabled', 'referring_entity')
     ordering_fields = '__all__'
 
     def create(self, request, *args, **kwargs):
@@ -124,11 +138,13 @@ class ReferringReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
         return Response({'ids': ids})
 
 
-class ClinicReportSettingView(ClinicViewSetMixin, viewsets.ModelViewSet):
+class ClinicReportSettingView(PaginationPageSizeMixin,
+                              ClinicViewSetMixin, viewsets.ModelViewSet):
     '''
     rest view for ClinicReportSetting resource
     '''
 
+    max_page_size = 0  # zero mean unlimitted page_size
     queryset = ClinicReportSetting.objects.all()
     serializer_class = ClinicReportSettingSerializer
     filter_fields = ('period', 'report_name', 'enabled', 'clinic_user')
@@ -294,10 +310,10 @@ class MonthlyProvidersVisitReportView(ClinicViewSetMixin,
 
     def list(self, request, *args, **kwargs):
         today = date.today()
-        end_cur_year = (today.replace(day=10) + timedelta(days=30)
-                        ).replace(day=1) - timedelta(days=1)
-        start_cur_year = date(end_cur_year.year, 1, 1)
-        start_prev_year = start_cur_year.replace(year=start_cur_year.year-1)
+        end_cur_year = date(today.year, 12, 31) if today.month == 12 else \
+            date(today.year, today.month + 1, 1) - timedelta(days=1)
+        start_cur_year = date(today.year, 1, 1)
+        start_prev_year = date(today.year - 1, 1, 1)
         end_prev_year = end_cur_year.replace(year=end_cur_year.year-1)
         year_months = [start_cur_year.replace(month=i+1) for i in
                        range(end_cur_year.month)]

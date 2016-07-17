@@ -14,6 +14,10 @@ class CustomPagination(PageNumberPagination):
     max_page_size = 20
 
     def get_page_size(self, request):
+        '''
+        this is overrided to allow 0 as a page_size.
+        if page_size=0, we will set page_size as max_page_size.
+        '''
         page_size = self.page_size
         if self.page_size_query_param:
             try:

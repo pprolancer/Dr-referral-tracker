@@ -70,7 +70,7 @@ def send_clinic_reports(period):
             clinic_user = report_setting.clinic_user
             email = clinic_user.user.email
             if not email:
-                logger.warn('No entity_email for [%s]!', clinic_user)
+                logger.warn('No email for [%s]!', clinic_user)
                 continue
             report = reports_map.get(report_setting.report_name, None)
             if not report:

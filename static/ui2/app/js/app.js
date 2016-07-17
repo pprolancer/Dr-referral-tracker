@@ -172,6 +172,37 @@ app.config(function($stateProvider, $urlRouterProvider) {
             }
         },
         controller  : 'MonthlyProvidersVisitsReportCtrl'
+    }).state('reportsettings', {
+        url: "/reportsettings",
+        redirectTo: 'reportsetting-clinic',
+        data: {
+            pageInfo: {
+                title: 'Report Settings'
+            }
+        },
+        controller  : 'PatientVisitEditCtrl'
+    }).state('reportsetting-clinic', {
+        url: "/reportsettings/clinic/",
+        templateUrl : 'app/partials/pages/reportsettings/clinic.html',
+        data: {
+            pageInfo: {
+                title: 'Clinic Report Setting',
+                titleDesc: 'email report setting related clinic',
+                back: 'reports'
+            }
+        },
+        controller  : 'ClinicReportSettingCtrl'
+    }).state('reportsetting-referring', {
+        url: "/reportsettings/referring/",
+        templateUrl : 'app/partials/pages/reportsettings/referring.html',
+        data: {
+            pageInfo: {
+                title: 'Referring Report Setting',
+                titleDesc: 'email report setting related referring',
+                back: 'reports'
+            }
+        },
+        controller  : 'ReferringReportSettingCtrl'
     });
 });
 

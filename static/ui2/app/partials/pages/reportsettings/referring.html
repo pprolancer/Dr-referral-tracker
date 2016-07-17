@@ -1,0 +1,85 @@
+<!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+<!-- BEGIN PAGE HEADER-->
+<ng-include src="'app/partials/pagebar.html'"></ng-include>
+<!-- END PAGE HEADER-->
+
+<div id="quick-add-reportsetting-clinic" class="">
+    <div class="col-md-12 portlet light">
+        <form role="form" ng-submit="applyRecord(this)">
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label class="control-label">Report Name(*)</label>
+                    <ui-select autofocus ng-required="true" ui-select-required focus-on="ReferringReportSettingReportNameFocus" data-ng-model="selectedRecord.report_name" theme="bootstrap">
+                        <ui-select-match placeholder="Report Name">
+                            {{$select.selected.display_name}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="choice.value as choice in $global.ReferringReportSetting.reportNameChoices | filter: $select.search" value="{{$select.selected.id}}">
+                            <span ng-bind-html="choice.display_name | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label class="control-label">Period(*)</label>
+                    <ui-select data-ng-model="selectedRecord.period" theme="bootstrap">
+                        <ui-select-match placeholder="Period">
+                            {{$select.selected.display_name}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="choice.value as choice in $global.ReportSetting.periodChoices | filter: $select.search" value="{{$select.selected.id}}">
+                            <span ng-bind-html="choice.display_name | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label class="control-label">Referring Entities(*)</label>
+                    <ui-select multiple data-ng-model="selectedRecord.referring_entity" theme="bootstrap" ng-disabled="allReferringEntitiesSelected" close-on-select="false">
+                        <ui-select-match placeholder="Select Referring Entities">
+                            {{$item.entity_name || 'All Entities'}}
+                        </ui-select-match>
+                        <ui-select-choices repeat="item.id as item in $global.ReferringEntity.comboData | filter: $select.search" value="{{$select.selected.id}}">
+                            <span ng-bind-html="item.entity_name | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                    <label class="control-label">Apply on All Referring Entities</label>
+                    <input type="checkbox" ng-click="selectAllReferringEntities($event)" ng-checked="allReferringEntitiesSelected"/>
+                </div>
+                <div class="col-md-3 form-group mar-top30">
+                    <label class="control-label">Is Enabled?</label>
+                    <input type="checkbox" data-ng-model="selectedRecord.enabled"/>
+                </div>
+
+            </div>
+            <div class="row margiv-top-10">
+                <div class="col-md-6 form-group">
+                    <button type="submit" name="submitBtn" class="btn green-haze"  ng-disabled="saving">
+                    <i ng-class="saving? 'fa fa-spin fa-spinner':'fa fa-check'"></i>
+                    <span ng-hide="saving">Apply</span>
+                    <span ng-show="saving">Applying</span>
+                    </button>
+                    <button type="button" name="resetBtn" class="btn btn-warning" ng-click="resetForm()"><span class="fa fa-refresh"></span> Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h3 class="page-title">
+{{$state.current.data.pageInfo.title}} <small>{{$state.current.data.pageInfo.titleDesc}}</small>
+</h3>
+
+<div class="clearfix">
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div ui-grid="$global.ReferringReportSetting.gridOptions" ui-grid-pagination class="grid">
+            <div class="grid-msg-overlay" ng-hide="!loadingGrid">
+                <div class="msg">
+                    <span>
+                      <i class="fa fa-spinner fa-spin fa-2x"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

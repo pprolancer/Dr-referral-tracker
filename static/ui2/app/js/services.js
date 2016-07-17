@@ -130,7 +130,10 @@ app.factory('GeneralUiGrid', ['uiGridConstants', 'Utils', function(uiGridConstan
         getPage: function($scope, queryService, gridOpt) {
             return function() {
                 $scope.loadingGrid = true;
-                var params = {page: $scope.paginationOptions.page};
+                var params = {
+                    page: $scope.paginationOptions.page,
+                    page_size: gridOpt.paginationPageSize
+                };
                 if ($scope.sortingOptions) {
                     params.ordering=$scope.sortingOptions;
                 }
@@ -139,7 +142,7 @@ app.factory('GeneralUiGrid', ['uiGridConstants', 'Utils', function(uiGridConstan
                     gridOpt.data = response.results;
                     gridOpt.totalItems = pg.count;
                     gridOpt.paginationCurrentPage = pg.current_page;
-                    gridOpt.paginationPageSize = pg.page_size;
+                    // gridOpt.paginationPageSize = pg.page_size;
                 }, function(response) {
                     Utils.showDefaultServerError(response);
                 }).$promise.finally(function() {
@@ -247,5 +250,38 @@ app.factory('PatientVisitService', ['$resource', function($resource) {
             params: {id: '@id'},
             transformResponse: generalTransformResponse
         },
+    });
+}]);
+
+app.factory('ClinicUserService', ['$resource', function($resource) {
+    return $resource('/api/v1/clinic_user/:id', {id: '@id'}, {
+        update: {
+            method: 'PUT'
+        },
+        'query': {
+            method:'GET', isArray: false
+        }
+    });
+}]);
+
+app.factory('ClinicReportSettingService', ['$resource', function($resource) {
+    return $resource('/api/v1/report_setting/clinic/', {}, {
+        update: {
+            method: 'PUT'
+        },
+        'query': {
+            method:'GET', isArray: false
+        }
+    });
+}]);
+
+app.factory('ReferringReportSettingService', ['$resource', function($resource) {
+    return $resource('/api/v1/report_setting/referring/', {}, {
+        update: {
+            method: 'PUT'
+        },
+        'query': {
+            method:'GET', isArray: false
+        }
     });
 }]);

@@ -2,7 +2,7 @@
                 <div class="col-md-6 form-group">
                     <label class="control-label">Referring Entity(*)</label>
                     <ui-select autofocus focus-on="PatientVisitReferringFocus" data-ng-model="selectedRecord.referring_entity" theme="bootstrap">
-                        <ui-select-match placeholder="Referring Entity or Visit">
+                        <ui-select-match placeholder="Referring Entity of Visit">
                             {{$select.selected.entity_name}}
                         </ui-select-match>
                         <ui-select-choices repeat="item.id as item in $global.ReferringEntity.comboData | filter: $select.search" value="{{$select.selected.id}}">
@@ -13,7 +13,7 @@
                 <div class="col-md-6 form-group">
                     <label class="control-label">Treating Provider</label>
                     <ui-select data-ng-model="selectedRecord.treating_provider" theme="bootstrap">
-                        <ui-select-match placeholder="Treating Provider or Visit">
+                        <ui-select-match placeholder="Treating Provider of Visit">
                             {{$select.selected.provider_name}}
                         </ui-select-match>
                         <ui-select-choices repeat="item.id as item in $global.TreatingProvider.comboData | filter: $select.search" value="{{$select.selected.id}}">

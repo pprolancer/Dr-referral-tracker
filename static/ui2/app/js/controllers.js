@@ -5,50 +5,49 @@ app.controller('PageContentController', function($scope) {
     });
 });
 
-app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, ReferringEntityService, TreatingProviderService, OrganizationService) {
+app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, ReferringEntityService, TreatingProviderService, OrganizationService, ClinicUserService) {
     // load current user
     $rootScope.currentUser = {};
     $rootScope.pageLoaded = false;
-    $rootScope.$global.TreatingProvider = {}
-    $rootScope.$global.Organization = {}
-    $rootScope.$global.ReferringEntity = {}
-    $rootScope.$global.PatientVisit = {}
-    $rootScope.$global.PatientVisitsReport = {}
-    $rootScope.$global.WeeklyProvidersVisitsReport = {}
-    $rootScope.$global.MonthlyProvidersVisitsReport = {}
+    $rootScope.$global.TreatingProvider = {};
+    $rootScope.$global.Organization = {};
+    $rootScope.$global.ReferringEntity = {};
+    $rootScope.$global.PatientVisit = {};
+    $rootScope.$global.PatientVisitsReport = {};
+    $rootScope.$global.WeeklyProvidersVisitsReport = {};
+    $rootScope.$global.MonthlyProvidersVisitsReport = {};
+    $rootScope.$global.ReportSetting = {};
+    $rootScope.$global.ClinicUser = {};
+    $rootScope.$global.ClinicReportSetting = {};
+    $rootScope.$global.ReferringReportSetting = {};
 
-    $rootScope.$global.TreatingProvider.typeChoices = [
-        {
-            "value": "PA",
-            "display_name": "Physician Assistant"
-        }, {
-            "value": "D",
-            "display_name": "Doctor"
-        }, {
-            "value": "N",
-            "display_name": "Nurse"
-        }, {
-            "value": "NP",
-            "display_name": "Nurse Practitioner"
-        }
+    $rootScope.$global.ReportSetting.periodChoices = [
+        {value: 'daily', display_name: 'Daily'},
+        {value: 'weekly', display_name: 'Weekly'},
+        {value: 'monthly', display_name: 'Monthly'},
+        {value: 'quarterly', display_name: 'Quarterly'},
+        {value: 'yearly', display_name: 'Yearly'}
     ];
+    $rootScope.$global.ClinicReportSetting.reportNameChoices = [
+        {value: 'visit_history', display_name: 'Patient Visit History Report'},
+        {value: 'weekly_visit', display_name: 'Weekly Visits Report'},
+        {value: 'monthly_visit', display_name: 'Monthly Visits Report'}
+    ];
+    $rootScope.$global.ReferringReportSetting.reportNameChoices = [
+        {value: 'thankyou', display_name: 'Thank You Email Report'},
+    ];
+    $rootScope.$global.TreatingProvider.typeChoices = [
+        {value: "PA", display_name: "Physician Assistant"},
+        {value: "D", display_name: "Doctor"},
+        {value: "N", display_name: "Nurse"},
+        {value: "NP", display_name: "Nurse Practitioner"}
+   ];
     $rootScope.$global.Organization.typeChoices = [
-        {
-            "display_name": "Marketing",
-            "value": "MAR"
-        }, {
-            "display_name": "Insurance",
-            "value": "INS"
-        }, {
-            "display_name": "Internal",
-            "value": "INT"
-        }, {
-            "display_name": "Work comp.",
-            "value": "WKC"
-        }, {
-            "display_name": "Healthcare Provider",
-            "value": "HCP"
-        }
+        {value: "MAR", display_name: "Marketing"},
+        {value: "INS", display_name: "Insurance"},
+        {value: "INT", display_name: "Internal"},
+        {value: "WKC", display_name: "Work comp."},
+        {value: "HCP", display_name: "Healthcare Provider"}
     ];
 
     $scope.$on('$viewContentLoaded', function() {
@@ -101,6 +100,14 @@ app.controller("MainCtrl", function($scope, $rootScope, $http, $window, Utils, R
         if (!$rootScope.$global.Organization.comboData) {
             OrganizationService.query({page_size: 0, ordering: 'org_name', fields: 'id,org_name'}, function(response) {
                 $rootScope.$global.Organization.comboData = response.results;
+            });
+        }
+    };
+
+    $rootScope.loadClinicUserCombo = function() {
+        if (!$rootScope.$global.ClinicUser.comboData) {
+            ClinicUserService.query({page_size: 0, ordering: 'user', fields: 'id,_user'}, function(response) {
+                $rootScope.$global.ClinicUser.comboData = response.results;
             });
         }
     };
@@ -845,4 +852,209 @@ app.controller("MonthlyProvidersVisitsReportCtrl", function($scope, $rootScope, 
         $scope.refreshData();
     }
 
+});
+
+
+/******************************************************************
+********************* ClinicReportSetting controllers *************
+*******************************************************************/
+
+app.controller("ClinicReportSettingCtrl", function($scope, $rootScope, $state, $stateParams, ClinicReportSettingService, Utils, GeneralUiGrid) {
+    var initialized = true,
+        $global = $rootScope.$global.ClinicReportSetting;
+
+    $scope.getDisplayReportName = function(reportName) {
+        var choice = $global.reportNameChoices.filter(function(v) {
+            return v.value==reportName;
+        })[0];
+        return choice? choice.display_name: reportName;
+    };
+    $scope.getDisplayPeriod = function(period) {
+        var choice = $rootScope.$global.ReportSetting.periodChoices.filter(function(v) {
+            return v.value==period;
+        })[0];
+        return choice? choice.display_name: period;
+    };
+    $scope.selectAllClinicUsers = function($event) {
+        if ($event.target.checked) {
+            $scope.allClinicUsersSelected = true;
+            $scope.selectedRecord.clinic_user = '*'
+        } else {
+            $scope.allClinicUsersSelected = false;
+            $scope.selectedRecord.clinic_user = [];
+            $scope.allClinicUsersSelected = false;
+        }
+    };
+    $scope.resetForm = function() {
+        $scope.selectedRecord = new ClinicReportSettingService({
+            bulk: true, clinic_user: [], enabled: false
+        });
+        $scope.allClinicUsersSelected = false;
+        $scope.$broadcast('ClinicReportSettingReportNameFocus');
+    };
+    $scope.loadRecord = function(record) {
+        $scope.selectedRecord = new ClinicReportSettingService(record);
+        $scope.selectedRecord.clinic_user = [record.clinic_user];
+        $scope.selectedRecord.bulk = true;
+    };
+    $scope.applyRecord = function() {
+        var r = $scope.selectedRecord;
+        if (!r.report_name || !r.period || !r.clinic_user || r.clinic_user.length==0) {
+            Utils.showError('<b>Invalid Input</b><br>Form fields should not be blank!', 5000);
+            return;
+        }
+        $scope.saving = true;
+        var jsonData = $scope.selectedRecord.toJSON();
+        $scope.selectedRecord.$save().then(function(response) {
+            Utils.showDefaultServerSuccess(response);
+            $scope.selectedRecord = new ClinicReportSettingService(jsonData);
+            $scope.$broadcast('ClinicReportSettingReportNameFocus');
+            $scope.getPage();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function() {
+            $scope.saving = false;
+        });
+    };
+    $scope.loadingGrid = false;
+    $scope.sortingOptions = null;
+    $scope.filteringOptions = [];
+    $scope.paginationOptions = {
+        page: 1
+    };
+
+    if (!$global.gridOptions) {
+        initialized = false;
+        $global.gridOptions = {
+            paginationPageSizes: [10],
+            paginationPageSize: 10,
+            useExternalPagination: true,
+            useExternalSorting: true,
+            rowHeight: 35,
+            columnDefs: [
+                {name: 'report_name', 'displayName': 'Report Name',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{grid.appScope.getDisplayReportName(row.entity.report_name)}}</div>'
+                },
+                {name: 'clinic_user', 'displayName': 'Clinic User',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="nounderline text text-primary" ng-click="grid.appScope.loadRecord(row.entity);">{{row.entity._clinic_user.user}}</a></div>'
+                },
+                {name: 'period', 'displayName': 'Period',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{grid.appScope.getDisplayPeriod(row.entity.period)}}</div>'
+                },
+                {name: 'enabled', 'displayName': 'Enabled?', width: 120,
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope fa" ng-class="{true:\'fa-check text-success\', false:\'fa-close text-danger\'}[row.entity.enabled==true]"></div>'
+                }
+            ],
+            // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
+        };
+    }
+    $rootScope.loadClinicUserCombo();
+    $scope.resetForm();
+    $global.gridOptions.onRegisterApi = GeneralUiGrid.onRegisterApi($scope);
+    $scope.getPage = GeneralUiGrid.getPage($scope, ClinicReportSettingService, $global.gridOptions);
+    if (!initialized) {
+        $scope.getPage();
+    }
+});
+
+/******************************************************************
+********************* ReferringReportSetting controllers *************
+*******************************************************************/
+
+app.controller("ReferringReportSettingCtrl", function($scope, $rootScope, $state, $stateParams, ReferringReportSettingService, Utils, GeneralUiGrid) {
+    var initialized = true,
+        $global = $rootScope.$global.ReferringReportSetting;
+
+    $scope.getDisplayReportName = function(reportName) {
+        var choice = $global.reportNameChoices.filter(function(v) {
+            return v.value==reportName;
+        })[0];
+        return choice? choice.display_name: reportName;
+    };
+    $scope.getDisplayPeriod = function(period) {
+        var choice = $rootScope.$global.ReportSetting.periodChoices.filter(function(v) {
+            return v.value==period;
+        })[0];
+        return choice? choice.display_name: period;
+    };
+    $scope.selectAllReferringEntities = function($event) {
+        if ($event.target.checked) {
+            $scope.allReferringEntitiesSelected = true;
+            $scope.selectedRecord.referring_entity = '*'
+        } else {
+            $scope.allReferringEntitiesSelected = false;
+            $scope.selectedRecord.referring_entity = [];
+            $scope.allReferringEntitiesSelected = false;
+        }
+    };
+    $scope.resetForm = function() {
+        $scope.selectedRecord = new ReferringReportSettingService({
+            bulk: true, referring_entity: [], enabled: false
+        });
+        $scope.allReferringEntitiesSelected = false;
+        $scope.$broadcast('ReferringReportSettingReportNameFocus');
+    };
+    $scope.loadRecord = function(record) {
+        $scope.selectedRecord = new ReferringReportSettingService(record);
+        $scope.selectedRecord.referring_entity = [record.referring_entity];
+        $scope.selectedRecord.bulk = true;
+    };
+    $scope.applyRecord = function() {
+        var r = $scope.selectedRecord;
+        if (!r.report_name || !r.period || !r.referring_entity || r.referring_entity.length==0) {
+            Utils.showError('<b>Invalid Input</b><br>Form fields should not be blank!', 5000);
+            return;
+        }
+        $scope.saving = true;
+        var jsonData = $scope.selectedRecord.toJSON();
+        $scope.selectedRecord.$save().then(function(response) {
+            Utils.showDefaultServerSuccess(response);
+            $scope.selectedRecord = new ReferringReportSettingService(jsonData);
+            $scope.$broadcast('ReferringReportSettingReportNameFocus');
+            $scope.getPage();
+        }, function(response) {
+            Utils.showDefaultServerError(response);
+        }).finally(function() {
+            $scope.saving = false;
+        });
+    };
+    $scope.loadingGrid = false;
+    $scope.sortingOptions = null;
+    $scope.filteringOptions = [];
+    $scope.paginationOptions = {
+        page: 1
+    };
+
+    if (!$global.gridOptions) {
+        initialized = false;
+        $global.gridOptions = {
+            paginationPageSizes: [10],
+            paginationPageSize: 10,
+            useExternalPagination: true,
+            useExternalSorting: true,
+            rowHeight: 35,
+            columnDefs: [
+                {name: 'report_name', 'displayName': 'Report Name',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{grid.appScope.getDisplayReportName(row.entity.report_name)}}</div>'
+                },
+                {name: 'referring_entity', 'displayName': 'Referring Entity',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope"><a class="nounderline text text-primary" ng-click="grid.appScope.loadRecord(row.entity);">{{row.entity._referring_entity.entity_name}}</a></div>'
+                },
+                {name: 'period', 'displayName': 'Period',
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope">{{grid.appScope.getDisplayPeriod(row.entity.period)}}</div>'
+                },
+                {name: 'enabled', 'displayName': 'Enabled?', width: 120,
+                    cellTemplate: '<div class="ui-grid-cell-contents ng-binding ng-scope fa" ng-class="{true:\'fa-check text-success\', false:\'fa-close text-danger\'}[row.entity.enabled==true]"></div>'
+                }
+            ],
+            // onRegisterApi: GeneralUiGrid.onRegisterApi($scope)
+        };
+    }
+    $rootScope.loadReferringEntityCombo();
+    $scope.resetForm();
+    $global.gridOptions.onRegisterApi = GeneralUiGrid.onRegisterApi($scope);
+    $scope.getPage = GeneralUiGrid.getPage($scope, ReferringReportSettingService, $global.gridOptions);
+    if (!initialized) {
+        $scope.getPage();
+    }
 });

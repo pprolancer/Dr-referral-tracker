@@ -1,8 +1,9 @@
 import inspect
 import sys
+from django.contrib.auth.models import User
 from tracking.models import Organization, ReferringReportSetting, \
     ClinicReportSetting, TrackedModel, ClinicBaseModel, ReferringEntity, \
-    TreatingProvider, PatientVisit
+    TreatingProvider, PatientVisit, ClinicUser
 from rest_framework import serializers
 from Practice_Referral import DynamicFieldsSerializerMixin
 
@@ -78,11 +79,24 @@ class PatientVisitSerializer(DynamicFieldsSerializerMixin,
         model = PatientVisit
 
 
+class RelReferringEntitySerializer(serializers.ModelSerializer):
+    '''
+    a serializer for ClinicUser resource
+    '''
+
+    class Meta:
+        model = ReferringEntity
+        fields = ('id', 'entity_name')
+
+
 class ReferringReportSettingSerializer(DynamicFieldsSerializerMixin,
                                        serializers.ModelSerializer):
     '''
     a serializer for ReferringReportSetting resource
     '''
+    _referring_entity = RelReferringEntitySerializer(
+        read_only=True, source='referring_entity')
+
     class Meta:
         model = ReferringReportSetting
 
@@ -96,11 +110,46 @@ class BulkReferringReportSettingSerializer(serializers.ModelSerializer):
         exclude = ('id', 'referring_entity',)
 
 
+class RelUserSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for User resource
+    '''
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
+class ClinicUserSerializer(DynamicFieldsSerializerMixin,
+                           serializers.ModelSerializer):
+    '''
+    a serializer for ClinicUser resource
+    '''
+    _user = RelUserSerializer(
+        read_only=True, source='user')
+
+    class Meta:
+        model = ClinicUser
+
+
+class RelClinicUserSerializer(serializers.ModelSerializer):
+    '''
+    a serializer for ClinicUser resource
+    '''
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = ClinicUser
+        fields = ('id', 'user')
+
+
 class ClinicReportSettingSerializer(DynamicFieldsSerializerMixin,
                                     serializers.ModelSerializer):
     '''
     a serializer for ClinicReportSetting resource
     '''
+    _clinic_user = RelClinicUserSerializer(
+        read_only=True, source='clinic_user')
+
     class Meta:
         model = ClinicReportSetting
 
